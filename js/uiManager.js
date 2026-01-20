@@ -253,23 +253,40 @@ export function showNotification(message) {
     }, 3000);
 }
 
-export function showBattleDialog(attackingShips, planet) {
+export function showBattleDialog(attackingShips, planet, isDefending = false) {
     const dialog = document.getElementById('battleDialog');
     const attackPower = attackingShips.reduce((sum, s) => sum + SHIP_TYPES[s.type].attack, 0);
     const defensePower = planet.ships.reduce((sum, s) => sum + SHIP_TYPES[s.type].attack, 0);
 
-    dialog.innerHTML = `
-        <h2>⚔️ BATTLE!</h2>
-        <div class="battle-info">
-            <p><strong>Target:</strong> ${planet.name}</p>
-            <p><strong>Your Fleet:</strong> ${attackingShips.length} ships (Power: ${attackPower})</p>
-            <p><strong>Defenders:</strong> ${planet.ships.length} ships (Power: ${defensePower})</p>
-        </div>
-        <div class="battle-buttons">
-            <button class="battle-btn fight" onclick="window.resolveBattle('fight')">FIGHT</button>
-            <button class="battle-btn withdraw" onclick="window.resolveBattle('withdraw')">WITHDRAW</button>
-        </div>
-    `;
+    if (isDefending) {
+        // Enemy is attacking player's planet
+        dialog.innerHTML = `
+            <h2>🚨 UNDER ATTACK!</h2>
+            <div class="battle-info">
+                <p><strong>Location:</strong> ${planet.name}</p>
+                <p><strong>Enemy Fleet:</strong> ${attackingShips.length} ships (Power: ${attackPower})</p>
+                <p><strong>Your Defenders:</strong> ${planet.ships.length} ships (Power: ${defensePower})</p>
+            </div>
+            <div class="battle-buttons">
+                <button class="battle-btn fight" onclick="window.resolveBattle('fight')">🛡️ DEFEND</button>
+                <button class="battle-btn withdraw" onclick="window.resolveBattle('withdraw')">🏃 RETREAT</button>
+            </div>
+        `;
+    } else {
+        // Player is attacking
+        dialog.innerHTML = `
+            <h2>⚔️ BATTLE!</h2>
+            <div class="battle-info">
+                <p><strong>Target:</strong> ${planet.name}</p>
+                <p><strong>Your Fleet:</strong> ${attackingShips.length} ships (Power: ${attackPower})</p>
+                <p><strong>Defenders:</strong> ${planet.ships.length} ships (Power: ${defensePower})</p>
+            </div>
+            <div class="battle-buttons">
+                <button class="battle-btn fight" onclick="window.resolveBattle('fight')">⚔️ ATTACK</button>
+                <button class="battle-btn withdraw" onclick="window.resolveBattle('withdraw')">🏃 WITHDRAW</button>
+            </div>
+        `;
+    }
 
     dialog.style.display = 'block';
 }

@@ -86,16 +86,24 @@ export function handleShipArrival(shipGroup) {
     if (isHostile || hasDefenders) {
         // Battle scenario
         if (shipGroup.owner === 'player') {
-            // Player ships arriving - show battle dialog
+            // Player ships attacking - show battle dialog
             gameState.battlePending = {
                 attackingShips: shipGroup.ships,
-                planet: targetPlanet
+                planet: targetPlanet,
+                isDefending: false
             };
-
-            // UI will show battle dialog
         } else {
-            // AI ships - auto-resolve
-            resolveCombat(shipGroup.ships, targetPlanet.ships, targetPlanet);
+            // Enemy ships attacking player planet - show battle dialog
+            if (targetPlanet.owner === 'player' || targetPlanet.ships.some(s => s.owner === 'player')) {
+                gameState.battlePending = {
+                    attackingShips: shipGroup.ships,
+                    planet: targetPlanet,
+                    isDefending: true
+                };
+            } else {
+                // AI vs AI - auto-resolve
+                resolveCombat(shipGroup.ships, targetPlanet.ships, targetPlanet);
+            }
         }
     } else {
         // Friendly arrival

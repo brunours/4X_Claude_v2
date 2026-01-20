@@ -189,7 +189,11 @@ function handleEndTurn() {
 
     // Show battle dialog if needed
     if (gameState.battlePending) {
-        showBattleDialog(gameState.battlePending.attackingShips, gameState.battlePending.planet);
+        showBattleDialog(
+            gameState.battlePending.attackingShips,
+            gameState.battlePending.planet,
+            gameState.battlePending.isDefending
+        );
     }
 
     updateDisplay();

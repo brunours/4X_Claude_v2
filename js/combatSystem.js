@@ -4,20 +4,56 @@
 
 import { gameState, generateId } from './gameState.js';
 import { SHIP_TYPES } from './config.js';
+import { showNotification } from './uiManager.js';
 
 export function resolveBattleChoice(choice) {
     if (!gameState.battlePending) return;
 
-    const { attackingShips, planet } = gameState.battlePending;
+    const { attackingShips, planet, isDefending } = gameState.battlePending;
 
+    let result = null;
     if (choice === 'fight') {
-        resolveCombat(attackingShips, planet.ships, planet);
+        result = resolveCombat(attackingShips, planet.ships, planet);
     } else if (choice === 'withdraw') {
         resolveWithdraw(attackingShips, planet);
     }
 
     document.getElementById('battleDialog').style.display = 'none';
     gameState.battlePending = null;
+
+    // Show battle result notification
+    if (result && choice === 'fight') {
+        showBattleResult(result, isDefending);
+    }
+}
+
+function showBattleResult(result, isDefending) {
+    let message = '';
+
+    if (isDefending) {
+        // Player was defending
+        if (result.victory) {
+            // Attackers won (enemy won)
+            message = `⚔️ DEFEAT! Enemy destroyed ${result.defendersDestroyed} of your ships. ${result.defendersSurvived} survived.`;
+        } else {
+            // Defenders won (player won)
+            message = `🛡️ VICTORY! You destroyed ${result.attackersDestroyed} enemy ships! ${result.defendersSurvived} of yours survived.`;
+        }
+    } else {
+        // Player was attacking
+        if (result.victory) {
+            message = `⚔️ VICTORY! You destroyed ${result.defendersDestroyed} enemy ships. ${result.attackersSurvived} of yours survived.`;
+            if (result.conquered) {
+                message += ' Planet conquered!';
+            } else if (result.conquering) {
+                message += ' Conquest in progress!';
+            }
+        } else {
+            message = `⚔️ DEFEAT! Enemy destroyed ${result.attackersDestroyed} of your ships. ${result.attackersSurvived} survived.`;
+        }
+    }
+
+    showNotification(message);
 }
 
 export function resolveWithdraw(attackingShips, planet) {
@@ -29,6 +65,12 @@ export function resolveWithdraw(attackingShips, planet) {
 export function resolveCombat(attackingShips, defendingShips, planet) {
     let attackers = [...attackingShips];
     let defenders = [...defendingShips];
+
+    const initialAttackerCount = attackers.length;
+    const initialDefenderCount = defenders.length;
+
+    const destroyedAttackers = [];
+    const destroyedDefenders = [];
 
     while (attackers.length > 0 && defenders.length > 0) {
         // Attackers fire first
@@ -43,6 +85,7 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
             target.hitPoints -= damage;
 
             if (target.hitPoints <= 0) {
+                destroyedDefenders.push({ type: target.type, owner: target.owner });
                 defenders = defenders.filter(s => s.id !== target.id);
             }
         }
@@ -59,6 +102,7 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
             target.hitPoints -= damage;
 
             if (target.hitPoints <= 0) {
+                destroyedAttackers.push({ type: target.type, owner: target.owner });
                 attackers = attackers.filter(s => s.id !== target.id);
             }
         }
@@ -66,6 +110,16 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
 
     // Update planet ships with survivors
     planet.ships = defenders;
+
+    const result = {
+        victory: attackers.length > 0,
+        attackersSurvived: attackers.length,
+        defendersSurvived: defenders.length,
+        attackersDestroyed: destroyedAttackers.length,
+        defendersDestroyed: destroyedDefenders.length,
+        destroyedAttackers,
+        destroyedDefenders
+    };
 
     // If attackers won and planet is not theirs, attempt conquest
     if (attackers.length > 0 && defenders.length === 0) {
@@ -80,7 +134,7 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
                 planet.population = 10;
                 planet.ships = attackers.filter(s => s.type !== 'colonizer');
 
-                return { victory: true, conquered: true };
+                result.conquered = true;
             }
         } else {
             // Enemy planet - needs time to conquer
@@ -95,16 +149,16 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
                     turnsRemaining: 3
                 });
 
-                return { victory: true, conquering: true };
+                result.conquering = true;
             } else {
                 // No colonizer - just occupy
                 planet.ships = attackers;
-                return { victory: true, occupied: true };
+                result.occupied = true;
             }
         }
     }
 
-    return { victory: attackers.length > 0 };
+    return result;
 }
 
 export function processPendingConquests() {
