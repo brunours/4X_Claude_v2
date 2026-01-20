@@ -234,16 +234,6 @@
             gap: 10px;
             z-index: 50;
         }
-
-        #togglePanelsBtn {
-            border-color: rgba(168, 85, 247, 0.5);
-            color: #a855f7;
-        }
-
-        #togglePanelsBtn:hover {
-            background: rgba(168, 85, 247, 0.2);
-            box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
-        }
         
         .action-btn {
             padding: 15px 25px;
@@ -275,12 +265,11 @@
         /* Fleet Panel */
         #fleetPanel {
             position: absolute;
-            bottom: 90px;
-            left: 350px;
+            top: 360px;
+            left: 20px;
             width: 320px;
-            height: 400px;
+            height: 250px;
             max-width: calc(100vw - 40px);
-            max-height: 50vh;
             background: rgba(5, 15, 30, 0.98);
             border: 1px solid rgba(0, 170, 255, 0.4);
             border-radius: 12px;
@@ -363,12 +352,11 @@
         /* Shipyard Panel */
         #shipyardPanel {
             position: absolute;
-            bottom: 90px;
-            left: 680px;
+            top: 620px;
+            left: 20px;
             width: 320px;
-            height: 400px;
+            height: 250px;
             max-width: calc(100vw - 40px);
-            max-height: 50vh;
             background: rgba(5, 15, 30, 0.98);
             border: 1px solid rgba(255, 200, 0, 0.4);
             border-radius: 12px;
@@ -609,12 +597,11 @@
         /* Planet Panel */
         #planetPanel {
             position: absolute;
-            bottom: 90px;
+            top: 100px;
             left: 20px;
             width: 320px;
-            height: 400px;
+            height: 250px;
             max-width: calc(100vw - 40px);
-            max-height: 50vh;
             background: rgba(5, 15, 30, 0.98);
             border: 1px solid rgba(0, 255, 136, 0.4);
             border-radius: 12px;
