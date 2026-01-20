@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>4X Space Conquest</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Start Screen -->
+        <div id="startScreen">
+            <h1>4X SPACE</h1>
+            <div class="subtitle">Conquest</div>
+
+            <div class="menu-section">
+                <h2>Galaxy Size</h2>
+                <div class="option-group">
+                    <button class="option-btn selected" data-size="compact">Compact</button>
+                    <button class="option-btn" data-size="standard">Standard</button>
+                    <button class="option-btn" data-size="vast">Vast</button>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h2>AI Difficulty</h2>
+                <div class="option-group">
+                    <button class="option-btn difficulty-easy selected" data-difficulty="easy">Easy</button>
+                    <button class="option-btn difficulty-medium" data-difficulty="medium">Medium</button>
+                    <button class="option-btn difficulty-hard" data-difficulty="hard">Hard</button>
+                </div>
+            </div>
+
+            <button id="startBtn">LAUNCH</button>
+        </div>
+
+        <!-- Game UI -->
+        <div id="ui">
+            <div class="resources-row">
+                <div class="resource energy">
+                    <span class="resource-icon">⚡</span>
+                    <span id="energyCount">100</span>
+                </div>
+                <div class="resource minerals">
+                    <span class="resource-icon">⛏️</span>
+                    <span id="mineralsCount">100</span>
+                </div>
+                <div class="resource food">
+                    <span class="resource-icon">🌿</span>
+                    <span id="foodCount">100</span>
+                </div>
+            </div>
+            <div id="turnInfo">
+                <span>Turn <span id="turnCount">1</span></span>
+                <button id="endTurnBtn">END TURN</button>
+            </div>
+        </div>
+
+        <!-- Action Buttons (Planet, Fleet, Shipyard) -->
+        <div id="actionButtons">
+            <button id="planetBtn" class="action-btn">🌍 PLANET</button>
+            <button id="fleetBtn" class="action-btn">🚀 FLEET</button>
+            <button id="shipyardBtn" class="action-btn shipyard-btn">🔧 SHIPYARD</button>
+        </div>
+
+        <!-- Fleet Panel -->
+        <div id="fleetPanel">
+            <div class="scroll-track"><div class="scroll-thumb" id="fleetScrollThumb"></div></div>
+            <div class="fleet-header">
+                <h3>Fleet</h3>
+                <button class="close-btn" onclick="closeFleetPanel()">&times;</button>
+            </div>
+            <div class="fleet-tabs">
+                <button class="fleet-tab active" data-tab="stationed" onclick="switchFleetTab('stationed')">Stationed</button>
+                <button class="fleet-tab" data-tab="transit" onclick="switchFleetTab('transit')">In Transit</button>
+            </div>
+            <div id="fleetContent"></div>
+        </div>
+
+        <!-- Shipyard Panel -->
+        <div id="shipyardPanel">
+            <div class="scroll-track"><div class="scroll-thumb" id="shipyardScrollThumb"></div></div>
+            <div class="fleet-header">
+                <h3>Shipyard</h3>
+                <button class="close-btn" onclick="closeShipyardPanel()">&times;</button>
+            </div>
+            <div id="shipyardContent"></div>
+        </div>
+
+        <!-- Planet Panel -->
+        <div id="planetPanel">
+            <div class="scroll-track"><div class="scroll-thumb" id="planetScrollThumb"></div></div>
+            <div class="planet-header">
+                <span class="planet-name" id="selectedPlanetName">Planet</span>
+                <button class="close-btn" onclick="closePlanetPanel()">&times;</button>
+            </div>
+            <div id="planetContent"></div>
+        </div>
+
+        <!-- Notifications -->
+        <div id="notifications"></div>
+
+        <!-- Destination Hint -->
+        <div id="destinationHint">Select destination planet</div>
+
+        <!-- Battle Dialog -->
+        <div id="battleDialog">
+            <h2>⚔️ ENEMY CONTACT</h2>
+            <div class="battle-info">
+                <p id="battleLocation"></p>
+                <p id="battleEnemyForce"></p>
+                <p id="battleYourForce"></p>
+            </div>
+            <div class="battle-buttons">
+                <button class="battle-btn fight" onclick="resolveBattle('fight')">⚔️ FIGHT</button>
+                <button class="battle-btn withdraw" onclick="resolveBattle('withdraw')">🏃 WITHDRAW</button>
+            </div>
+        </div>
+
+        <!-- Zoom Indicator -->
+        <div id="zoomIndicator">Zoom: 100%</div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen">
+            <h1 id="gameOverTitle">VICTORY</h1>
+            <p id="gameOverMessage">You have conquered the galaxy!</p>
+            <button id="restartBtn" onclick="location.reload()">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <!-- Load JavaScript Modules -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
