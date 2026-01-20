@@ -43,6 +43,37 @@ export function toggleShipyardPanel() {
     }
 }
 
+export function toggleAllPanels() {
+    const planetPanel = document.getElementById('planetPanel');
+    const fleetPanel = document.getElementById('fleetPanel');
+    const shipyardPanel = document.getElementById('shipyardPanel');
+
+    const anyVisible = planetPanel.style.display === 'block' ||
+                       fleetPanel.style.display === 'block' ||
+                       shipyardPanel.style.display === 'block';
+
+    if (anyVisible) {
+        // Close all panels
+        closePlanetPanel();
+        closeFleetPanel();
+        closeShipyardPanel();
+    } else {
+        // Open all panels
+        updateFleetPanel();
+        fleetPanel.style.display = 'block';
+
+        if (gameState.selectedPlanet) {
+            updatePlanetPanel(gameState.selectedPlanet);
+            planetPanel.style.display = 'block';
+
+            if (gameState.selectedPlanet.owner === 'player') {
+                updateShipyardPanel();
+                shipyardPanel.style.display = 'block';
+            }
+        }
+    }
+}
+
 export function closePlanetPanel() {
     document.getElementById('planetPanel').style.display = 'none';
     gameState.selectedPlanet = null;

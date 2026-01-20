@@ -4,7 +4,7 @@
 
 import { gameState, camera, canvas } from './gameState.js';
 import { screenToWorld, clampCamera, updateZoomIndicator, getPlanetAt } from './camera.js';
-import { selectPlanet, togglePlanetPanel, toggleFleetPanel, toggleShipyardPanel, updateDisplay, updatePlanetPanel, updateFleetPanel, showBattleDialog, closePlanetPanel, closeFleetPanel, closeShipyardPanel, switchFleetTab, updateShipyardPanel, showNotification, showGameOver } from './uiManager.js';
+import { selectPlanet, togglePlanetPanel, toggleFleetPanel, toggleShipyardPanel, toggleAllPanels, updateDisplay, updatePlanetPanel, updateFleetPanel, showBattleDialog, closePlanetPanel, closeFleetPanel, closeShipyardPanel, switchFleetTab, updateShipyardPanel, showNotification, showGameOver } from './uiManager.js';
 import { completeShipSend, buildShip, cancelBuild } from './shipSystem.js';
 import { endTurn, checkGameEnd } from './turnSystem.js';
 import { processAITurn } from './aiSystem.js';
@@ -26,6 +26,7 @@ export function setupEventListeners() {
 
     // UI buttons
     document.getElementById('endTurnBtn').addEventListener('click', handleEndTurn);
+    document.getElementById('togglePanelsBtn').addEventListener('click', toggleAllPanels);
     document.getElementById('fleetBtn').addEventListener('click', toggleFleetPanel);
     document.getElementById('planetBtn').addEventListener('click', () => {
         if (gameState.selectedPlanet) {
