@@ -58,45 +58,32 @@
             </div>
         </div>
 
-        <!-- Action Buttons (Planet, Fleet, Shipyard) -->
-        <div id="actionButtons">
-            <button id="planetBtn" class="action-btn">🌍 PLANET</button>
-            <button id="fleetBtn" class="action-btn">🚀 FLEET</button>
-            <button id="shipyardBtn" class="action-btn shipyard-btn">🔧 SHIPYARD</button>
-        </div>
-
-        <!-- Fleet Panel -->
-        <div id="fleetPanel">
-            <div class="scroll-track"><div class="scroll-thumb" id="fleetScrollThumb"></div></div>
-            <div class="fleet-header">
-                <h3>Fleet</h3>
-                <button class="close-btn" onclick="closeFleetPanel()">&times;</button>
-            </div>
-            <div class="fleet-tabs">
-                <button class="fleet-tab active" data-tab="stationed" onclick="switchFleetTab('stationed')">Stationed</button>
-                <button class="fleet-tab" data-tab="transit" onclick="switchFleetTab('transit')">In Transit</button>
-            </div>
-            <div id="fleetContent"></div>
-        </div>
-
-        <!-- Shipyard Panel -->
-        <div id="shipyardPanel">
-            <div class="scroll-track"><div class="scroll-thumb" id="shipyardScrollThumb"></div></div>
-            <div class="fleet-header">
-                <h3>Shipyard</h3>
-                <button class="close-btn" onclick="closeShipyardPanel()">&times;</button>
-            </div>
-            <div id="shipyardContent"></div>
-        </div>
-
-        <!-- Planet Panel -->
-        <div id="planetPanel">
-            <div class="scroll-track"><div class="scroll-thumb" id="planetScrollThumb"></div></div>
-            <div class="planet-header">
+        <!-- Unified Panel -->
+        <div id="unifiedPanel">
+            <div class="unified-header">
                 <span class="planet-name" id="selectedPlanetName">Planet</span>
                 <button class="close-btn" onclick="closePlanetPanel()">&times;</button>
             </div>
+
             <div id="planetContent"></div>
+
+            <div class="section-divider"></div>
+
+            <div class="fleet-section">
+                <h3>Fleet</h3>
+                <div class="fleet-tabs">
+                    <button class="fleet-tab active" data-tab="stationed" onclick="switchFleetTab('stationed')">Stationed</button>
+                    <button class="fleet-tab" data-tab="transit" onclick="switchFleetTab('transit')">In Transit</button>
+                </div>
+                <div id="fleetContent"></div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="shipyard-section">
+                <h3>Shipyard</h3>
+                <div id="shipyardContent"></div>
+            </div>
         </div>
 
         <!-- Notifications -->

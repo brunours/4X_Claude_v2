@@ -226,40 +226,79 @@
         }
         
         /* Action Buttons Container */
-        #actionButtons {
+        /* Unified Panel */
+        #unifiedPanel {
             position: absolute;
-            bottom: 20px;
+            top: 100px;
             left: 20px;
-            display: none;
-            gap: 10px;
-            z-index: 50;
-        }
-        
-        .action-btn {
-            padding: 15px 25px;
-            background: rgba(5, 15, 30, 0.95);
-            border: 2px solid rgba(0, 170, 255, 0.5);
+            width: 340px;
+            max-height: calc(100vh - 120px);
+            background: rgba(5, 15, 30, 0.98);
+            border: 1px solid rgba(0, 170, 255, 0.4);
             border-radius: 12px;
-            color: #0af;
-            font-family: 'Orbitron', monospace;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            padding: 15px;
+            display: none;
+            z-index: 50;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
-        
-        .action-btn:hover {
-            background: rgba(0, 170, 255, 0.2);
-            box-shadow: 0 0 30px rgba(0, 170, 255, 0.4);
+
+        .unified-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
-        
-        #planetBtn {
-            border-color: rgba(0, 255, 136, 0.5);
+
+        .unified-header .planet-name {
+            font-size: 1.2rem;
+            font-weight: bold;
             color: #0f8;
         }
-        
-        #planetBtn:hover {
-            background: rgba(0, 255, 136, 0.2);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 170, 255, 0.3), transparent);
+            margin: 20px 0;
+        }
+
+        .fleet-section h3,
+        .shipyard-section h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            color: #0af;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .shipyard-section h3 {
+            color: #fc0;
+        }
+
+        /* Two-column layout for ship lists */
+        #fleetContent,
+        #shipyardContent {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        #fleetContent .ship-row,
+        #shipyardContent .ship-row {
+            grid-column: span 1;
+            padding: 6px;
+            font-size: 0.85rem;
+        }
+
+        #fleetContent .ship-info,
+        #shipyardContent .ship-info {
+            gap: 4px;
+        }
+
+        #fleetContent .ship-count,
+        #shipyardContent .ship-count {
+            font-size: 0.7rem;
+            padding: 1px 6px;
         }
         
         /* Fleet Panel */

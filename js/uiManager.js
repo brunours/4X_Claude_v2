@@ -231,32 +231,27 @@ export function selectPlanet(planet) {
 }
 
 export function showAllPanels() {
-    const planetPanel = document.getElementById('planetPanel');
-    const fleetPanel = document.getElementById('fleetPanel');
-    const shipyardPanel = document.getElementById('shipyardPanel');
+    const unifiedPanel = document.getElementById('unifiedPanel');
 
-    // Always show planet and fleet panels when a planet is selected
     if (gameState.selectedPlanet) {
         updatePlanetPanel(gameState.selectedPlanet);
-        planetPanel.style.display = 'block';
-    }
+        updateFleetPanel();
 
-    updateFleetPanel();
-    fleetPanel.style.display = 'block';
+        // Show/hide shipyard section based on ownership
+        const shipyardSection = document.querySelector('.shipyard-section');
+        if (gameState.selectedPlanet.owner === 'player') {
+            updateShipyardPanel();
+            shipyardSection.style.display = 'block';
+        } else {
+            shipyardSection.style.display = 'none';
+        }
 
-    // Show shipyard only if planet is player-owned
-    if (gameState.selectedPlanet && gameState.selectedPlanet.owner === 'player') {
-        updateShipyardPanel();
-        shipyardPanel.style.display = 'block';
-    } else {
-        shipyardPanel.style.display = 'none';
+        unifiedPanel.style.display = 'block';
     }
 }
 
 export function hideAllPanels() {
-    document.getElementById('planetPanel').style.display = 'none';
-    document.getElementById('fleetPanel').style.display = 'none';
-    document.getElementById('shipyardPanel').style.display = 'none';
+    document.getElementById('unifiedPanel').style.display = 'none';
 }
 
 export function switchFleetTab(tab) {
