@@ -229,10 +229,10 @@
         /* Unified Panel */
         #unifiedPanel {
             position: absolute;
-            top: 100px;
+            top: 140px;
             left: 20px;
             width: 340px;
-            max-height: calc(100vh - 120px);
+            max-height: calc(100vh - 160px);
             background: rgba(5, 15, 30, 0.98);
             border: 1px solid rgba(0, 170, 255, 0.4);
             border-radius: 12px;
@@ -785,9 +785,9 @@
         }
         
         .build-options {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
         }
         
         .build-btn {

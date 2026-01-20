@@ -59,16 +59,10 @@ export function updateFleetPanel() {
     let content = '';
 
     if (tab === 'stationed') {
-        const playerPlanets = gameState.planets.filter(p => p.owner === 'player' && p.ships.length > 0);
-
-        for (const planet of playerPlanets) {
-            content += `
-                <div class="fleet-planet">
-                    <div class="fleet-planet-name">${planet.name}</div>
-            `;
-
+        // Show ships from selected planet only
+        if (gameState.selectedPlanet && gameState.selectedPlanet.ships.length > 0) {
             const shipCounts = {};
-            for (const ship of planet.ships) {
+            for (const ship of gameState.selectedPlanet.ships) {
                 shipCounts[ship.type] = (shipCounts[ship.type] || 0) + 1;
             }
 
@@ -84,8 +78,6 @@ export function updateFleetPanel() {
                     </div>
                 `;
             }
-
-            content += '</div>';
         }
     } else if (tab === 'transit') {
         const playerShips = gameState.travelingShips.filter(g => g.owner === 'player');
@@ -94,10 +86,12 @@ export function updateFleetPanel() {
             const fromPlanet = gameState.planets.find(p => p.id === group.fromPlanetId);
             const toPlanet = gameState.planets.find(p => p.id === group.targetPlanetId);
 
+            // Show route header spanning both columns
             content += `
-                <div class="fleet-planet">
-                    <div class="fleet-planet-name">${fromPlanet?.name || '?'} → ${toPlanet?.name || '?'}</div>
-                    <div style="font-size:0.8rem;color:#888;">ETA: ${group.turnsRemaining} turns</div>
+                <div style="grid-column: 1 / -1; font-size:0.85rem; margin-bottom: 4px;">
+                    <div style="color:#0af;">${fromPlanet?.name || '?'} → ${toPlanet?.name || '?'}</div>
+                    <div style="font-size:0.75rem;color:#888;">ETA: ${group.turnsRemaining} turns</div>
+                </div>
             `;
 
             const shipCounts = {};
@@ -117,12 +111,10 @@ export function updateFleetPanel() {
                     </div>
                 `;
             }
-
-            content += '</div>';
         }
     }
 
-    panel.innerHTML = content || '<p style="color:#888;text-align:center;padding:20px;">No ships</p>';
+    panel.innerHTML = content || '<p style="color:#888;text-align:center;padding:20px;grid-column: 1 / -1;">No ships</p>';
 }
 
 export function updateShipyardPanel() {
@@ -177,25 +169,19 @@ export function updateShipyardPanel() {
 }
 
 export function selectPlanet(planet) {
-    console.log('[selectPlanet] Called with planet:', planet);
     gameState.selectedPlanet = planet;
 
     if (planet) {
-        console.log('[selectPlanet] Showing panels for planet:', planet.name);
         showAllPanels();
     } else {
-        console.log('[selectPlanet] Hiding panels');
         hideAllPanels();
     }
 }
 
 export function showAllPanels() {
-    console.log('[showAllPanels] Called');
     const unifiedPanel = document.getElementById('unifiedPanel');
-    console.log('[showAllPanels] unifiedPanel element:', unifiedPanel);
 
     if (gameState.selectedPlanet) {
-        console.log('[showAllPanels] Updating panels for planet:', gameState.selectedPlanet.name);
         updatePlanetPanel(gameState.selectedPlanet);
         updateFleetPanel();
 
@@ -208,9 +194,7 @@ export function showAllPanels() {
             shipyardSection.style.display = 'none';
         }
 
-        console.log('[showAllPanels] Setting display to block');
         unifiedPanel.style.display = 'block';
-        console.log('[showAllPanels] Final display value:', unifiedPanel.style.display);
     }
 }
 
