@@ -17,7 +17,8 @@
       "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" repo create 4X_Claude_v2 --public --source=. --description=\"A modular 4X space strategy game built with Claude - Version 2\" --push)",
       "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" api -X POST /repos/brunours/4X_Claude_v2/pages -f source[branch]=master -f source[path]=/)",
       "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" api -X POST repos/brunours/4X_Claude_v2/pages -f source[branch]=master -f source[path]=/)",
-      "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" api repos/brunours/4X_Claude_v2/pages/builds/latest)"
+      "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" api repos/brunours/4X_Claude_v2/pages/builds/latest)",
+      "Bash(git push)"
     ]
   }
 }

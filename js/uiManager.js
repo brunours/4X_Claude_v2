@@ -48,9 +48,12 @@ export function toggleAllPanels() {
     const fleetPanel = document.getElementById('fleetPanel');
     const shipyardPanel = document.getElementById('shipyardPanel');
 
-    const anyVisible = planetPanel.style.display === 'block' ||
-                       fleetPanel.style.display === 'block' ||
-                       shipyardPanel.style.display === 'block';
+    // Check computed styles to handle both inline and CSS display values
+    const planetVisible = window.getComputedStyle(planetPanel).display === 'block';
+    const fleetVisible = window.getComputedStyle(fleetPanel).display === 'block';
+    const shipyardVisible = window.getComputedStyle(shipyardPanel).display === 'block';
+
+    const anyVisible = planetVisible || fleetVisible || shipyardVisible;
 
     if (anyVisible) {
         // Close all panels

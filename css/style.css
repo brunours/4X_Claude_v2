@@ -276,7 +276,7 @@
         #fleetPanel {
             position: absolute;
             bottom: 90px;
-            left: 360px;
+            left: 350px;
             width: 320px;
             max-width: calc(100vw - 40px);
             max-height: 50vh;
@@ -363,8 +363,8 @@
         #shipyardPanel {
             position: absolute;
             bottom: 90px;
-            left: 700px;
-            width: 300px;
+            left: 680px;
+            width: 320px;
             max-width: calc(100vw - 40px);
             max-height: 50vh;
             background: rgba(5, 15, 30, 0.98);
