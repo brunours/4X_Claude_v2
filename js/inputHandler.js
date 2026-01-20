@@ -91,12 +91,11 @@ function handleClick(e) {
             updateDisplay();
             updateFleetPanel();
         } else {
-            // Select planet
-            selectPlanet(planet);
-
-            if (planet.owner === 'player') {
-                updatePlanetPanel(planet);
-                document.getElementById('planetPanel').style.display = 'block';
+            // Toggle planet selection (click to unselect)
+            if (gameState.selectedPlanet === planet) {
+                selectPlanet(null);
+            } else {
+                selectPlanet(planet);
             }
         }
     }
@@ -165,11 +164,11 @@ function handleTouchEnd(e) {
                 updateDisplay();
                 updateFleetPanel();
             } else {
-                selectPlanet(planet);
-
-                if (planet.owner === 'player') {
-                    updatePlanetPanel(planet);
-                    document.getElementById('planetPanel').style.display = 'block';
+                // Toggle planet selection (tap to unselect)
+                if (gameState.selectedPlanet === planet) {
+                    selectPlanet(null);
+                } else {
+                    selectPlanet(planet);
                 }
             }
         }

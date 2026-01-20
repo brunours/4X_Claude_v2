@@ -7,53 +7,9 @@ import { buildShip, cancelBuild } from './shipSystem.js';
 import { SHIP_TYPES } from './config.js';
 
 // Export functions used by other modules and HTML onclick handlers
-export function togglePlanetPanel() {
-    const panel = document.getElementById('planetPanel');
-    const isVisible = panel.style.display === 'block';
-
-    if (isVisible || !gameState.selectedPlanet) {
-        closePlanetPanel();
-    } else {
-        updatePlanetPanel(gameState.selectedPlanet);
-        panel.style.display = 'block';
-    }
-}
-
-export function toggleFleetPanel() {
-    const panel = document.getElementById('fleetPanel');
-    const isVisible = panel.style.display === 'block';
-
-    if (isVisible) {
-        closeFleetPanel();
-    } else {
-        updateFleetPanel();
-        panel.style.display = 'block';
-    }
-}
-
-export function toggleShipyardPanel() {
-    const panel = document.getElementById('shipyardPanel');
-    const isVisible = panel.style.display === 'block';
-
-    if (isVisible || !gameState.selectedPlanet || gameState.selectedPlanet.owner !== 'player') {
-        closeShipyardPanel();
-    } else {
-        updateShipyardPanel();
-        panel.style.display = 'block';
-    }
-}
-
 export function closePlanetPanel() {
     gameState.selectedPlanet = null;
     hideAllPanels();
-}
-
-export function closeFleetPanel() {
-    document.getElementById('fleetPanel').style.display = 'none';
-}
-
-export function closeShipyardPanel() {
-    document.getElementById('shipyardPanel').style.display = 'none';
 }
 
 export function updateDisplay() {
@@ -65,14 +21,14 @@ export function updateDisplay() {
 }
 
 export function updatePlanetPanel(planet) {
-    const panel = document.getElementById('planetPanel');
+    const panel = document.getElementById('planetContent');
+    const planetName = document.getElementById('selectedPlanetName');
     if (!planet) return;
 
+    // Update planet name in header
+    planetName.textContent = planet.name;
+
     const content = `
-        <div class="planet-header">
-            <span class="planet-name">${planet.name}</span>
-            <button class="close-btn" onclick="window.closePlanetPanel()">&times;</button>
-        </div>
         <div class="planet-stats">
             <div class="stat">
                 <div class="stat-label">Owner</div>
