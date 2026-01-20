@@ -59,23 +59,27 @@ export function updateFleetPanel() {
     let content = '';
 
     if (tab === 'stationed') {
-        // Show ships from selected planet only
+        // Show individual ships from selected planet with selection capability
         if (gameState.selectedPlanet && gameState.selectedPlanet.ships.length > 0) {
-            const shipCounts = {};
             for (const ship of gameState.selectedPlanet.ships) {
-                shipCounts[ship.type] = (shipCounts[ship.type] || 0) + 1;
-            }
-
-            for (const [type, count] of Object.entries(shipCounts)) {
-                const shipType = SHIP_TYPES[type];
+                const shipType = SHIP_TYPES[ship.type];
+                const isSelected = gameState.selectedShipIds.has(ship.id);
                 content += `
-                    <div class="ship-row">
+                    <div class="ship-row ${isSelected ? 'selected' : ''}" onclick="window.toggleShipSelection('${ship.id}')">
                         <div class="ship-info">
                             <span>${shipType.icon}</span>
                             <span>${shipType.name}</span>
-                            <span class="ship-count">${count}</span>
                         </div>
                     </div>
+                `;
+            }
+
+            // Add Send button if ships are selected
+            if (gameState.selectedShipIds.size > 0) {
+                content += `
+                    <button class="send-ships-btn" onclick="window.sendSelectedShips()" style="grid-column: 1 / -1; margin-top: 10px; padding: 8px; background: linear-gradient(135deg, #0f8, #0c6); border: none; border-radius: 6px; color: #000; font-family: 'Orbitron', monospace; font-weight: 600; cursor: pointer;">
+                        SEND ${gameState.selectedShipIds.size} SHIP${gameState.selectedShipIds.size > 1 ? 'S' : ''}
+                    </button>
                 `;
             }
         }

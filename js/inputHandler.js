@@ -5,7 +5,7 @@
 import { gameState, camera, canvas } from './gameState.js';
 import { screenToWorld, clampCamera, updateZoomIndicator, getPlanetAt } from './camera.js';
 import { selectPlanet, updateDisplay, updatePlanetPanel, updateFleetPanel, showBattleDialog, closePlanetPanel, switchFleetTab, updateShipyardPanel, showNotification, showGameOver } from './uiManager.js';
-import { completeShipSend, buildShip, cancelBuild } from './shipSystem.js';
+import { completeShipSend, buildShip, cancelBuild, sendSelectedShips } from './shipSystem.js';
 import { endTurn, checkGameEnd } from './turnSystem.js';
 import { processAITurn } from './aiSystem.js';
 import { resolveBattleChoice } from './combatSystem.js';
@@ -225,4 +225,18 @@ window.cancelBuildItem = (planetId, buildId) => {
 window.resolveBattle = (choice) => {
     resolveBattleChoice(choice);
     updateDisplay();
+};
+
+window.toggleShipSelection = (shipId) => {
+    if (gameState.selectedShipIds.has(shipId)) {
+        gameState.selectedShipIds.delete(shipId);
+    } else {
+        gameState.selectedShipIds.add(shipId);
+    }
+    updateFleetPanel();
+};
+
+window.sendSelectedShips = () => {
+    sendSelectedShips();
+    updateFleetPanel();
 };
