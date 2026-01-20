@@ -75,9 +75,13 @@ export function sendSelectedShips() {
     if (gameState.selectedShipIds.size === 0) return;
 
     const selectedPlanet = gameState.selectedPlanet;
-    if (!selectedPlanet || selectedPlanet.owner !== 'player') return;
+    if (!selectedPlanet) return;
 
-    const ships = selectedPlanet.ships.filter(s => gameState.selectedShipIds.has(s.id));
+    // Filter ships that are both selected and owned by player
+    const ships = selectedPlanet.ships.filter(s =>
+        gameState.selectedShipIds.has(s.id) && s.owner === 'player'
+    );
+
     if (ships.length > 0) {
         sendShips(selectedPlanet, ships);
     }

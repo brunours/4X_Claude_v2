@@ -61,7 +61,12 @@ export function updateFleetPanel() {
     if (tab === 'stationed') {
         // Show individual ships from selected planet with selection capability
         if (gameState.selectedPlanet && gameState.selectedPlanet.ships.length > 0) {
-            for (const ship of gameState.selectedPlanet.ships) {
+            // Separate player ships and enemy ships
+            const playerShips = gameState.selectedPlanet.ships.filter(s => s.owner === 'player');
+            const enemyShips = gameState.selectedPlanet.ships.filter(s => s.owner !== 'player');
+
+            // Show player ships (selectable)
+            for (const ship of playerShips) {
                 const shipType = SHIP_TYPES[ship.type];
                 const isSelected = gameState.selectedShipIds.has(ship.id);
                 content += `
@@ -69,6 +74,20 @@ export function updateFleetPanel() {
                         <div class="ship-info">
                             <span>${shipType.icon}</span>
                             <span>${shipType.name}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Show enemy ships (not selectable)
+            for (const ship of enemyShips) {
+                const shipType = SHIP_TYPES[ship.type];
+                content += `
+                    <div class="ship-row" style="opacity: 0.6; cursor: default;">
+                        <div class="ship-info">
+                            <span>${shipType.icon}</span>
+                            <span>${shipType.name}</span>
+                            <span style="color: #f44; font-size: 0.75rem;">(${ship.owner})</span>
                         </div>
                     </div>
                 `;
@@ -156,11 +175,13 @@ export function updateShipyardPanel() {
     if (planet.buildQueue.length > 0) {
         content += '<div class="build-queue"><h4>Build Queue</h4>';
 
+        let cumulativeTurns = 0;
         for (const item of planet.buildQueue) {
             const shipType = SHIP_TYPES[item.type];
+            cumulativeTurns += item.turnsRemaining;
             content += `
                 <div class="queue-item">
-                    <span>${shipType.icon} ${shipType.name} (${item.turnsRemaining} turns)</span>
+                    <span>${shipType.icon} ${shipType.name} (${cumulativeTurns} turns)</span>
                     <button class="queue-cancel" onclick="window.cancelBuildItem('${planet.id}', '${item.id}')">&times;</button>
                 </div>
             `;
