@@ -278,6 +278,7 @@
             bottom: 90px;
             left: 350px;
             width: 320px;
+            height: 400px;
             max-width: calc(100vw - 40px);
             max-height: 50vh;
             background: rgba(5, 15, 30, 0.98);
@@ -365,6 +366,7 @@
             bottom: 90px;
             left: 680px;
             width: 320px;
+            height: 400px;
             max-width: calc(100vw - 40px);
             max-height: 50vh;
             background: rgba(5, 15, 30, 0.98);
@@ -610,6 +612,7 @@
             bottom: 90px;
             left: 20px;
             width: 320px;
+            height: 400px;
             max-width: calc(100vw - 40px);
             max-height: 50vh;
             background: rgba(5, 15, 30, 0.98);

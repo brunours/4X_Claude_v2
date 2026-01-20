@@ -56,10 +56,10 @@ export function toggleAllPanels() {
     const anyVisible = planetVisible || fleetVisible || shipyardVisible;
 
     if (anyVisible) {
-        // Close all panels
-        closePlanetPanel();
-        closeFleetPanel();
-        closeShipyardPanel();
+        // Close all panels without clearing selectedPlanet
+        planetPanel.style.display = 'none';
+        fleetPanel.style.display = 'none';
+        shipyardPanel.style.display = 'none';
     } else {
         // Open all panels
         updateFleetPanel();
