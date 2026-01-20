@@ -177,19 +177,25 @@ export function updateShipyardPanel() {
 }
 
 export function selectPlanet(planet) {
+    console.log('[selectPlanet] Called with planet:', planet);
     gameState.selectedPlanet = planet;
 
     if (planet) {
+        console.log('[selectPlanet] Showing panels for planet:', planet.name);
         showAllPanels();
     } else {
+        console.log('[selectPlanet] Hiding panels');
         hideAllPanels();
     }
 }
 
 export function showAllPanels() {
+    console.log('[showAllPanels] Called');
     const unifiedPanel = document.getElementById('unifiedPanel');
+    console.log('[showAllPanels] unifiedPanel element:', unifiedPanel);
 
     if (gameState.selectedPlanet) {
+        console.log('[showAllPanels] Updating panels for planet:', gameState.selectedPlanet.name);
         updatePlanetPanel(gameState.selectedPlanet);
         updateFleetPanel();
 
@@ -202,7 +208,9 @@ export function showAllPanels() {
             shipyardSection.style.display = 'none';
         }
 
+        console.log('[showAllPanels] Setting display to block');
         unifiedPanel.style.display = 'block';
+        console.log('[showAllPanels] Final display value:', unifiedPanel.style.display);
     }
 }
 

@@ -202,21 +202,9 @@ function handleEndTurn() {
 }
 
 // Make functions available globally for HTML onclick handlers
-window.closePlanetPanel = () => {
-    closePlanetPanel();
-};
+window.closePlanetPanel = closePlanetPanel;
 
-window.closeFleetPanel = () => {
-    closeFleetPanel();
-};
-
-window.closeShipyardPanel = () => {
-    closeShipyardPanel();
-};
-
-window.switchFleetTab = (tab) => {
-    switchFleetTab(tab);
-};
+window.switchFleetTab = switchFleetTab;
 
 window.buildShipType = (type) => {
     if (buildShip(type)) {
