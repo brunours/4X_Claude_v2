@@ -4,7 +4,7 @@
 
 import { gameState, camera, canvas } from './gameState.js';
 import { screenToWorld, clampCamera, updateZoomIndicator, getPlanetAt } from './camera.js';
-import { selectPlanet, updateDisplay, updatePlanetPanel, updateFleetPanel, showBattleDialog, closePlanetPanel, switchFleetTab, updateShipyardPanel, showNotification, showGameOver } from './uiManager.js';
+import { selectPlanet, updateDisplay, updatePlanetPanel, updateFleetPanel, updateShipyardPanel, showBattleDialog, closePlanetPanel, switchFleetTab, showNotification, showGameOver } from './uiManager.js';
 import { completeShipSend, buildShip, cancelBuild, sendSelectedShips } from './shipSystem.js';
 import { endTurn, checkGameEnd } from './turnSystem.js';
 import { processAITurn } from './aiSystem.js';
@@ -196,9 +196,13 @@ function handleEndTurn() {
 
     if (gameState.selectedPlanet) {
         updatePlanetPanel(gameState.selectedPlanet);
-    }
+        updateFleetPanel();
 
-    updateFleetPanel();
+        // Update shipyard panel if player owns the selected planet
+        if (gameState.selectedPlanet.owner === 'player') {
+            updateShipyardPanel();
+        }
+    }
 }
 
 // Make functions available globally for HTML onclick handlers

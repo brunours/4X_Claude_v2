@@ -173,7 +173,7 @@ export function updateShipyardPanel() {
 
     // Build queue
     if (planet.buildQueue.length > 0) {
-        content += '<div class="build-queue"><h4>Build Queue</h4>';
+        content += '<div class="build-queue"><h4>Build Queue</h4><div class="queue-grid">';
 
         let cumulativeTurns = 0;
         for (const item of planet.buildQueue) {
@@ -187,7 +187,7 @@ export function updateShipyardPanel() {
             `;
         }
 
-        content += '</div>';
+        content += '</div></div>';
     }
 
     panel.innerHTML = content;

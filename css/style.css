@@ -836,7 +836,13 @@
         .build-queue {
             margin-top: 10px;
         }
-        
+
+        .queue-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
         .queue-item {
             display: flex;
             justify-content: space-between;
@@ -844,7 +850,6 @@
             padding: 6px 8px;
             background: rgba(168, 85, 247, 0.1);
             border-radius: 4px;
-            margin-bottom: 4px;
             font-size: 0.75rem;
         }
         
