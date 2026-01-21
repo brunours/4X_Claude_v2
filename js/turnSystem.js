@@ -14,6 +14,7 @@ export function endTurn() {
     healStationedShips();
     collectResources();
     processPendingConquests();
+    processEmptyPlanets();
 
     // Process AI turn (will be imported from aiSystem)
     // processAITurn();
@@ -171,6 +172,31 @@ export function collectResources() {
         gameState.players[owner].energy += energy;
         gameState.players[owner].minerals += minerals;
         gameState.players[owner].food += food;
+    }
+}
+
+export function processEmptyPlanets() {
+    for (const planet of gameState.planets) {
+        // Skip if already neutral or has ships of the owner
+        if (!planet.owner) continue;
+
+        const ownerShips = planet.ships.filter(s => s.owner === planet.owner);
+        if (ownerShips.length > 0) continue;
+
+        // Check if ships are building that will complete next turn
+        const buildingShips = planet.buildQueue.some(item => item.turnsRemaining === 1);
+        if (buildingShips) continue;
+
+        // Check if ships are arriving next turn
+        const arrivingShips = gameState.travelingShips.some(group =>
+            group.targetPlanetId === planet.id &&
+            group.owner === planet.owner &&
+            group.turnsRemaining === 1
+        );
+        if (arrivingShips) continue;
+
+        // No ships, no reinforcements coming - planet becomes neutral
+        planet.owner = null;
     }
 }
 
