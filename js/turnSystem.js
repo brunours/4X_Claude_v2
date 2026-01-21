@@ -186,6 +186,25 @@ export function collectResources() {
 }
 
 export function processEmptyPlanets() {
+    // First, handle planets that were successfully attacked (immediate neutralization)
+    if (gameState.attackedPlanets && gameState.attackedPlanets.length > 0) {
+        for (const attackedInfo of gameState.attackedPlanets) {
+            const planet = gameState.planets.find(p => p.id === attackedInfo.planetId);
+            if (!planet) continue;
+
+            // Check if original owner has any ships left on the planet
+            const ownerShips = planet.ships.filter(s => s.owner === attackedInfo.previousOwner);
+            if (ownerShips.length === 0) {
+                // No defenders - planet becomes neutral
+                planet.owner = null;
+                planet.buildQueue = []; // Ensure build queue is cleared
+            }
+        }
+        // Clear the attacked planets list after processing
+        gameState.attackedPlanets = [];
+    }
+
+    // Then, check for planets that have become empty naturally
     for (const planet of gameState.planets) {
         // Skip if already neutral or has ships of the owner
         if (!planet.owner) continue;

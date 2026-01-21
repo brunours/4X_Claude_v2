@@ -20,7 +20,12 @@ export function calculateBuildTime(type, population) {
 }
 
 export function buildShip(type) {
-    if (!gameState.selectedPlanet || gameState.selectedPlanet.owner !== 'player') return;
+    if (!gameState.selectedPlanet) return;
+
+    // Neutral planets cannot build ships
+    if (gameState.selectedPlanet.owner === null) return false;
+
+    if (gameState.selectedPlanet.owner !== 'player') return;
     if (!canAffordShip('player', type)) return;
 
     const cost = SHIP_TYPES[type].cost;

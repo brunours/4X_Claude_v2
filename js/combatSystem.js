@@ -208,6 +208,7 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
     // If attackers won and planet is not theirs, attempt conquest
     if (attackers.length > 0 && defenders.length === 0) {
         const hasColonizer = attackers.some(s => s.type === 'colonizer');
+        const previousOwner = planet.owner;
 
         if (planet.owner === null) {
             // Neutral planet - colonize immediately if colonizer present
@@ -222,7 +223,10 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
                 planet.ships = attackers;
             }
         } else {
-            // Enemy planet - needs time to conquer
+            // Enemy planet - shipyard is destroyed by successful attack
+            // Cancel all build queue items
+            planet.buildQueue = [];
+
             if (hasColonizer) {
                 const attackerOwner = attackingShips[0].owner;
                 planet.ships = attackers;
@@ -236,9 +240,19 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
 
                 result.conquering = true;
             } else {
-                // No colonizer - just occupy
+                // No colonizer - planet will become neutral
+                // Mark for neutralization (will happen in processEmptyPlanets)
                 planet.ships = attackers;
                 result.occupied = true;
+
+                // Mark planet as attacked to trigger immediate neutralization
+                if (!gameState.attackedPlanets) {
+                    gameState.attackedPlanets = [];
+                }
+                gameState.attackedPlanets.push({
+                    planetId: planet.id,
+                    previousOwner: previousOwner
+                });
             }
         }
     } else if (attackers.length > 0) {
