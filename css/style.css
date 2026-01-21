@@ -163,15 +163,18 @@
             border: 1px solid rgba(0, 170, 255, 0.3);
             backdrop-filter: blur(10px);
             display: none;
-            width: 340px;
+            width: 20%;
+            min-width: 280px;
+            max-width: 400px;
             z-index: 50;
         }
         
         .resources-row {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 8px;
             margin-bottom: 10px;
+            overflow-x: auto;
         }
         
         .resource {
@@ -182,6 +185,9 @@
             background: rgba(30, 40, 60, 0.8);
             border-radius: 6px;
             font-size: 0.85rem;
+            flex: 1 1 auto;
+            min-width: 0;
+            white-space: nowrap;
         }
         
         .resource-icon {
@@ -232,7 +238,9 @@
             position: absolute;
             top: 160px;
             left: 10px;
-            width: 340px;
+            width: 20%;
+            min-width: 280px;
+            max-width: 400px;
             max-height: calc(100vh - 180px);
             background: rgba(5, 15, 30, 0.98);
             border: 1px solid rgba(0, 170, 255, 0.4);
