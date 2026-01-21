@@ -49,7 +49,7 @@ export function processBuildQueues() {
             const enemyShips = planet.ships.filter(s => s.owner === enemyOwner);
 
             if (enemyShips.length > 0) {
-                // New ship fights occupiers
+                // New ship needs to fight occupiers - show battle dialog
                 planet.ships.push(newShip);
 
                 const conquestIdx = gameState.pendingConquests.findIndex(c => c.planetId === planet.id);
@@ -57,7 +57,17 @@ export function processBuildQueues() {
                     gameState.pendingConquests.splice(conquestIdx, 1);
                 }
 
-                resolveCombat([newShip], enemyShips, planet);
+                // Set up battle dialog for player's planet being defended
+                if (planet.owner === 'player') {
+                    gameState.battlePending = {
+                        attackingShips: enemyShips,
+                        planet: planet,
+                        isDefending: true
+                    };
+                } else {
+                    // AI planet - auto-resolve
+                    resolveCombat([newShip], enemyShips, planet);
+                }
             } else {
                 // No enemies, just add ship
                 planet.ships.push(newShip);

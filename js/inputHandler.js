@@ -248,3 +248,15 @@ window.sendSelectedShips = () => {
     sendSelectedShips();
     updateFleetPanel();
 };
+
+window.closeBattleResults = () => {
+    document.getElementById('battleResultsDialog').style.display = 'none';
+    updateDisplay();
+    if (gameState.selectedPlanet) {
+        updatePlanetPanel(gameState.selectedPlanet);
+        updateFleetPanel();
+        if (gameState.selectedPlanet.owner === 'player') {
+            updateShipyardPanel();
+        }
+    }
+};

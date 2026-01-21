@@ -6,78 +6,134 @@ import { gameState, generateId } from './gameState.js';
 import { SHIP_TYPES } from './config.js';
 import { showNotification } from './uiManager.js';
 
+// Ship strength values for combat calculations
+const SHIP_STRENGTH = {
+    scout: 1,
+    frigate: 5,      // 4 frigates = 1 battleship
+    battleship: 20
+};
+
 export function resolveBattleChoice(choice) {
     if (!gameState.battlePending) return;
 
     const { attackingShips, planet, isDefending } = gameState.battlePending;
 
+    document.getElementById('battleDialog').style.display = 'none';
+
     let result = null;
     if (choice === 'fight') {
         result = resolveCombat(attackingShips, planet.ships, planet);
+        // Show battle results window
+        showBattleResults(result, isDefending);
     } else if (choice === 'withdraw') {
-        resolveWithdraw(attackingShips, planet);
+        resolveWithdraw(attackingShips, planet, isDefending);
     }
 
-    document.getElementById('battleDialog').style.display = 'none';
     gameState.battlePending = null;
-
-    // Show battle result notification
-    if (result && choice === 'fight') {
-        showBattleResult(result, isDefending);
-    }
 }
 
-function showBattleResult(result, isDefending) {
-    let message = '';
+export function showBattleResults(result, isDefending) {
+    const dialog = document.getElementById('battleResultsDialog');
+
+    let title = '';
+    let summary = '';
 
     if (isDefending) {
-        // Player was defending
         if (result.victory) {
             // Attackers won (enemy won)
-            message = `⚔️ DEFEAT! Enemy destroyed ${result.defendersDestroyed} of your ships. ${result.defendersSurvived} survived.`;
+            title = '⚔️ DEFEAT!';
+            summary = `Enemy forces have overwhelmed your defenses!`;
         } else {
             // Defenders won (player won)
-            message = `🛡️ VICTORY! You destroyed ${result.attackersDestroyed} enemy ships! ${result.defendersSurvived} of yours survived.`;
+            title = '🛡️ VICTORY!';
+            summary = `You successfully repelled the attack!`;
         }
     } else {
-        // Player was attacking
         if (result.victory) {
-            message = `⚔️ VICTORY! You destroyed ${result.defendersDestroyed} enemy ships. ${result.attackersSurvived} of yours survived.`;
+            title = '⚔️ VICTORY!';
+            summary = `Your forces prevailed!`;
             if (result.conquered) {
-                message += ' Planet conquered!';
+                summary += ' Planet conquered!';
             } else if (result.conquering) {
-                message += ' Conquest in progress!';
+                summary += ' Conquest in progress!';
             }
         } else {
-            message = `⚔️ DEFEAT! Enemy destroyed ${result.attackersDestroyed} of your ships. ${result.attackersSurvived} survived.`;
+            title = '⚔️ DEFEAT!';
+            summary = `Your attack was repelled!`;
         }
     }
 
-    showNotification(message);
+    let casualties = '<div class="casualties-grid">';
+
+    // Attacker casualties
+    casualties += '<div class="casualty-side">';
+    casualties += `<h4>${isDefending ? 'Enemy' : 'Your'} Forces</h4>`;
+    casualties += `<div class="casualty-stat"><span>Ships Destroyed:</span> <span class="stat-value">${result.attackersDestroyed}</span></div>`;
+    casualties += `<div class="casualty-stat"><span>Ships Survived:</span> <span class="stat-value">${result.attackersSurvived}</span></div>`;
+
+    if (result.damagedAttackers.length > 0) {
+        casualties += '<div class="damaged-ships"><strong>Damaged Ships:</strong>';
+        for (const ship of result.damagedAttackers) {
+            const shipType = SHIP_TYPES[ship.type];
+            const healthPercent = Math.round((ship.hitPoints / shipType.maxHitPoints) * 100);
+            casualties += `<div>${shipType.icon} ${shipType.name} (${healthPercent}% HP)</div>`;
+        }
+        casualties += '</div>';
+    }
+    casualties += '</div>';
+
+    // Defender casualties
+    casualties += '<div class="casualty-side">';
+    casualties += `<h4>${isDefending ? 'Your' : 'Enemy'} Forces</h4>`;
+    casualties += `<div class="casualty-stat"><span>Ships Destroyed:</span> <span class="stat-value">${result.defendersDestroyed}</span></div>`;
+    casualties += `<div class="casualty-stat"><span>Ships Survived:</span> <span class="stat-value">${result.defendersSurvived}</span></div>`;
+
+    if (result.damagedDefenders.length > 0) {
+        casualties += '<div class="damaged-ships"><strong>Damaged Ships:</strong>';
+        for (const ship of result.damagedDefenders) {
+            const shipType = SHIP_TYPES[ship.type];
+            const healthPercent = Math.round((ship.hitPoints / shipType.maxHitPoints) * 100);
+            casualties += `<div>${shipType.icon} ${shipType.name} (${healthPercent}% HP)</div>`;
+        }
+        casualties += '</div>';
+    }
+    casualties += '</div>';
+
+    casualties += '</div>';
+
+    dialog.innerHTML = `
+        <h2>${title}</h2>
+        <p class="battle-summary">${summary}</p>
+        ${casualties}
+        <button class="battle-results-btn" onclick="window.closeBattleResults()">CONTINUE</button>
+    `;
+
+    dialog.style.display = 'block';
 }
 
-export function resolveWithdraw(attackingShips, planet) {
+export function resolveWithdraw(attackingShips, planet, isDefending) {
     // Ships return to source planet (simplified - just destroy them for now)
     // In a full implementation, they would return to origin
-    return;
+    const message = isDefending ?
+        '🏃 Your forces have retreated!' :
+        '🏃 You withdrew from the battle!';
+    showNotification(message);
 }
 
 export function resolveCombat(attackingShips, defendingShips, planet) {
     let attackers = [...attackingShips];
     let defenders = [...defendingShips];
 
-    const initialAttackerCount = attackers.length;
-    const initialDefenderCount = defenders.length;
-
     const destroyedAttackers = [];
     const destroyedDefenders = [];
+    const damagedAttackers = [];
+    const damagedDefenders = [];
 
     // Special case: Colonizers are auto-destroyed if facing enemies without escort
     const attackerColonizers = attackers.filter(s => s.type === 'colonizer');
     const attackerEscorts = attackers.filter(s => s.type !== 'colonizer');
 
     if (attackerColonizers.length > 0 && attackerEscorts.length === 0 && defenders.length > 0) {
-        // Colonizers without escort are destroyed immediately
         for (const colonizer of attackerColonizers) {
             destroyedAttackers.push({ type: colonizer.type, owner: colonizer.owner });
         }
@@ -88,64 +144,51 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
     const defenderEscorts = defenders.filter(s => s.type !== 'colonizer');
 
     if (defenderColonizers.length > 0 && defenderEscorts.length === 0 && attackers.length > 0) {
-        // Colonizers without escort are destroyed immediately
         for (const colonizer of defenderColonizers) {
             destroyedDefenders.push({ type: colonizer.type, owner: colonizer.owner });
         }
         defenders = defenders.filter(s => s.type !== 'colonizer');
     }
 
-    while (attackers.length > 0 && defenders.length > 0) {
-        // Attackers fire first (excluding colonizers)
-        const activeAttackers = attackers.filter(s => SHIP_TYPES[s.type].attack > 0);
-        for (const attacker of activeAttackers) {
-            if (defenders.length === 0) break;
+    // Calculate combat strength
+    const attackerStrength = calculateFleetStrength(attackers);
+    const defenderStrength = calculateFleetStrength(defenders);
 
-            const shipType = SHIP_TYPES[attacker.type];
+    // Apply defender advantage (10% if planet is owned)
+    const defenderBonus = planet.owner ? 1.10 : 1.0;
+    const adjustedDefenderStrength = defenderStrength * defenderBonus;
 
-            // Target non-colonizer ships first if available
-            let validTargets = defenders.filter(s => s.type !== 'colonizer');
-            if (validTargets.length === 0) {
-                validTargets = defenders; // Only colonizers left
-            }
+    // Calculate win probability for attackers
+    const totalStrength = attackerStrength + adjustedDefenderStrength;
+    const attackerWinChance = totalStrength > 0 ? attackerStrength / totalStrength : 0.5;
 
-            const target = validTargets[Math.floor(Math.random() * validTargets.length)];
-            const targetType = SHIP_TYPES[target.type];
+    // Simulate combat
+    const combatResult = simulateCombat(attackers, defenders, attackerWinChance);
 
-            const damage = Math.max(1, shipType.attack - targetType.defense);
-            target.hitPoints -= damage;
+    // Process casualties
+    for (const ship of combatResult.destroyedAttackers) {
+        destroyedAttackers.push({ type: ship.type, owner: ship.owner });
+    }
+    for (const ship of combatResult.destroyedDefenders) {
+        destroyedDefenders.push({ type: ship.type, owner: ship.owner });
+    }
 
-            if (target.hitPoints <= 0) {
-                destroyedDefenders.push({ type: target.type, owner: target.owner });
-                defenders = defenders.filter(s => s.id !== target.id);
-            }
-        }
-
-        // Defenders fire back (excluding colonizers)
-        const activeDefenders = defenders.filter(s => SHIP_TYPES[s.type].attack > 0);
-        for (const defender of activeDefenders) {
-            if (attackers.length === 0) break;
-
-            const shipType = SHIP_TYPES[defender.type];
-
-            // Target non-colonizer ships first if available
-            let validTargets = attackers.filter(s => s.type !== 'colonizer');
-            if (validTargets.length === 0) {
-                validTargets = attackers; // Only colonizers left
-            }
-
-            const target = validTargets[Math.floor(Math.random() * validTargets.length)];
-            const targetType = SHIP_TYPES[target.type];
-
-            const damage = Math.max(1, shipType.attack - targetType.defense);
-            target.hitPoints -= damage;
-
-            if (target.hitPoints <= 0) {
-                destroyedAttackers.push({ type: target.type, owner: target.owner });
-                attackers = attackers.filter(s => s.id !== target.id);
-            }
+    // Track damaged ships
+    for (const ship of combatResult.survivingAttackers) {
+        const shipType = SHIP_TYPES[ship.type];
+        if (ship.hitPoints < shipType.maxHitPoints) {
+            damagedAttackers.push({ type: ship.type, owner: ship.owner, hitPoints: ship.hitPoints });
         }
     }
+    for (const ship of combatResult.survivingDefenders) {
+        const shipType = SHIP_TYPES[ship.type];
+        if (ship.hitPoints < shipType.maxHitPoints) {
+            damagedDefenders.push({ type: ship.type, owner: ship.owner, hitPoints: ship.hitPoints });
+        }
+    }
+
+    attackers = combatResult.survivingAttackers;
+    defenders = combatResult.survivingDefenders;
 
     // Update planet ships with survivors
     planet.ships = defenders;
@@ -157,12 +200,13 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
         attackersDestroyed: destroyedAttackers.length,
         defendersDestroyed: destroyedDefenders.length,
         destroyedAttackers,
-        destroyedDefenders
+        destroyedDefenders,
+        damagedAttackers,
+        damagedDefenders
     };
 
     // If attackers won and planet is not theirs, attempt conquest
     if (attackers.length > 0 && defenders.length === 0) {
-        // Check for colonizer ships
         const hasColonizer = attackers.some(s => s.type === 'colonizer');
 
         if (planet.owner === null) {
@@ -174,6 +218,8 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
                 planet.ships = attackers.filter(s => s.type !== 'colonizer');
 
                 result.conquered = true;
+            } else {
+                planet.ships = attackers;
             }
         } else {
             // Enemy planet - needs time to conquer
@@ -195,9 +241,108 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
                 result.occupied = true;
             }
         }
+    } else if (attackers.length > 0) {
+        // Battle ended but both sides have survivors - attackers stay
+        planet.ships = [...defenders, ...attackers];
     }
 
     return result;
+}
+
+function calculateFleetStrength(ships) {
+    let strength = 0;
+    for (const ship of ships) {
+        if (ship.type === 'colonizer') continue;
+
+        const baseStrength = SHIP_STRENGTH[ship.type] || 1;
+        const shipType = SHIP_TYPES[ship.type];
+        const healthRatio = ship.hitPoints / shipType.maxHitPoints;
+
+        strength += baseStrength * healthRatio;
+    }
+    return strength;
+}
+
+function simulateCombat(attackers, defenders, attackerWinChance) {
+    const survivingAttackers = [];
+    const survivingDefenders = [];
+    const destroyedAttackers = [];
+    const destroyedDefenders = [];
+
+    // Determine winner
+    const attackersWin = Math.random() < attackerWinChance;
+
+    if (attackersWin) {
+        // Attackers win - distribute damage proportionally
+        const damageRatio = 1 - attackerWinChance; // How much damage attackers take
+        distributeDamage(attackers, damageRatio, survivingAttackers, destroyedAttackers);
+
+        // Defenders take heavy losses
+        for (const ship of defenders) {
+            if (ship.type !== 'colonizer') {
+                destroyedDefenders.push(ship);
+            }
+        }
+    } else {
+        // Defenders win - distribute damage proportionally
+        const damageRatio = attackerWinChance; // How much damage defenders take
+        distributeDamage(defenders, damageRatio, survivingDefenders, destroyedDefenders);
+
+        // Attackers take heavy losses
+        for (const ship of attackers) {
+            if (ship.type !== 'colonizer') {
+                destroyedAttackers.push(ship);
+            }
+        }
+    }
+
+    return {
+        survivingAttackers,
+        survivingDefenders,
+        destroyedAttackers,
+        destroyedDefenders
+    };
+}
+
+function distributeDamage(ships, damageRatio, survivors, destroyed) {
+    const combatShips = ships.filter(s => s.type !== 'colonizer');
+    const totalStrength = calculateFleetStrength(combatShips);
+    const totalDamage = totalStrength * damageRatio * 2; // Multiply by 2 to make battles more costly
+
+    let remainingDamage = totalDamage;
+
+    // Sort by strength (weakest first to destroy weak ships first)
+    const sorted = [...combatShips].sort((a, b) => {
+        const aStr = SHIP_STRENGTH[a.type] || 1;
+        const bStr = SHIP_STRENGTH[b.type] || 1;
+        return aStr - bStr;
+    });
+
+    for (const ship of sorted) {
+        if (remainingDamage <= 0) {
+            survivors.push(ship);
+            continue;
+        }
+
+        const shipType = SHIP_TYPES[ship.type];
+        const damage = Math.min(ship.hitPoints, remainingDamage);
+
+        ship.hitPoints -= damage;
+        remainingDamage -= damage;
+
+        if (ship.hitPoints <= 0) {
+            destroyed.push(ship);
+        } else {
+            survivors.push(ship);
+        }
+    }
+
+    // Add colonizers to survivors (they don't fight)
+    for (const ship of ships) {
+        if (ship.type === 'colonizer') {
+            survivors.push(ship);
+        }
+    }
 }
 
 export function processPendingConquests() {
