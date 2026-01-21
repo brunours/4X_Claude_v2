@@ -2,7 +2,7 @@
 // UI MANAGER
 // ============================================
 
-import { gameState } from './gameState.js';
+import { gameState, calculateScore } from './gameState.js';
 import { buildShip, cancelBuild } from './shipSystem.js';
 import { SHIP_TYPES } from './config.js';
 
@@ -18,6 +18,10 @@ export function updateDisplay() {
     document.getElementById('mineralsCount').textContent = Math.floor(gameState.players.player.minerals);
     document.getElementById('foodCount').textContent = Math.floor(gameState.players.player.food);
     document.getElementById('turnCount').textContent = gameState.turn;
+
+    // Update score
+    const score = calculateScore('player');
+    document.getElementById('scoreCount').textContent = score;
 }
 
 export function updatePlanetPanel(planet) {

@@ -44,6 +44,9 @@ export function processBuildQueues() {
 
             planet.buildQueue.shift();
 
+            // Track ship built
+            gameState.players[planet.owner].shipsBuilt++;
+
             // Check if enemy ships are occupying
             const enemyOwner = planet.owner === 'player' ? 'enemy' : 'player';
             const enemyShips = planet.ships.filter(s => s.owner === enemyOwner);
@@ -141,22 +144,21 @@ export function handleShipArrival(shipGroup) {
             }
         }
     } else {
-        // Friendly arrival
-        targetPlanet.ships.push(...shipGroup.ships);
-
-        // Check for colonizer on neutral planet
+        // Friendly arrival or neutral planet
+        // Check for colonizer on neutral planet BEFORE adding ships
         if (!targetPlanet.owner) {
             const colonizer = shipGroup.ships.find(s => s.type === 'colonizer');
             if (colonizer) {
                 targetPlanet.owner = shipGroup.owner;
                 targetPlanet.population = 10;
-                // Remove colonizer
-                const idx = targetPlanet.ships.findIndex(s => s.id === colonizer.id);
-                if (idx !== -1) {
-                    targetPlanet.ships.splice(idx, 1);
-                }
+                // Add all ships except colonizer
+                targetPlanet.ships.push(...shipGroup.ships.filter(s => s.id !== colonizer.id));
+                return;
             }
         }
+
+        // Normal friendly arrival
+        targetPlanet.ships.push(...shipGroup.ships);
     }
 }
 

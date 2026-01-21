@@ -168,9 +168,19 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
     // Process casualties
     for (const ship of combatResult.destroyedAttackers) {
         destroyedAttackers.push({ type: ship.type, owner: ship.owner });
+        // Track enemy ships destroyed (defenders destroyed attackers)
+        const defenderOwner = defendingShips[0]?.owner;
+        if (defenderOwner && gameState.players[defenderOwner]) {
+            gameState.players[defenderOwner].enemyShipsDestroyed++;
+        }
     }
     for (const ship of combatResult.destroyedDefenders) {
         destroyedDefenders.push({ type: ship.type, owner: ship.owner });
+        // Track enemy ships destroyed (attackers destroyed defenders)
+        const attackerOwner = attackingShips[0]?.owner;
+        if (attackerOwner && gameState.players[attackerOwner]) {
+            gameState.players[attackerOwner].enemyShipsDestroyed++;
+        }
     }
 
     // Track damaged ships

@@ -191,6 +191,7 @@
         .resource.energy { border-left: 3px solid #ff0; }
         .resource.minerals { border-left: 3px solid #888; }
         .resource.food { border-left: 3px solid #0f0; }
+        .resource.score { border-left: 3px solid #0af; }
         
         #turnInfo {
             display: flex;

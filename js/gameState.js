@@ -15,8 +15,8 @@ export let gameState = {
     travelingShips: [],
     pendingConquests: [], // Track planets being conquered
     players: {
-        player: { energy: 100, minerals: 100, food: 100 },
-        enemy: { energy: 100, minerals: 100, food: 100 }
+        player: { energy: 100, minerals: 100, food: 100, score: 0, shipsBuilt: 0, enemyShipsDestroyed: 0 },
+        enemy: { energy: 100, minerals: 100, food: 100, score: 0, shipsBuilt: 0, enemyShipsDestroyed: 0 }
     },
     selectedPlanet: null,
     selectingDestination: false,
@@ -200,4 +200,32 @@ export function generateBackgroundStars() {
 
 export function generateId() {
     return Math.random().toString(36).substr(2, 9);
+}
+
+export function calculateScore(owner) {
+    const ownedPlanets = gameState.planets.filter(p => p.owner === owner);
+    const totalPopulation = ownedPlanets.reduce((sum, p) => sum + p.population, 0);
+
+    // Count ships: stationed + traveling
+    const stationedShips = ownedPlanets.reduce((sum, p) =>
+        sum + p.ships.filter(s => s.owner === owner).length, 0
+    );
+    const travelingShips = gameState.travelingShips
+        .filter(g => g.owner === owner)
+        .reduce((sum, g) => sum + g.ships.length, 0);
+    const totalShips = stationedShips + travelingShips;
+
+    const player = gameState.players[owner];
+
+    // Score formula:
+    // - 100 points per planet
+    // - 1 point per population
+    // - 10 points per ship in service
+    // - 20 points per enemy ship destroyed
+    const score = (ownedPlanets.length * 100) +
+                  totalPopulation +
+                  (totalShips * 10) +
+                  (player.enemyShipsDestroyed * 20);
+
+    return score;
 }
