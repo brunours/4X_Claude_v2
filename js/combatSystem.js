@@ -72,13 +72,44 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
     const destroyedAttackers = [];
     const destroyedDefenders = [];
 
+    // Special case: Colonizers are auto-destroyed if facing enemies without escort
+    const attackerColonizers = attackers.filter(s => s.type === 'colonizer');
+    const attackerEscorts = attackers.filter(s => s.type !== 'colonizer');
+
+    if (attackerColonizers.length > 0 && attackerEscorts.length === 0 && defenders.length > 0) {
+        // Colonizers without escort are destroyed immediately
+        for (const colonizer of attackerColonizers) {
+            destroyedAttackers.push({ type: colonizer.type, owner: colonizer.owner });
+        }
+        attackers = attackers.filter(s => s.type !== 'colonizer');
+    }
+
+    const defenderColonizers = defenders.filter(s => s.type === 'colonizer');
+    const defenderEscorts = defenders.filter(s => s.type !== 'colonizer');
+
+    if (defenderColonizers.length > 0 && defenderEscorts.length === 0 && attackers.length > 0) {
+        // Colonizers without escort are destroyed immediately
+        for (const colonizer of defenderColonizers) {
+            destroyedDefenders.push({ type: colonizer.type, owner: colonizer.owner });
+        }
+        defenders = defenders.filter(s => s.type !== 'colonizer');
+    }
+
     while (attackers.length > 0 && defenders.length > 0) {
-        // Attackers fire first
-        for (const attacker of attackers) {
+        // Attackers fire first (excluding colonizers)
+        const activeAttackers = attackers.filter(s => SHIP_TYPES[s.type].attack > 0);
+        for (const attacker of activeAttackers) {
             if (defenders.length === 0) break;
 
             const shipType = SHIP_TYPES[attacker.type];
-            const target = defenders[Math.floor(Math.random() * defenders.length)];
+
+            // Target non-colonizer ships first if available
+            let validTargets = defenders.filter(s => s.type !== 'colonizer');
+            if (validTargets.length === 0) {
+                validTargets = defenders; // Only colonizers left
+            }
+
+            const target = validTargets[Math.floor(Math.random() * validTargets.length)];
             const targetType = SHIP_TYPES[target.type];
 
             const damage = Math.max(1, shipType.attack - targetType.defense);
@@ -90,12 +121,20 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
             }
         }
 
-        // Defenders fire back
-        for (const defender of defenders) {
+        // Defenders fire back (excluding colonizers)
+        const activeDefenders = defenders.filter(s => SHIP_TYPES[s.type].attack > 0);
+        for (const defender of activeDefenders) {
             if (attackers.length === 0) break;
 
             const shipType = SHIP_TYPES[defender.type];
-            const target = attackers[Math.floor(Math.random() * attackers.length)];
+
+            // Target non-colonizer ships first if available
+            let validTargets = attackers.filter(s => s.type !== 'colonizer');
+            if (validTargets.length === 0) {
+                validTargets = attackers; // Only colonizers left
+            }
+
+            const target = validTargets[Math.floor(Math.random() * validTargets.length)];
             const targetType = SHIP_TYPES[target.type];
 
             const damage = Math.max(1, shipType.attack - targetType.defense);

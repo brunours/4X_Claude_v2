@@ -166,9 +166,9 @@ export function generatePlanets(count) {
     playerStart.owner = 'player';
     playerStart.population = 50;
     playerStart.ships = [
-        { type: 'scout', id: generateId(), hitPoints: SHIP_TYPES.scout.hitPoints, maxHitPoints: SHIP_TYPES.scout.hitPoints, owner: 'player' },
-        { type: 'scout', id: generateId(), hitPoints: SHIP_TYPES.scout.hitPoints, maxHitPoints: SHIP_TYPES.scout.hitPoints, owner: 'player' },
-        { type: 'frigate', id: generateId(), hitPoints: SHIP_TYPES.frigate.hitPoints, maxHitPoints: SHIP_TYPES.frigate.hitPoints, owner: 'player' }
+        { type: 'scout', id: generateId(), hitPoints: SHIP_TYPES.scout.maxHitPoints, maxHitPoints: SHIP_TYPES.scout.maxHitPoints, owner: 'player' },
+        { type: 'scout', id: generateId(), hitPoints: SHIP_TYPES.scout.maxHitPoints, maxHitPoints: SHIP_TYPES.scout.maxHitPoints, owner: 'player' },
+        { type: 'frigate', id: generateId(), hitPoints: SHIP_TYPES.frigate.maxHitPoints, maxHitPoints: SHIP_TYPES.frigate.maxHitPoints, owner: 'player' }
     ];
 
     // Enemy starts on opposite side
@@ -176,9 +176,9 @@ export function generatePlanets(count) {
     enemyStart.owner = 'enemy';
     enemyStart.population = 50;
     enemyStart.ships = [
-        { type: 'scout', id: generateId(), hitPoints: SHIP_TYPES.scout.hitPoints, maxHitPoints: SHIP_TYPES.scout.hitPoints, owner: 'enemy' },
-        { type: 'scout', id: generateId(), hitPoints: SHIP_TYPES.scout.hitPoints, maxHitPoints: SHIP_TYPES.scout.hitPoints, owner: 'enemy' },
-        { type: 'frigate', id: generateId(), hitPoints: SHIP_TYPES.frigate.hitPoints, maxHitPoints: SHIP_TYPES.frigate.hitPoints, owner: 'enemy' }
+        { type: 'scout', id: generateId(), hitPoints: SHIP_TYPES.scout.maxHitPoints, maxHitPoints: SHIP_TYPES.scout.maxHitPoints, owner: 'enemy' },
+        { type: 'scout', id: generateId(), hitPoints: SHIP_TYPES.scout.maxHitPoints, maxHitPoints: SHIP_TYPES.scout.maxHitPoints, owner: 'enemy' },
+        { type: 'frigate', id: generateId(), hitPoints: SHIP_TYPES.frigate.maxHitPoints, maxHitPoints: SHIP_TYPES.frigate.maxHitPoints, owner: 'enemy' }
     ];
 
     // Center camera on player's starting planet

@@ -11,6 +11,7 @@ export function endTurn() {
 
     processBuildQueues();
     processTravelingShips();
+    healStationedShips();
     collectResources();
     processPendingConquests();
 
@@ -35,8 +36,8 @@ export function processBuildQueues() {
             const newShip = {
                 id: generateId(),
                 type: item.type,
-                hitPoints: SHIP_TYPES[item.type].hitPoints,
-                maxHitPoints: SHIP_TYPES[item.type].hitPoints,
+                hitPoints: SHIP_TYPES[item.type].maxHitPoints,
+                maxHitPoints: SHIP_TYPES[item.type].maxHitPoints,
                 owner: planet.owner
             };
 
@@ -72,6 +73,29 @@ export function processTravelingShips() {
         if (group.turnsRemaining <= 0) {
             handleShipArrival(group);
             gameState.travelingShips.splice(i, 1);
+        }
+    }
+}
+
+export function healStationedShips() {
+    const HEAL_RATE = 0.2;
+
+    for (const planet of gameState.planets) {
+        if (!planet.owner) continue; // Only heal at owned planets
+
+        for (const ship of planet.ships) {
+            // Only heal ships owned by the planet owner
+            if (ship.owner !== planet.owner) continue;
+
+            const shipType = SHIP_TYPES[ship.type];
+
+            // Heal the ship
+            if (ship.hitPoints < shipType.maxHitPoints) {
+                ship.hitPoints = Math.min(
+                    shipType.maxHitPoints,
+                    ship.hitPoints + HEAL_RATE
+                );
+            }
         }
     }
 }

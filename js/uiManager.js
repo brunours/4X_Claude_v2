@@ -69,11 +69,20 @@ export function updateFleetPanel() {
             for (const ship of playerShips) {
                 const shipType = SHIP_TYPES[ship.type];
                 const isSelected = gameState.selectedShipIds.has(ship.id);
+                const healthPercent = (ship.hitPoints / shipType.maxHitPoints) * 100;
+                const healthColor = healthPercent > 66 ? '#0f8' : healthPercent > 33 ? '#fa0' : '#f44';
+
                 content += `
                     <div class="ship-row ${isSelected ? 'selected' : ''}" onclick="window.toggleShipSelection('${ship.id}')">
                         <div class="ship-info">
                             <span>${shipType.icon}</span>
                             <span>${shipType.name}</span>
+                        </div>
+                        <div class="ship-health">
+                            <div class="health-bar">
+                                <div class="health-fill" style="width: ${healthPercent}%; background: ${healthColor};"></div>
+                            </div>
+                            <span class="health-text">${Math.ceil(ship.hitPoints)}/${shipType.maxHitPoints}</span>
                         </div>
                     </div>
                 `;
@@ -82,12 +91,21 @@ export function updateFleetPanel() {
             // Show enemy ships (not selectable)
             for (const ship of enemyShips) {
                 const shipType = SHIP_TYPES[ship.type];
+                const healthPercent = (ship.hitPoints / shipType.maxHitPoints) * 100;
+                const healthColor = healthPercent > 66 ? '#0f8' : healthPercent > 33 ? '#fa0' : '#f44';
+
                 content += `
                     <div class="ship-row" style="opacity: 0.6; cursor: default;">
                         <div class="ship-info">
                             <span>${shipType.icon}</span>
                             <span>${shipType.name}</span>
                             <span style="color: #f44; font-size: 0.75rem;">(${ship.owner})</span>
+                        </div>
+                        <div class="ship-health">
+                            <div class="health-bar">
+                                <div class="health-fill" style="width: ${healthPercent}%; background: ${healthColor};"></div>
+                            </div>
+                            <span class="health-text">${Math.ceil(ship.hitPoints)}/${shipType.maxHitPoints}</span>
                         </div>
                     </div>
                 `;
