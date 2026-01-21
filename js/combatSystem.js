@@ -1,6 +1,28 @@
 // ============================================
 // COMBAT SYSTEM
 // ============================================
+//
+// This module handles all combat mechanics, including battle resolution,
+// casualty calculations, conquest mechanics, and battle result displays.
+//
+// Core Responsibilities:
+// - Resolve combat between attacking and defending fleets using strength calculations
+// - Handle player battle choices (fight or withdraw) with confirmation dialogs
+// - Calculate fleet strength based on ship types, HP, and defender bonuses
+// - Distribute damage proportionally across fleets with ship destruction
+// - Process planet conquest with colonizer mechanics (3-turn timer)
+// - Track battle casualties and damaged ships for result displays
+// - Handle special cases (colonizers auto-destroyed without escorts)
+// - Manage planet ownership changes and neutralization after successful attacks
+//
+// Exports:
+// - resolveBattleChoice(choice): Processes player's fight/withdraw decision
+// - resolveCombat(attackers, defenders, planet): Core combat resolution algorithm
+// - showBattleResults(result, isDefending): Displays detailed battle outcome
+// - resolveWithdraw(ships, planet, isDefending): Handles retreat mechanics
+// - processPendingConquests(): Updates conquest timers each turn
+//
+// Used by: turnSystem (ship arrivals, new ship construction), uiManager (battle dialogs)
 
 import { gameState, generateId } from './gameState.js';
 import { SHIP_TYPES } from './config.js';

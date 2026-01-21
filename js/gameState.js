@@ -1,6 +1,25 @@
 // ============================================
 // GAME STATE & INITIALIZATION
 // ============================================
+//
+// This module manages the central game state and handles game initialization,
+// including planet generation, canvas setup, and start screen configuration.
+//
+// Core Responsibilities:
+// - Maintains the gameState object (turn counter, planets, ships, players, resources)
+// - Manages camera viewport and background stars
+// - Generates random galaxy with planets and resource distributions
+// - Handles canvas resizing and coordinate system setup
+// - Processes start screen options (difficulty, map size)
+// - Calculates player scores based on planets, population, ships, and combat
+//
+// Exports:
+// - gameState: Central mutable state object accessed by all modules
+// - camera: Viewport position and zoom level
+// - backgroundStars: Decorative star positions for rendering
+// - Functions: init(), startGame(), generatePlanets(), calculateScore(), generateId()
+//
+// Used by: All game modules that need to read or modify game state
 
 import { MAP_SIZES, SHIP_TYPES } from './config.js';
 

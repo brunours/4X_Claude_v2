@@ -1,6 +1,24 @@
 // ============================================
 // RENDERING
 // ============================================
+//
+// This module handles all canvas rendering for the game, including the game loop,
+// background, planets, ships, travel routes, and UI overlays.
+//
+// Core Responsibilities:
+// - Main game loop using requestAnimationFrame for smooth 60fps rendering
+// - Draw background gradient and decorative stars
+// - Render all planets with ownership colors, names, and orbital effects
+// - Display ship icons and counts at planets
+// - Visualize traveling ship groups with animated routes
+// - Show destination selection indicators and travel paths
+// - Apply camera transformations for pan and zoom
+//
+// Exports:
+// - gameLoop(): Main rendering loop, called continuously by browser
+// - render(): Single frame render function that draws entire game state
+//
+// Used by: main.js (starts the game loop on initialization)
 
 import { gameState, camera, canvas, ctx, backgroundStars } from './gameState.js';
 import { SHIP_TYPES } from './config.js';

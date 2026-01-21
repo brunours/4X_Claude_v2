@@ -1,6 +1,33 @@
 // ============================================
 // TURN SYSTEM
 // ============================================
+//
+// This module orchestrates the end-turn sequence, processing all game events
+// that occur each turn including builds, movement, healing, and resource collection.
+//
+// Core Responsibilities:
+// - Coordinate turn progression and increment turn counter
+// - Process ship build queues and complete construction
+// - Move traveling ship groups and handle arrivals (combat or friendly landing)
+// - Heal stationed ships at owned planets (20% HP per turn)
+// - Collect resources from owned planets and apply population growth
+// - Process conquest timers for planets being captured
+// - Neutralize planets that lose all defending ships
+// - Handle ship arrivals including colonization of neutral planets
+// - Trigger combat when enemy ships encounter each other
+// - Check for victory/defeat conditions
+//
+// Exports:
+// - endTurn(): Main turn processing function called by "End Turn" button
+// - processBuildQueues(): Completes ship construction
+// - processTravelingShips(): Moves fleets and handles arrivals
+// - healStationedShips(): Restores HP to ships at friendly planets
+// - collectResources(): Gathers resources and grows populations
+// - handleShipArrival(group): Processes fleet arrival events
+// - processEmptyPlanets(): Neutralizes abandoned planets
+// - checkGameEnd(): Evaluates win/loss conditions
+//
+// Used by: main.js and uiManager (End Turn button), called once per turn
 
 import { gameState, generateId } from './gameState.js';
 import { SHIP_TYPES } from './config.js';

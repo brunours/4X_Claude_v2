@@ -1,6 +1,17 @@
 // ============================================
 // GAME CONFIGURATION
 // ============================================
+//
+// This module contains all core game configuration constants that define
+// gameplay parameters, ship statistics, map sizes, and AI behavior settings.
+//
+// Exports:
+// - SHIP_TYPES: Defines all ship types with their stats (cost, combat, speed, HP)
+// - MAP_SIZES: Defines galaxy sizes (compact, standard, vast) with planet counts
+// - AI_CONFIG: Defines AI difficulty levels and their behavioral parameters
+//
+// Used by: All game modules that need access to ship stats, map generation,
+// or AI decision-making parameters
 
 export const SHIP_TYPES = {
     scout: { name: 'Scout', icon: '🔭', color: '#00ffff', speed: 1.5, attack: 2, defense: 1, maxHitPoints: 3, cost: { energy: 10, minerals: 5, food: 0 }, baseBuildTime: 2, minBuildTime: 1 },

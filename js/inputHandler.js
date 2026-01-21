@@ -1,6 +1,34 @@
 // ============================================
 // INPUT HANDLER
 // ============================================
+//
+// This module handles all user input including mouse, touch, and keyboard events,
+// translating them into game actions and UI interactions.
+//
+// Core Responsibilities:
+// - Process mouse events (click, drag, scroll) for planet selection and camera control
+// - Handle touch gestures (pan, pinch-zoom, tap) for mobile support
+// - Detect planet clicks for selection and destination targeting
+// - Manage camera panning with mouse drag or touch drag
+// - Implement mouse wheel and pinch zoom with constraints (0.5x-3x)
+// - Process "End Turn" button click with AI turn and game state updates
+// - Expose window functions for HTML onclick handlers (build, send, cancel, battle)
+// - Distinguish between drag (camera pan) and click (planet selection)
+// - Handle destination selection mode for fleet movement
+//
+// Event Flow:
+// 1. Mouse/touch down → Track start position, begin potential drag
+// 2. Mouse/touch move → Update camera position if dragging
+// 3. Mouse/touch up → If not dragged, process click (select planet or send fleet)
+// 4. Wheel/pinch → Adjust camera zoom level
+//
+// Exports:
+// - setupEventListeners(): Binds all event handlers to canvas and UI elements
+//
+// Window Functions (for HTML onclick):
+// - buildShipType(), cancelBuildItem(), sendSelectedShips(), resolveBattle(), etc.
+//
+// Used by: main.js (called once during initialization)
 
 import { gameState, camera, canvas } from './gameState.js';
 import { screenToWorld, clampCamera, updateZoomIndicator, getPlanetAt } from './camera.js';

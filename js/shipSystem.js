@@ -1,6 +1,28 @@
 // ============================================
 // SHIP BUILDING & MOVEMENT
 // ============================================
+//
+// This module manages ship construction, build queues, and fleet movement
+// between planets, including destination selection and fleet composition.
+//
+// Core Responsibilities:
+// - Check if player can afford to build specific ship types
+// - Calculate build times based on ship type and planet population
+// - Add ships to planet build queues and deduct resources
+// - Cancel builds and refund 50% of resources
+// - Initiate fleet movement with destination selection mode
+// - Create traveling ship groups with travel time calculations
+// - Handle fleet composition and individual ship selection
+//
+// Exports:
+// - buildShip(type): Builds a ship at selected planet
+// - canAffordShip(owner, type): Checks resource availability
+// - calculateBuildTime(type, population): Computes build duration
+// - cancelBuild(planetId, buildId): Cancels and refunds build
+// - sendShips(), sendSelectedShips(), completeShipSend(): Fleet movement functions
+// - cancelDestinationSelection(): Exits destination selection mode
+//
+// Used by: uiManager (build buttons, fleet UI), turnSystem (processes build queues)
 
 import { gameState, generateId } from './gameState.js';
 import { SHIP_TYPES } from './config.js';

@@ -1,6 +1,30 @@
 // ============================================
 // AI SYSTEM
 // ============================================
+//
+// This module implements AI decision-making for the enemy player, including
+// ship construction priorities, fleet movement strategies, and difficulty scaling.
+//
+// Core Responsibilities:
+// - Process enemy turn actions (building ships, moving fleets)
+// - Make strategic decisions based on difficulty settings (easy/medium/hard)
+// - Balance expansion (colonizers) vs military (combat ships) based on priorities
+// - Evaluate threats and opportunities for fleet movements
+// - Target neutral planets for colonization or enemy planets for attack
+// - Scale aggressiveness, build efficiency, and decision quality by difficulty
+// - Calculate fleet compositions and military strength ratios
+//
+// AI Decision Factors:
+// - expansionPriority: Likelihood of building colonizers vs military
+// - militaryPriority: Focus on combat ship construction
+// - aggressiveness: Frequency of attacks and fleet movements
+// - buildEfficiency: Chance to make optimal build decisions each turn
+// - decisionDelay: (Unused) Could add reaction time delays
+//
+// Exports:
+// - processAITurn(): Main AI turn processor called at end of each turn
+//
+// Used by: turnSystem (called during endTurn() after player actions)
 
 import { gameState, generateId } from './gameState.js';
 import { canAffordShip, buildShip, calculateBuildTime } from './shipSystem.js';

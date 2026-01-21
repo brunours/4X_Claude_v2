@@ -1,6 +1,32 @@
 // ============================================
 // UI MANAGER
 // ============================================
+//
+// This module manages all UI panels, displays, and user interactions including
+// planet details, fleet management, shipyard controls, and notifications.
+//
+// Core Responsibilities:
+// - Update resource displays (energy, minerals, food, score, turn counter)
+// - Manage unified planet panel (stats, ownership, production)
+// - Display fleet information (stationed ships, ships in transit)
+// - Handle shipyard UI (build options, build queue visualization)
+// - Enable ship selection with visual feedback (checkboxes, highlighting)
+// - Show/hide panels based on planet selection and ownership
+// - Display battle dialogs with combat information
+// - Show battle results with detailed casualties
+// - Generate notifications for game events
+// - Manage tab switching (stationed vs transit fleets)
+// - Handle game over screen (victory/defeat)
+//
+// Exports:
+// - updateDisplay(): Refreshes resource and score displays
+// - updatePlanetPanel(), updateFleetPanel(), updateShipyardPanel(): Panel updates
+// - selectPlanet(planet): Opens panels for selected planet
+// - showNotification(message): Displays temporary notification
+// - showBattleDialog(), showGameOver(): Modal dialogs
+// - closePlanetPanel(), switchFleetTab(): Panel controls
+//
+// Used by: inputHandler (planet selection), turnSystem (auto-updates), main.js
 
 import { gameState, calculateScore } from './gameState.js';
 import { buildShip, cancelBuild } from './shipSystem.js';

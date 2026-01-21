@@ -1,6 +1,23 @@
 // ============================================
 // CAMERA & COORDINATE TRANSFORMATIONS
 // ============================================
+//
+// This module provides utility functions for camera control and coordinate
+// system transformations between screen space and world space.
+//
+// Core Responsibilities:
+// - Convert screen coordinates (mouse/touch) to world coordinates (game map)
+// - Convert world coordinates to screen coordinates (for rendering)
+// - Constrain camera position to prevent panning beyond map boundaries
+// - Update zoom indicator display in the UI
+//
+// Exports:
+// - screenToWorld(x, y): Converts mouse/touch position to game world position
+// - worldToScreen(x, y): Converts game world position to canvas pixel position
+// - clampCamera(): Keeps camera within world bounds with padding
+// - updateZoomIndicator(): Updates the zoom percentage display
+//
+// Used by: inputHandler (mouse/touch events), renderer (drawing positions)
 
 import { gameState, camera, canvas } from './gameState.js';
 
