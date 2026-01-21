@@ -235,11 +235,26 @@ export function checkGameEnd() {
     const playerPlanets = gameState.planets.filter(p => p.owner === 'player');
     const enemyPlanets = gameState.planets.filter(p => p.owner === 'enemy');
 
-    if (playerPlanets.length === 0) {
+    // Check for colonizer ships
+    const hasPlayerColonizer = gameState.planets.some(p =>
+        p.ships.some(s => s.owner === 'player' && s.type === 'colonizer')
+    ) || gameState.travelingShips.some(g =>
+        g.owner === 'player' && g.ships.some(s => s.type === 'colonizer')
+    );
+
+    const hasEnemyColonizer = gameState.planets.some(p =>
+        p.ships.some(s => s.owner === 'enemy' && s.type === 'colonizer')
+    ) || gameState.travelingShips.some(g =>
+        g.owner === 'enemy' && g.ships.some(s => s.type === 'colonizer')
+    );
+
+    // Player loses if no planets AND no colonizers
+    if (playerPlanets.length === 0 && !hasPlayerColonizer) {
         return { gameOver: true, victory: false };
     }
 
-    if (enemyPlanets.length === 0) {
+    // Enemy loses if no planets AND no colonizers
+    if (enemyPlanets.length === 0 && !hasEnemyColonizer) {
         return { gameOver: true, victory: true };
     }
 
