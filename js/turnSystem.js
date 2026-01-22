@@ -257,8 +257,18 @@ export function processEmptyPlanets() {
         );
         if (arrivingShips) continue;
 
-        // No ships, no reinforcements coming - planet becomes neutral
-        planet.owner = null;
+        // Check if the owner still has colonizers anywhere that could reclaim this planet
+        const ownerHasColonizers = gameState.planets.some(p =>
+            p.ships.some(s => s.owner === planet.owner && s.type === 'colonizer')
+        ) || gameState.travelingShips.some(g =>
+            g.owner === planet.owner && g.ships.some(s => s.type === 'colonizer')
+        );
+
+        // If owner has colonizers, keep the planet owned (they can reclaim it)
+        // Otherwise, planet becomes neutral
+        if (!ownerHasColonizers) {
+            planet.owner = null;
+        }
     }
 }
 
@@ -266,7 +276,7 @@ export function checkGameEnd() {
     const playerPlanets = gameState.planets.filter(p => p.owner === 'player');
     const enemyPlanets = gameState.planets.filter(p => p.owner === 'enemy');
 
-    // Check for colonizer ships
+    // Check for colonizer ships (stationed or traveling)
     const hasPlayerColonizer = gameState.planets.some(p =>
         p.ships.some(s => s.owner === 'player' && s.type === 'colonizer')
     ) || gameState.travelingShips.some(g =>
