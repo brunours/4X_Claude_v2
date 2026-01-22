@@ -37,47 +37,106 @@
 
 ### Main Game Files
 
-#### `4x-space-game.html`
-The complete, self-contained game in a single HTML file (~3,360 lines, ~139KB).
+The game uses a modular architecture with separated HTML, CSS, and JavaScript files (~3,760 lines total).
 
-**Contents:**
-- HTML structure (canvas, UI panels, dialogs)
-- CSS styling (embedded in `<style>` tags)
-- JavaScript game logic (embedded in `<script>` tags)
+#### `index.html` (132 lines)
+Main HTML structure containing:
+- Canvas element for game rendering
+- UI overlay panels (start screen, unified panel, battle dialogs)
+- Game over screen
+- Resource and turn display
+- Links to external CSS and JavaScript modules
+
+#### `css/style.css` (1,201 lines)
+Complete styling for the game:
+- Panel layouts and responsive design
+- Button styles and animations
+- Canvas and UI overlays
+- Battle dialog styling
 - Font imports (Orbitron, Exo 2 from Google Fonts)
 
-**Sections within the file:**
-1. **Lines 1-500**: HTML structure and CSS styling
-2. **Lines 500-1137**: Additional CSS for panels and UI
-3. **Lines 1138-1177**: Game configuration constants
-4. **Lines 1179-1221**: Game state initialization
-5. **Lines 1222-1380**: Initialization functions
-6. **Lines 1382-1737**: Event listeners (mouse, touch, keyboard)
-7. **Lines 1738-2279**: UI management functions
-8. **Lines 2280-2342**: Ship building and resource functions
-9. **Lines 2343-2833**: Game loop and turn processing
-10. **Lines 2834-3030**: AI system
-11. **Lines 3031-3089**: Victory condition checking
-12. **Lines 3090-3360**: Rendering pipeline
+#### JavaScript Modules (`js/` directory)
 
-#### `README.md`
-Brief project description and overview. Contains:
-- Project title
-- One-line description of game features
+**`js/main.js`** (42 lines)
+- Entry point for the game
+- Initializes all game systems
+- Starts the game loop
 
-#### `DEPLOYMENT.md`
-Deployment instructions for GitHub Pages. Contains:
-- Steps to host the game online
-- GitHub Pages configuration
+**`js/config.js`** (51 lines)
+- Game configuration constants
+- Ship type definitions (Scout, Colonizer, Frigate, Battleship)
+- Map sizes and AI difficulty settings
 
-#### `GITHUB-SETUP.md`
-Guide for setting up the GitHub repository.
+**`js/gameState.js`** (250 lines)
+- Central game state management
+- Player data, planets, ships
+- Selected entities and camera state
+- State initialization functions
 
-#### `deploy.bat` / `setup-github.sh`
-Automated deployment scripts for Windows and Unix systems.
+**`js/camera.js`** (58 lines)
+- Camera control system
+- Zoom and pan functionality
+- Coordinate transformations
 
-#### `extract_sections.sh`
-Utility script for extracting sections from the monolithic HTML file.
+**`js/inputHandler.js`** (290 lines)
+- Mouse and touch event handling
+- Click detection for planet selection
+- Drag-to-pan and pinch-to-zoom
+- End turn button handling
+
+**`js/uiManager.js`** (352 lines)
+- UI panel management (planet, fleet, shipyard)
+- Notification system
+- Battle dialog display
+- Resource and turn counter updates
+
+**`js/shipSystem.js`** (161 lines)
+- Ship movement and travel groups
+- Ship selection logic
+- Fleet management utilities
+
+**`js/combatSystem.js`** (421 lines)
+- Combat resolution logic
+- Battle damage calculations
+- Ship arrival and colonization handling
+- Withdraw mechanics
+
+**`js/turnSystem.js`** (293 lines)
+- Turn processing pipeline
+- Build queue management
+- Resource collection
+- Population growth
+- Victory/defeat condition checking
+
+**`js/aiSystem.js`** (214 lines)
+- AI decision making
+- Ship building strategy
+- Movement and targeting logic
+- Difficulty-based behavior
+
+**`js/renderer.js`** (296 lines)
+- Canvas rendering pipeline
+- Planet and ship drawing
+- Travel route visualization
+- Background stars and effects
+
+#### Documentation Files
+
+**`README.md`**
+- Brief project description and overview
+- Project title and feature summary
+
+**`DOCUMENTATION.md`** (this file)
+- Complete game documentation
+- Code architecture and mechanics
+- Developer guide
+
+**`DEPLOYMENT.md`**
+- GitHub Pages deployment instructions
+- Hosting configuration
+
+**`GITHUB-SETUP.md`**
+- Git repository setup guide
 
 ---
 
@@ -335,7 +394,7 @@ The game follows a modular architecture within a single file:
 ### Initialization Functions
 
 #### `init()`
-**Location**: Line ~1222
+**File**: `js/main.js`
 **Purpose**: Main entry point, called when page loads
 **Actions**:
 - Gets canvas context
@@ -344,7 +403,7 @@ The game follows a modular architecture within a single file:
 - Shows start screen
 
 #### `startGame()`
-**Location**: Line ~1250
+**File**: `js/gameState.js`
 **Purpose**: Initializes a new game
 **Parameters**: Uses selected difficulty and map size from UI
 **Actions**:
@@ -355,7 +414,7 @@ The game follows a modular architecture within a single file:
 - Hides start screen
 
 #### `generatePlanets(count)`
-**Location**: Line ~1280
+**File**: `js/gameState.js`
 **Purpose**: Creates random planets on the map
 **Algorithm**:
 1. Loop until `count` planets created
@@ -367,7 +426,7 @@ The game follows a modular architecture within a single file:
 ### Event Handling Functions
 
 #### `handleMouseDown(e)`, `handleMouseMove(e)`, `handleMouseUp(e)`
-**Location**: Lines 1382-1450
+**File**: `js/inputHandler.js`
 **Purpose**: Camera panning with mouse drag
 **Mechanism**:
 - Track mouse down state and position
@@ -376,13 +435,13 @@ The game follows a modular architecture within a single file:
 - Clamp to map boundaries
 
 #### `handleWheel(e)`
-**Location**: Line ~1455
+**File**: `js/inputHandler.js`
 **Purpose**: Zoom control with mouse wheel
 **Range**: 0.5× to 3.0×
 **Increments**: 0.1 per scroll tick
 
 #### `handleTouchStart/Move/End(e)`
-**Location**: Lines 1500-1650
+**File**: `js/inputHandler.js`
 **Purpose**: Touch support (pan and pinch-zoom)
 **Features**:
 - Single finger: pan camera
@@ -390,7 +449,7 @@ The game follows a modular architecture within a single file:
 - Prevents default browser gestures
 
 #### `handleClick(e)`
-**Location**: Lines 1680-1737
+**File**: `js/inputHandler.js`
 **Purpose**: Planet selection and ship destination
 **Logic**:
 1. Convert click coordinates to world space
@@ -401,7 +460,7 @@ The game follows a modular architecture within a single file:
 ### UI Management Functions
 
 #### `selectPlanet(planet)`
-**Location**: Line ~1738
+**File**: `js/uiManager.js`
 **Purpose**: Sets selected planet and updates UI
 **Actions**:
 - Updates `gameState.selectedPlanet`
@@ -409,12 +468,12 @@ The game follows a modular architecture within a single file:
 - Updates planet panel
 - Highlights planet on canvas
 
-#### `togglePlanetPanel()`
-**Location**: Line ~1760
-**Purpose**: Shows/hides planet information panel
+#### `closePlanetPanel()`
+**File**: `js/uiManager.js`
+**Purpose**: Closes the unified panel
 
 #### `updatePlanetPanel(planet)`
-**Location**: Line ~1775
+**File**: `js/uiManager.js`
 **Purpose**: Refreshes planet panel with current data
 **Displays**:
 - Planet name and owner
@@ -423,24 +482,20 @@ The game follows a modular architecture within a single file:
 - Ships present
 - Build queue status
 
-#### `toggleFleetPanel()`
-**Location**: Line ~1850
-**Purpose**: Shows/hides fleet management panel
+#### `switchFleetTab(tab)`
+**File**: `js/uiManager.js`
+**Purpose**: Switches between stationed and transit fleet views
 
 #### `updateFleetPanel()`
-**Location**: Line ~1865
+**File**: `js/uiManager.js`
 **Purpose**: Lists all player's planets and ships
 **Features**:
 - Shows ships at each planet
 - Displays traveling ship groups
 - Allows planet selection from list
 
-#### `toggleShipyardPanel()`
-**Location**: Line ~1970
-**Purpose**: Shows/hides ship construction panel
-
 #### `updateShipyardPanel()`
-**Location**: Line ~1985
+**File**: `js/uiManager.js`
 **Purpose**: Updates shipyard with available ships to build
 **Displays**:
 - Ship types with stats
@@ -451,7 +506,7 @@ The game follows a modular architecture within a single file:
 ### Ship Management Functions
 
 #### `sendShips(fromPlanet, toPlanet, ships)`
-**Location**: Line ~2100
+**File**: `js/shipSystem.js`
 **Purpose**: Initiates ship movement
 **Actions**:
 1. Validates ship ownership
@@ -461,24 +516,24 @@ The game follows a modular architecture within a single file:
 5. Adds visual travel route
 
 #### `toggleShipSelection(shipId)`
-**Location**: Line ~2140
+**File**: `js/shipSystem.js`
 **Purpose**: Toggles individual ship selection
 **Mechanism**: Adds/removes ship ID from selected ships array
 
 #### `selectAllShips(planetId)`
-**Location**: Line ~2160
+**File**: `js/shipSystem.js`
 **Purpose**: Selects all military ships at a planet
 **Exclusion**: Does not select ships in build queue
 
 #### `getSelectedShipsAtPlanet(planet)`
-**Location**: Line ~2180
+**File**: `js/shipSystem.js`
 **Purpose**: Returns array of selected ships at planet
 **Filter**: Only returns ships belonging to current player
 
 ### Building Functions
 
 #### `buildShip(type)`
-**Location**: Line ~2280
+**File**: `js/turnSystem.js`
 **Purpose**: Queues ship construction
 **Process**:
 1. Check if player can afford ship
@@ -488,18 +543,18 @@ The game follows a modular architecture within a single file:
 5. Show notification
 
 #### `calculateBuildTime(type, population)`
-**Location**: Line ~2310
+**File**: `js/turnSystem.js`
 **Purpose**: Determines turns needed to build ship
 **Formula**: `Math.ceil(baseBuildTime / (population / 100))`
 **Result**: Higher population = faster builds
 
 #### `canAffordShip(type)`
-**Location**: Line ~2325
+**File**: `js/turnSystem.js`
 **Purpose**: Checks if player has enough resources
 **Returns**: Boolean (true if affordable)
 
 #### `processBuildQueues()`
-**Location**: Line ~2340
+**File**: `js/turnSystem.js`
 **Purpose**: Advances construction each turn
 **Actions**:
 - Decrements turns remaining on each queued ship
@@ -509,7 +564,7 @@ The game follows a modular architecture within a single file:
 ### Turn Processing Functions
 
 #### `endTurn()`
-**Location**: Line ~2343
+**File**: `js/turnSystem.js`
 **Purpose**: Main turn advancement function
 **Sequence**:
 1. Process traveling ships
@@ -522,7 +577,7 @@ The game follows a modular architecture within a single file:
 8. Update all UI panels
 
 #### `processTravelingShips()`
-**Location**: Line ~2380
+**File**: `js/turnSystem.js`
 **Purpose**: Moves ships and handles arrivals
 **Logic**:
 - Decrements turns remaining for each group
@@ -530,7 +585,7 @@ The game follows a modular architecture within a single file:
 - Removes arrived groups from traveling list
 
 #### `handleShipArrival(group, planet)`
-**Location**: Line ~2420
+**File**: `js/combatSystem.js`
 **Purpose**: Processes ships arriving at destination
 **Cases**:
 1. **Friendly planet**: Ships join planet's fleet
@@ -539,7 +594,7 @@ The game follows a modular architecture within a single file:
 4. **Pending conquest planet**: Triggers combat
 
 #### `resolveCombat(attackingGroup, planet, isWithdraw)`
-**Location**: Line ~2500
+**File**: `js/combatSystem.js`
 **Purpose**: Calculates combat outcome
 **Algorithm**:
 1. If withdraw: return ships to origin
@@ -551,7 +606,7 @@ The game follows a modular architecture within a single file:
 4. Winner takes planet if attacker wins
 
 #### `collectResources()`
-**Location**: Line ~2650
+**File**: `js/turnSystem.js`
 **Purpose**: Generates resources each turn
 **Process**:
 - For each player-owned planet
@@ -559,7 +614,7 @@ The game follows a modular architecture within a single file:
 - Add to player's resource pool
 
 #### `processPopulationGrowth()`
-**Location**: Line ~2680
+**File**: `js/turnSystem.js`
 **Purpose**: Grows planet populations
 **Formula**: `population * 1.10` (10% growth)
 **Cap**: `planetSize * 4`
@@ -567,7 +622,7 @@ The game follows a modular architecture within a single file:
 ### AI Functions
 
 #### `processAITurn()`
-**Location**: Line ~2834
+**File**: `js/aiSystem.js`
 **Purpose**: Executes AI player's turn
 **Actions**:
 1. For each AI-owned planet:
@@ -576,7 +631,7 @@ The game follows a modular architecture within a single file:
 2. Calls `aiDecideBuild()` and `aiDecideShipMovement()`
 
 #### `aiDecideBuild(planet, config, player)`
-**Location**: Line ~2860
+**File**: `js/aiSystem.js`
 **Purpose**: AI ship construction logic
 **Strategy**:
 - Uses difficulty config (military vs. expansion preference)
@@ -585,7 +640,7 @@ The game follows a modular architecture within a single file:
 - Random chance based on config values
 
 #### `aiDecideShipMovement(planet, config)`
-**Location**: Line ~2920
+**File**: `js/aiSystem.js`
 **Purpose**: AI ship movement strategy
 **Targets**:
 1. **Aggressive**: Attack player planets (weakest first)
@@ -595,27 +650,27 @@ The game follows a modular architecture within a single file:
 **Selection**: Based on config aggression value
 
 #### `findNearestPlanet(from, candidatePlanets)`
-**Location**: Line ~2970
+**File**: `js/aiSystem.js`
 **Purpose**: Returns closest planet from list
 **Algorithm**: Linear search with distance calculation
 
 #### `findWeakestPlanet(candidatePlanets)`
-**Location**: Line ~2990
+**File**: `js/aiSystem.js`
 **Purpose**: Returns planet with fewest military ships
 **Use**: AI targeting priority
 
 ### Victory Functions
 
 #### `checkGameEnd()`
-**Location**: Line ~3031
+**File**: `js/turnSystem.js`
 **Purpose**: Detects win/loss conditions
 **Checks**:
-- If player has 0 planets: Defeat
-- If AI has 0 planets: Victory
+- If player has 0 planets AND no colonizers: Defeat
+- If AI has 0 planets AND no colonizers: Victory
 - Otherwise: Continue game
 
 #### `showGameOver(victory)`
-**Location**: Line ~3050
+**File**: `js/uiManager.js`
 **Purpose**: Displays end game screen
 **Actions**:
 - Shows victory or defeat message
@@ -625,7 +680,7 @@ The game follows a modular architecture within a single file:
 ### Rendering Functions
 
 #### `render()`
-**Location**: Line ~3090
+**File**: `js/renderer.js`
 **Purpose**: Main rendering loop (called 60 times/second)
 **Steps**:
 1. Clear canvas
@@ -637,7 +692,7 @@ The game follows a modular architecture within a single file:
 7. Request next frame
 
 #### `drawPlanet(planet)`
-**Location**: Line ~3120
+**File**: `js/renderer.js`
 **Purpose**: Renders a single planet
 **Features**:
 - Colored circle with gradient
@@ -647,12 +702,12 @@ The game follows a modular architecture within a single file:
 - Ship count indicators
 
 #### `drawShipDots(planet)`
-**Location**: Line ~3180
+**File**: `js/renderer.js`
 **Purpose**: Shows ship presence indicators
 **Display**: Small colored dots around planet
 
 #### `drawTravelRoute(group)`
-**Location**: Line ~3220
+**File**: `js/renderer.js`
 **Purpose**: Shows moving ship paths
 **Rendering**:
 - Dashed line from origin to destination
@@ -661,7 +716,7 @@ The game follows a modular architecture within a single file:
 - Progress indicator (fading)
 
 #### `drawDestinationIndicator(planet)`
-**Location**: Line ~3270
+**File**: `js/renderer.js`
 **Purpose**: Highlights valid destinations
 **Effect**: Pulsing circle around selectable planets
 
@@ -959,7 +1014,7 @@ AI Turn Start
 
 ### Adding a New Ship Type
 
-1. **Update SHIP_TYPES constant** (Line ~1138):
+1. **Update SHIP_TYPES constant** in `js/config.js`:
 ```javascript
 destroyer: {
     name: 'Destroyer',
@@ -972,17 +1027,17 @@ destroyer: {
 }
 ```
 
-2. **Update shipyard UI** in `updateShipyardPanel()`:
+2. **Update shipyard UI** in `js/uiManager.js` (`updateShipyardPanel()` function):
 - Add HTML for new ship card
 - Include stats and build button
 
-3. **Update AI logic** in `aiDecideBuild()`:
+3. **Update AI logic** in `js/aiSystem.js` (`aiDecideBuild()` function):
 - Add destroyer to military ship pool
 - Adjust building probabilities
 
 ### Adding a New Resource
 
-1. **Update player initialization**:
+1. **Update player initialization** in `js/gameState.js`:
 ```javascript
 resources: {
     energy: 100,
@@ -992,21 +1047,21 @@ resources: {
 }
 ```
 
-2. **Update resource generation** in `collectResources()`:
+2. **Update resource generation** in `js/turnSystem.js` (`collectResources()` function):
 ```javascript
 planet.resources.crystals = Math.floor(Math.random() * 11) + 5;
 ```
 
 3. **Update UI displays**:
-- Resource counter in header
-- Planet panel resource display
-- Shipyard cost displays
+- Resource counter in `index.html`
+- Planet panel in `js/uiManager.js`
+- Shipyard cost displays in `js/uiManager.js`
 
-4. **Update ship costs** to use new resource
+4. **Update ship costs** in `js/config.js`
 
 ### Modifying Combat
 
-**Damage Formula Location**: Line ~2500 in `resolveCombat()`
+**Damage Formula Location**: `js/combatSystem.js` in `resolveCombat()` function
 
 Current formula:
 ```javascript
@@ -1022,14 +1077,14 @@ Modifications could include:
 
 ### Adding Save/Load
 
-**State Serialization**:
+**State Serialization** - Add to `js/gameState.js`:
 ```javascript
-function saveGame() {
+export function saveGame() {
     const saveData = JSON.stringify(gameState);
     localStorage.setItem('4x_save', saveData);
 }
 
-function loadGame() {
+export function loadGame() {
     const saveData = localStorage.getItem('4x_save');
     if (saveData) {
         Object.assign(gameState, JSON.parse(saveData));
@@ -1039,9 +1094,9 @@ function loadGame() {
 ```
 
 **Recommended implementation**:
-1. Add save button to UI
-2. Auto-save every turn
-3. Load on game start if save exists
+1. Add save button to `index.html`
+2. Auto-save every turn in `js/turnSystem.js`
+3. Load on game start in `js/main.js` if save exists
 4. Handle version compatibility
 
 ### Performance Optimization
