@@ -1,5 +1,17 @@
+        /*
+         * 4X SPACE CONQUEST - STYLESHEET
+         * Version: 1.0.1
+         *
+         * Complete styling for the 4X space strategy game including:
+         * - Layout and responsive design
+         * - Button styles and animations
+         * - Canvas and UI overlays
+         * - Battle dialog styling
+         * - Version display (v1.0.1 - added semi-transparent version text in bottom right)
+         */
+
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap');
-        
+
         * {
             margin: 0;
             padding: 0;

@@ -12,7 +12,7 @@
 // - Heal stationed ships at owned planets (20% HP per turn)
 // - Collect resources from owned planets and apply population growth
 // - Process conquest timers for planets being captured
-// - Neutralize planets that lose all defending ships
+// - Neutralize planets that lose all defending ships (with protection for newly colonized planets)
 // - Handle ship arrivals including colonization of neutral planets
 // - Trigger combat when enemy ships encounter each other
 // - Check for victory/defeat conditions
@@ -24,10 +24,12 @@
 // - healStationedShips(): Restores HP to ships at friendly planets
 // - collectResources(): Gathers resources and grows populations
 // - handleShipArrival(group): Processes fleet arrival events
-// - processEmptyPlanets(): Neutralizes abandoned planets
+// - processEmptyPlanets(): Neutralizes abandoned planets (skips planets with population > 0)
 // - checkGameEnd(): Evaluates win/loss conditions
 //
 // Used by: main.js and uiManager (End Turn button), called once per turn
+//
+// Version: 1.0.1 - Fixed colonization bug where newly colonized planets were incorrectly neutralized
 
 import { gameState, generateId } from './gameState.js';
 import { SHIP_TYPES } from './config.js';
@@ -145,57 +147,18 @@ export function handleShipArrival(shipGroup) {
     const targetPlanet = gameState.planets.find(p => p.id === shipGroup.targetPlanetId);
     if (!targetPlanet) return;
 
-    console.log('Ship arrival:', {
-        planetOwner: targetPlanet.owner,
-        planetName: targetPlanet.name,
-        shipGroupOwner: shipGroup.owner,
-        ships: shipGroup.ships.map(s => ({ type: s.type, owner: s.owner })),
-        existingShips: targetPlanet.ships.map(s => ({ type: s.type, owner: s.owner }))
-    });
-
     // Check for colonizer on neutral planet FIRST (before any enemy checks)
     // Only colonize if no enemy ships are present
     if (!targetPlanet.owner) {
         const hasEnemyShips = targetPlanet.ships.some(s => s.owner !== shipGroup.owner);
-        console.log('Neutral planet check:', { hasEnemyShips });
 
         if (!hasEnemyShips) {
             const colonizer = shipGroup.ships.find(s => s.type === 'colonizer');
-            console.log('Looking for colonizer:', { found: !!colonizer, colonizer });
             if (colonizer) {
-                console.log('BEFORE colonization:', {
-                    planetId: targetPlanet.id,
-                    owner: targetPlanet.owner,
-                    population: targetPlanet.population,
-                    planetReference: targetPlanet
-                });
-
                 targetPlanet.owner = shipGroup.owner;
                 targetPlanet.population = 10;
-
-                console.log('AFTER setting owner/population:', {
-                    owner: targetPlanet.owner,
-                    population: targetPlanet.population
-                });
-
                 // Add all ships except colonizer
                 targetPlanet.ships.push(...shipGroup.ships.filter(s => s.id !== colonizer.id));
-
-                console.log('Planet colonized!', {
-                    owner: targetPlanet.owner,
-                    population: targetPlanet.population,
-                    ships: targetPlanet.ships.length
-                });
-
-                // Verify planet in gameState after modification
-                const verifyPlanet = gameState.planets.find(p => p.id === targetPlanet.id);
-                console.log('Verification check:', {
-                    foundPlanet: !!verifyPlanet,
-                    verifyOwner: verifyPlanet?.owner,
-                    verifyPopulation: verifyPlanet?.population,
-                    sameReference: verifyPlanet === targetPlanet
-                });
-
                 return;
             }
         }

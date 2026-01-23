@@ -1203,6 +1203,22 @@ When modifying the game:
 
 ---
 
-**Last Updated**: 2026-01-21
-**Version**: 1.0
+**Last Updated**: 2026-01-23
+**Version**: 1.0.1
 **Documentation**: Complete
+
+---
+
+## Recent Changes (v1.0.1)
+
+### Bug Fixes
+- Fixed colonization bug where colonizers would disappear without colonizing neutral planets
+- The issue occurred when `processEmptyPlanets()` ran after colonization and reverted newly colonized planets back to neutral
+- Added population check to prevent newly colonized planets from being incorrectly neutralized
+
+### Features
+- Added version display in bottom right corner (semi-transparent small text)
+
+### Documentation
+- Moved all documentation to `docs/` folder
+- Added `RELEASE_NOTES.md` for tracking version changes
