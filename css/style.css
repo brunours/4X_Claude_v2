@@ -996,7 +996,18 @@
             display: none;
             z-index: 50;
         }
-        
+
+        #versionDisplay {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.5rem;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 40;
+            pointer-events: none;
+        }
+
         /* Selecting destination mode */
         .selecting-destination #gameCanvas {
             cursor: crosshair;

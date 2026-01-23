@@ -19,7 +19,10 @@
       "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" api -X POST repos/brunours/4X_Claude_v2/pages -f source[branch]=master -f source[path]=/)",
       "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" api repos/brunours/4X_Claude_v2/pages/builds/latest)",
       "Bash(git push)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "mcp__filesystem__search_files",
+      "Bash(grep:*)",
+      "Bash(git rm:*)"
     ]
   }
 }
