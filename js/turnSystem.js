@@ -29,7 +29,9 @@
 //
 // Used by: main.js and uiManager (End Turn button), called once per turn
 //
-// Version: 1.0.1 - Fixed colonization bug where newly colonized planets were incorrectly neutralized
+// Version History:
+// - 1.0.2: Added retreat options to battlePending for tactical withdrawals
+// - 1.0.1: Fixed colonization bug where newly colonized planets were incorrectly neutralized
 
 import { gameState, generateId } from './gameState.js';
 import { SHIP_TYPES } from './config.js';
@@ -170,11 +172,21 @@ export function handleShipArrival(shipGroup) {
     if (isHostile || hasDefenders) {
         // Battle scenario
         if (shipGroup.owner === 'player') {
-            // Player ships attacking - show battle dialog
+            // Player ships attacking - show battle dialog with retreat options
+            const fromPlanet = gameState.planets.find(p => p.id === shipGroup.fromPlanetId);
+            const retreatOptions = gameState.planets.filter(p =>
+                p.owner === 'player' && p.id !== targetPlanet.id
+            );
+            // Include origin planet as first option if it's still friendly
+            if (fromPlanet && fromPlanet.owner === 'player' && !retreatOptions.includes(fromPlanet)) {
+                retreatOptions.unshift(fromPlanet);
+            }
+
             gameState.battlePending = {
                 attackingShips: shipGroup.ships,
                 planet: targetPlanet,
-                isDefending: false
+                isDefending: false,
+                retreatOptions: retreatOptions
             };
         } else {
             // Enemy ships attacking player planet - show battle dialog

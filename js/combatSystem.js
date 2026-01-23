@@ -5,35 +5,43 @@
 // This module handles all combat mechanics, including battle resolution,
 // casualty calculations, conquest mechanics, and battle result displays.
 //
+// Version: 1.0.2 - Combat system overhaul with HP-based calculations
+//
 // Core Responsibilities:
-// - Resolve combat between attacking and defending fleets using strength calculations
+// - Resolve combat using realistic HP-based round-by-round calculations
 // - Handle player battle choices (fight or withdraw) with confirmation dialogs
-// - Calculate fleet strength based on ship types, HP, and defender bonuses
-// - Distribute damage proportionally across fleets with ship destruction
+// - Calculate fleet power based on ship attack values (not abstract strength)
+// - Distribute damage across fleets weighted by HP (bigger ships = bigger targets)
 // - Process planet conquest with colonizer mechanics (3-turn timer)
 // - Track battle casualties and damaged ships for result displays
 // - Handle special cases (colonizers auto-destroyed without escorts)
 // - Manage planet ownership changes and neutralization after successful attacks
+// - Implement tactical withdrawal with damage and destination selection
+//
+// Combat Mechanics (v1.0.2):
+// - Ships fire in rounds until one side is eliminated
+// - Each round has ±15% damage randomness
+// - Defenders receive 10% HP bonus (not strength multiplier)
+// - Equal strength battles cause significant damage to winners
+// - Withdrawal incurs 30-40% of defender firepower as damage
 //
 // Exports:
 // - resolveBattleChoice(choice): Processes player's fight/withdraw decision
 // - resolveCombat(attackers, defenders, planet): Core combat resolution algorithm
 // - showBattleResults(result, isDefending): Displays detailed battle outcome
-// - resolveWithdraw(ships, planet, isDefending): Handles retreat mechanics
+// - resolveWithdraw(ships, planet, isDefending): Handles retreat with damage and destination
+// - completeRetreat(planetId): Finalizes retreat to chosen friendly planet
 // - processPendingConquests(): Updates conquest timers each turn
 //
-// Used by: turnSystem (ship arrivals, new ship construction), uiManager (battle dialogs)
+// Used by: turnSystem (ship arrivals, new ship construction), uiManager (battle dialogs),
+//          inputHandler (retreat destination selection)
 
 import { gameState, generateId } from './gameState.js';
 import { SHIP_TYPES } from './config.js';
 import { showNotification } from './uiManager.js';
 
-// Ship strength values for combat calculations
-const SHIP_STRENGTH = {
-    scout: 1,
-    frigate: 5,      // 4 frigates = 1 battleship
-    battleship: 20
-};
+// Combat system now uses actual attack power and hit points from SHIP_TYPES config
+// No longer needs abstract strength values
 
 export function resolveBattleChoice(choice) {
     if (!gameState.battlePending) return;
@@ -134,12 +142,98 @@ export function showBattleResults(result, isDefending) {
 }
 
 export function resolveWithdraw(attackingShips, planet, isDefending) {
-    // Ships return to source planet (simplified - just destroy them for now)
-    // In a full implementation, they would return to origin
-    const message = isDefending ?
-        '🏃 Your forces have retreated!' :
-        '🏃 You withdrew from the battle!';
-    showNotification(message);
+    // Calculate withdrawal damage (defenders get one free attack)
+    const defenders = planet.ships;
+    const defenderPower = calculateFleetPower(defenders);
+
+    // Withdrawing forces take 30-40% of defender firepower as damage
+    const withdrawalDamage = defenderPower * (0.30 + Math.random() * 0.10);
+
+    // Create a copy of attacking ships to apply damage
+    let retreatingShips = attackingShips.map(s => ({...s}));
+    const destroyedDuringRetreat = [];
+
+    // Apply withdrawal damage
+    applyDamageToFleet(retreatingShips, withdrawalDamage, destroyedDuringRetreat);
+    retreatingShips = retreatingShips.filter(s => s.hitPoints > 0);
+
+    if (isDefending) {
+        // Defending forces retreat - find friendly planets to retreat to
+        const friendlyPlanets = gameState.planets.filter(p =>
+            p.owner === 'player' && p.id !== planet.id
+        );
+
+        if (friendlyPlanets.length === 0) {
+            // No retreat option - ships are destroyed
+            showNotification('🏃 No friendly planets to retreat to! Ships destroyed!');
+            planet.ships = planet.ships.filter(s => s.owner !== 'player');
+        } else if (friendlyPlanets.length === 1) {
+            // Auto-retreat to only friendly planet
+            const retreatPlanet = friendlyPlanets[0];
+            planet.ships = planet.ships.filter(s => s.owner !== 'player');
+            retreatPlanet.ships.push(...retreatingShips);
+
+            const casualties = destroyedDuringRetreat.length;
+            showNotification(`🏃 Retreated to ${retreatPlanet.name}! ${casualties} ships lost during retreat.`);
+        } else {
+            // Show planet selection dialog
+            gameState.retreatingShips = retreatingShips;
+            gameState.retreatSource = planet;
+            gameState.retreatCasualties = destroyedDuringRetreat.length;
+            showRetreatDialog(friendlyPlanets, destroyedDuringRetreat.length);
+        }
+    } else {
+        // Attacking forces retreat - they came from somewhere
+        const battlePending = gameState.battlePending;
+        if (battlePending && battlePending.retreatOptions) {
+            const friendlyPlanets = battlePending.retreatOptions;
+
+            if (friendlyPlanets.length === 1) {
+                // Auto-retreat to origin
+                const retreatPlanet = friendlyPlanets[0];
+                retreatPlanet.ships.push(...retreatingShips);
+
+                const casualties = destroyedDuringRetreat.length;
+                showNotification(`🏃 Withdrew to ${retreatPlanet.name}! ${casualties} ships lost during retreat.`);
+            } else {
+                // Show planet selection dialog
+                gameState.retreatingShips = retreatingShips;
+                gameState.retreatCasualties = destroyedDuringRetreat.length;
+                showRetreatDialog(friendlyPlanets, destroyedDuringRetreat.length);
+            }
+        } else {
+            // Fallback - ships just disappear with message
+            const casualties = destroyedDuringRetreat.length;
+            showNotification(`🏃 Withdrew from battle! ${casualties} ships lost during retreat.`);
+        }
+    }
+}
+
+function showRetreatDialog(friendlyPlanets, casualties) {
+    const dialog = document.getElementById('battleDialog');
+
+    let planetsHtml = '';
+    for (const planet of friendlyPlanets) {
+        planetsHtml += `
+            <button class="battle-btn" style="width: 100%; margin: 5px 0;"
+                onclick="window.completeRetreat('${planet.id}')">
+                Retreat to ${planet.name}
+            </button>
+        `;
+    }
+
+    dialog.innerHTML = `
+        <h2>🏃 SELECT RETREAT DESTINATION</h2>
+        <div class="battle-info">
+            <p>${casualties} ships were destroyed during the retreat.</p>
+            <p>Choose a friendly planet to retreat to:</p>
+        </div>
+        <div class="battle-buttons" style="flex-direction: column;">
+            ${planetsHtml}
+        </div>
+    `;
+
+    dialog.style.display = 'block';
 }
 
 export function resolveCombat(attackingShips, defendingShips, planet) {
@@ -172,20 +266,18 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
         defenders = defenders.filter(s => s.type !== 'colonizer');
     }
 
-    // Calculate combat strength
-    const attackerStrength = calculateFleetStrength(attackers);
-    const defenderStrength = calculateFleetStrength(defenders);
+    // Apply defender advantage (10% extra HP if planet is owned)
+    if (planet.owner) {
+        for (const ship of defenders) {
+            if (ship.type !== 'colonizer') {
+                const shipType = SHIP_TYPES[ship.type];
+                ship.hitPoints = Math.min(ship.hitPoints * 1.1, shipType.maxHitPoints);
+            }
+        }
+    }
 
-    // Apply defender advantage (10% if planet is owned)
-    const defenderBonus = planet.owner ? 1.10 : 1.0;
-    const adjustedDefenderStrength = defenderStrength * defenderBonus;
-
-    // Calculate win probability for attackers
-    const totalStrength = attackerStrength + adjustedDefenderStrength;
-    const attackerWinChance = totalStrength > 0 ? attackerStrength / totalStrength : 0.5;
-
-    // Simulate combat
-    const combatResult = simulateCombat(attackers, defenders, attackerWinChance);
+    // Simulate combat (no longer needs win chance parameter)
+    const combatResult = simulateCombat(attackers, defenders, null);
 
     // Process casualties
     for (const ship of combatResult.destroyedAttackers) {
@@ -295,18 +387,15 @@ export function resolveCombat(attackingShips, defendingShips, planet) {
     return result;
 }
 
-function calculateFleetStrength(ships) {
-    let strength = 0;
+function calculateFleetPower(ships) {
+    // Calculate total firepower of a fleet
+    let power = 0;
     for (const ship of ships) {
         if (ship.type === 'colonizer') continue;
-
-        const baseStrength = SHIP_STRENGTH[ship.type] || 1;
         const shipType = SHIP_TYPES[ship.type];
-        const healthRatio = ship.hitPoints / shipType.maxHitPoints;
-
-        strength += baseStrength * healthRatio;
+        power += shipType.attack;
     }
-    return strength;
+    return power;
 }
 
 function simulateCombat(attackers, defenders, attackerWinChance) {
@@ -315,30 +404,55 @@ function simulateCombat(attackers, defenders, attackerWinChance) {
     const destroyedAttackers = [];
     const destroyedDefenders = [];
 
-    // Determine winner
-    const attackersWin = Math.random() < attackerWinChance;
+    // Make copies to avoid modifying originals during simulation
+    let attackerShips = attackers.filter(s => s.type !== 'colonizer').map(s => ({...s}));
+    let defenderShips = defenders.filter(s => s.type !== 'colonizer').map(s => ({...s}));
 
-    if (attackersWin) {
-        // Attackers win - distribute damage proportionally
-        const damageRatio = 1 - attackerWinChance; // How much damage attackers take
-        distributeDamage(attackers, damageRatio, survivingAttackers, destroyedAttackers);
+    // Combat rounds until one side is eliminated
+    let round = 0;
+    const maxRounds = 50; // Prevent infinite loops
 
-        // Defenders take heavy losses
-        for (const ship of defenders) {
-            if (ship.type !== 'colonizer') {
-                destroyedDefenders.push(ship);
-            }
+    while (attackerShips.length > 0 && defenderShips.length > 0 && round < maxRounds) {
+        round++;
+
+        // Attackers fire at defenders
+        const attackerDamage = calculateFleetPower(attackerShips);
+        // Add small randomness (±15%)
+        const actualAttackerDamage = attackerDamage * (0.85 + Math.random() * 0.3);
+        applyDamageToFleet(defenderShips, actualAttackerDamage, destroyedDefenders);
+
+        // Remove destroyed ships from defenders
+        defenderShips = defenderShips.filter(s => s.hitPoints > 0);
+
+        if (defenderShips.length === 0) break;
+
+        // Defenders fire at attackers
+        const defenderDamage = calculateFleetPower(defenderShips);
+        // Add small randomness (±15%)
+        const actualDefenderDamage = defenderDamage * (0.85 + Math.random() * 0.3);
+        applyDamageToFleet(attackerShips, actualDefenderDamage, destroyedAttackers);
+
+        // Remove destroyed ships from attackers
+        attackerShips = attackerShips.filter(s => s.hitPoints > 0);
+    }
+
+    // Update survivors
+    for (const ship of attackerShips) {
+        survivingAttackers.push(ship);
+    }
+    for (const ship of defenderShips) {
+        survivingDefenders.push(ship);
+    }
+
+    // Add colonizers to survivors (they don't participate in combat)
+    for (const ship of attackers) {
+        if (ship.type === 'colonizer') {
+            survivingAttackers.push(ship);
         }
-    } else {
-        // Defenders win - distribute damage proportionally
-        const damageRatio = attackerWinChance; // How much damage defenders take
-        distributeDamage(defenders, damageRatio, survivingDefenders, destroyedDefenders);
-
-        // Attackers take heavy losses
-        for (const ship of attackers) {
-            if (ship.type !== 'colonizer') {
-                destroyedAttackers.push(ship);
-            }
+    }
+    for (const ship of defenders) {
+        if (ship.type === 'colonizer') {
+            survivingDefenders.push(ship);
         }
     }
 
@@ -350,45 +464,59 @@ function simulateCombat(attackers, defenders, attackerWinChance) {
     };
 }
 
-function distributeDamage(ships, damageRatio, survivors, destroyed) {
-    const combatShips = ships.filter(s => s.type !== 'colonizer');
-    const totalStrength = calculateFleetStrength(combatShips);
-    const totalDamage = totalStrength * damageRatio * 2; // Multiply by 2 to make battles more costly
-
+function applyDamageToFleet(ships, totalDamage, destroyedList) {
+    // Distribute damage across fleet
+    // Damage is distributed randomly but weighted by HP (weaker ships more likely to be hit)
     let remainingDamage = totalDamage;
 
-    // Sort by strength (weakest first to destroy weak ships first)
-    const sorted = [...combatShips].sort((a, b) => {
-        const aStr = SHIP_STRENGTH[a.type] || 1;
-        const bStr = SHIP_STRENGTH[b.type] || 1;
-        return aStr - bStr;
-    });
+    while (remainingDamage > 0 && ships.length > 0) {
+        // Pick a random ship weighted by HP (ships with more HP are bigger targets)
+        const totalHP = ships.reduce((sum, s) => sum + s.hitPoints, 0);
+        let roll = Math.random() * totalHP;
+        let targetIndex = 0;
 
-    for (const ship of sorted) {
-        if (remainingDamage <= 0) {
-            survivors.push(ship);
-            continue;
+        for (let i = 0; i < ships.length; i++) {
+            roll -= ships[i].hitPoints;
+            if (roll <= 0) {
+                targetIndex = i;
+                break;
+            }
         }
 
-        const shipType = SHIP_TYPES[ship.type];
-        const damage = Math.min(ship.hitPoints, remainingDamage);
-
-        ship.hitPoints -= damage;
+        const target = ships[targetIndex];
+        const damage = Math.min(remainingDamage, target.hitPoints);
+        target.hitPoints -= damage;
         remainingDamage -= damage;
 
-        if (ship.hitPoints <= 0) {
-            destroyed.push(ship);
-        } else {
-            survivors.push(ship);
+        if (target.hitPoints <= 0) {
+            destroyedList.push({type: target.type, owner: target.owner});
+            ships.splice(targetIndex, 1);
         }
+    }
+}
+
+export function completeRetreat(planetId) {
+    const retreatPlanet = gameState.planets.find(p => p.id === planetId);
+    if (!retreatPlanet || !gameState.retreatingShips) return;
+
+    // Move retreating ships to chosen planet
+    if (gameState.retreatSource) {
+        // Remove from source planet if defending
+        gameState.retreatSource.ships = gameState.retreatSource.ships.filter(s => s.owner !== 'player');
     }
 
-    // Add colonizers to survivors (they don't fight)
-    for (const ship of ships) {
-        if (ship.type === 'colonizer') {
-            survivors.push(ship);
-        }
-    }
+    retreatPlanet.ships.push(...gameState.retreatingShips);
+
+    // Show notification
+    showNotification(`🏃 Retreated to ${retreatPlanet.name}! ${gameState.retreatCasualties} ships lost during retreat.`);
+
+    // Clean up
+    gameState.retreatingShips = null;
+    gameState.retreatSource = null;
+    gameState.retreatCasualties = 0;
+
+    // Close dialog
+    document.getElementById('battleDialog').style.display = 'none';
 }
 
 export function processPendingConquests() {

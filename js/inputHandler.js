@@ -26,9 +26,11 @@
 // - setupEventListeners(): Binds all event handlers to canvas and UI elements
 //
 // Window Functions (for HTML onclick):
-// - buildShipType(), cancelBuildItem(), sendSelectedShips(), resolveBattle(), etc.
+// - buildShipType(), cancelBuildItem(), sendSelectedShips(), resolveBattle(), completeRetreat(), etc.
 //
 // Used by: main.js (called once during initialization)
+//
+// Version: 1.0.2 - Added completeRetreat function for tactical withdrawal destination selection
 
 import { gameState, camera, canvas } from './gameState.js';
 import { screenToWorld, clampCamera, updateZoomIndicator, getPlanetAt } from './camera.js';
@@ -36,7 +38,7 @@ import { selectPlanet, updateDisplay, updatePlanetPanel, updateFleetPanel, updat
 import { completeShipSend, buildShip, cancelBuild, sendSelectedShips } from './shipSystem.js';
 import { endTurn, checkGameEnd } from './turnSystem.js';
 import { processAITurn } from './aiSystem.js';
-import { resolveBattleChoice } from './combatSystem.js';
+import { resolveBattleChoice, completeRetreat } from './combatSystem.js';
 import { SHIP_TYPES } from './config.js';
 
 export function setupEventListeners() {
@@ -286,5 +288,14 @@ window.closeBattleResults = () => {
         if (gameState.selectedPlanet.owner === 'player') {
             updateShipyardPanel();
         }
+    }
+};
+
+window.completeRetreat = (planetId) => {
+    completeRetreat(planetId);
+    updateDisplay();
+    if (gameState.selectedPlanet) {
+        updatePlanetPanel(gameState.selectedPlanet);
+        updateFleetPanel();
     }
 };
