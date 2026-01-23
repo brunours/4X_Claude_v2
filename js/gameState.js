@@ -40,7 +40,7 @@ export let gameState = {
     difficulty: 'easy',
     playerColor: 'blue', // Empire color choice
     aiColor: 'red', // AI color choice
-    influenceTransparency: 0.04, // 0.02 to 0.25 (default: 4%)
+    influenceTransparency: 0.10, // 0.02 to 0.25 (default: 10%)
     worldWidth: 1500,
     worldHeight: 1200,
     planets: [],

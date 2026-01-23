@@ -51,18 +51,19 @@ export function calculateInfluenceZones() {
         return cachedZones;
     }
 
-    const ownedPlanets = gameState.planets.filter(p => p.owner !== null);
-    if (ownedPlanets.length === 0) {
-        cachedZones = { playerSites: [], enemySites: [] };
+    const allPlanets = gameState.planets;
+    if (allPlanets.length === 0) {
+        cachedZones = { playerSites: [], enemySites: [], neutralSites: [] };
         cacheInvalidated = false;
         return cachedZones;
     }
 
-    // Create one site per owned planet (no weighting)
+    // Create one site per planet (owned or neutral, no weighting)
     const playerSites = [];
     const enemySites = [];
+    const neutralSites = [];
 
-    for (const planet of ownedPlanets) {
+    for (const planet of allPlanets) {
         const site = {
             x: planet.x,
             y: planet.y,
@@ -72,12 +73,14 @@ export function calculateInfluenceZones() {
 
         if (planet.owner === 'player') {
             playerSites.push(site);
-        } else {
+        } else if (planet.owner === 'enemy') {
             enemySites.push(site);
+        } else {
+            neutralSites.push(site);
         }
     }
 
-    cachedZones = { playerSites, enemySites };
+    cachedZones = { playerSites, enemySites, neutralSites };
     cacheInvalidated = false;
     return cachedZones;
 }
@@ -101,7 +104,7 @@ export function renderInfluenceZones(ctx) {
 }
 
 function renderVoronoiTerritories(ctx, zones) {
-    const allSites = [...zones.playerSites, ...zones.enemySites];
+    const allSites = [...zones.playerSites, ...zones.enemySites, ...zones.neutralSites];
     if (allSites.length === 0) return;
 
     // Determine rendering bounds (full map)
@@ -167,6 +170,18 @@ function renderVoronoiTerritories(ctx, zones) {
     ctx.beginPath();
     for (const [key, owner] of ownerMap) {
         if (owner === 'enemy') {
+            const [px, py] = key.split(',').map(Number);
+            ctx.rect(px * resolution, py * resolution, resolution, resolution);
+        }
+    }
+    ctx.fill();
+
+    // Draw neutral territory (completely transparent - creates holes in colored territories)
+    // Neutral planets participate in Voronoi calculation but their zones are invisible
+    ctx.fillStyle = `rgba(0, 0, 0, 0)`;
+    ctx.beginPath();
+    for (const [key, owner] of ownerMap) {
+        if (owner === null) {
             const [px, py] = key.split(',').map(Number);
             ctx.rect(px * resolution, py * resolution, resolution, resolution);
         }
