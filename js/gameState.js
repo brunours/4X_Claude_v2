@@ -27,6 +27,7 @@ import { MAP_SIZES, SHIP_TYPES } from './config.js';
 export const COLOR_OPTIONS = {
     blue: { name: 'Blue', hex: '#0096ff', glowRgba: '0, 150, 255', planetGlow: 'rgba(0, 255, 136, 0.3)' },
     red: { name: 'Red', hex: '#ff3232', glowRgba: '255, 50, 50', planetGlow: 'rgba(255, 68, 68, 0.3)' },
+    purple: { name: 'Purple', hex: '#a855f7', glowRgba: '168, 85, 247', planetGlow: 'rgba(168, 85, 247, 0.3)' },
     green: { name: 'Green', hex: '#00ff88', glowRgba: '0, 255, 136', planetGlow: 'rgba(0, 255, 136, 0.3)' },
     white: { name: 'White', hex: '#ffffff', glowRgba: '255, 255, 255', planetGlow: 'rgba(255, 255, 255, 0.3)' },
     orange: { name: 'Orange', hex: '#ff8800', glowRgba: '255, 136, 0', planetGlow: 'rgba(255, 136, 0, 0.3)' }
@@ -39,7 +40,7 @@ export let gameState = {
     difficulty: 'easy',
     playerColor: 'blue', // Empire color choice
     aiColor: 'red', // AI color choice
-    influenceTransparency: 0.25, // 0.1 to 0.5
+    influenceTransparency: 0.15, // 0.02 to 0.25 (default: 15%)
     worldWidth: 1500,
     worldHeight: 1200,
     planets: [],

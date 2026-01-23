@@ -38,6 +38,7 @@
                 <div class="color-picker" id="playerColorPicker">
                     <div class="color-tile" data-color="blue" style="background: #0096ff;"></div>
                     <div class="color-tile" data-color="red" style="background: #ff3232;"></div>
+                    <div class="color-tile" data-color="purple" style="background: #a855f7;"></div>
                     <div class="color-tile" data-color="green" style="background: #00ff88;"></div>
                     <div class="color-tile" data-color="white" style="background: #ffffff;"></div>
                     <div class="color-tile" data-color="orange" style="background: #ff8800;"></div>
@@ -49,6 +50,7 @@
                 <div class="color-picker" id="aiColorPicker">
                     <div class="color-tile" data-color="blue" style="background: #0096ff;"></div>
                     <div class="color-tile" data-color="red" style="background: #ff3232;"></div>
+                    <div class="color-tile" data-color="purple" style="background: #a855f7;"></div>
                     <div class="color-tile" data-color="green" style="background: #00ff88;"></div>
                     <div class="color-tile" data-color="white" style="background: #ffffff;"></div>
                     <div class="color-tile" data-color="orange" style="background: #ff8800;"></div>
@@ -58,10 +60,10 @@
             <div class="menu-section">
                 <h2>Influence Zone Transparency</h2>
                 <div class="slider-container">
-                    <input type="range" id="transparencySlider" min="10" max="50" value="25" step="5">
+                    <input type="range" id="transparencySlider" min="2" max="25" value="15" step="1">
                     <div class="slider-labels">
                         <span>Subtle</span>
-                        <span id="transparencyValue">25%</span>
+                        <span id="transparencyValue">15%</span>
                         <span>Strong</span>
                     </div>
                 </div>
@@ -94,6 +96,30 @@
                 <span>Turn <span id="turnCount">1</span></span>
                 <button id="endTurnBtn">END TURN</button>
                 <button id="influenceToggleBtn" title="Toggle Influence Zones (I)">🗺️</button>
+                <button id="settingsBtn" title="Settings (S)">⚙️</button>
+            </div>
+        </div>
+
+        <!-- Settings Overlay -->
+        <div id="settingsOverlay">
+            <div class="settings-panel">
+                <div class="settings-header">
+                    <h2>⚙️ Settings</h2>
+                    <button class="close-btn" onclick="closeSettings()">&times;</button>
+                </div>
+                <div class="settings-content">
+                    <div class="setting-item">
+                        <h3>Influence Zone Transparency</h3>
+                        <div class="slider-container">
+                            <input type="range" id="gameTransparencySlider" min="2" max="25" value="15" step="1">
+                            <div class="slider-labels">
+                                <span>Subtle (2%)</span>
+                                <span id="gameTransparencyValue">15%</span>
+                                <span>Strong (25%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -154,7 +180,7 @@
         <div id="zoomIndicator">Zoom: 100%</div>
 
         <!-- Version Display -->
-        <div id="versionDisplay">v1.0.4</div>
+        <div id="versionDisplay">v1.0.5</div>
 
         <!-- Game Over Screen -->
         <div id="gameOverScreen">

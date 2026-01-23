@@ -1,5 +1,52 @@
 # Release Notes
 
+## Version 1.0.5 - 24/01/2026 03:15
+
+### New Features: Enhanced Color Options and In-Game Settings
+
+**Purple Empire Color**
+- Added purple as a sixth color option for both player and AI empires
+- Purple positioned after red in the color spectrum for intuitive selection
+- Full integration with planets, ships, UI elements, and influence zones
+
+**Refined Transparency Range**
+- Influence zone transparency range changed from 10-50% to 2-25%
+- More subtle default transparency (15% instead of 25%)
+- Finer control with 1% increments for precise visual tuning
+- Better visibility while maintaining territorial awareness
+
+**In-Game Settings Menu**
+- New settings button (⚙️) in top UI bar next to influence toggle
+- Access settings during gameplay without restarting
+- Keyboard shortcut: Press 'S' to open settings, 'ESC' to close
+- Modal overlay with backdrop blur for focused adjustment
+
+**Real-Time Transparency Control**
+- Adjust influence zone transparency while playing
+- Mini slider (2-25%) with live percentage display
+- Changes apply immediately to the game view
+- Settings automatically saved to localStorage
+- No need to restart game or return to start screen
+
+### Visual Enhancements
+- Settings panel with sci-fi themed styling matching game aesthetic
+- Smooth backdrop blur effect on settings overlay
+- Color tile count increased from 5 to 6 options
+- Updated slider labels to show exact min/max values (2% / 25%)
+
+### Technical Implementation
+- Added purple color to COLOR_OPTIONS (#a855f7)
+- Updated transparency range in gameState (0.02 to 0.25, default 0.15)
+- Created settings overlay HTML structure with modal design
+- Added CSS styling for settings panel, button, and overlay
+- Implemented openSettings() and closeSettings() functions
+- Added keyboard shortcuts for settings access (S key, ESC key)
+- Integrated saveSettings() call on transparency slider change
+- Connected invalidateZoneCache() to force zone re-rendering
+- Files modified: `js/gameState.js`, `js/inputHandler.js`, `index.html`, `css/style.css`
+
+---
+
 ## Version 1.0.4 - 24/01/2026 02:30
 
 ### New Feature: Empire Color Customization

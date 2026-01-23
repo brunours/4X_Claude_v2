@@ -34,7 +34,7 @@
 // - 1.0.3: Added influence zone toggle controls (button and 'I' keyboard shortcut)
 // - 1.0.2: Added completeRetreat function for tactical withdrawal destination selection
 
-import { gameState, camera, canvas } from './gameState.js';
+import { gameState, camera, canvas, saveSettings } from './gameState.js';
 import { screenToWorld, clampCamera, updateZoomIndicator, getPlanetAt } from './camera.js';
 import { selectPlanet, updateDisplay, updatePlanetPanel, updateFleetPanel, updateShipyardPanel, showBattleDialog, closePlanetPanel, switchFleetTab, showNotification, showGameOver } from './uiManager.js';
 import { completeShipSend, buildShip, cancelBuild, sendSelectedShips } from './shipSystem.js';
@@ -60,6 +60,18 @@ export function setupEventListeners() {
     // UI buttons
     document.getElementById('endTurnBtn').addEventListener('click', handleEndTurn);
     document.getElementById('influenceToggleBtn').addEventListener('click', handleInfluenceToggle);
+    document.getElementById('settingsBtn').addEventListener('click', openSettings);
+
+    // In-game transparency slider
+    const gameTransparencySlider = document.getElementById('gameTransparencySlider');
+    const gameTransparencyValue = document.getElementById('gameTransparencyValue');
+    gameTransparencySlider.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        gameState.influenceTransparency = value / 100;
+        gameTransparencyValue.textContent = `${value}%`;
+        saveSettings(); // Save immediately when changed
+        invalidateZoneCache(); // Force zone recalculation with new transparency
+    });
 
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyDown);
@@ -70,6 +82,22 @@ function handleKeyDown(e) {
     if (e.key === 'i' || e.key === 'I') {
         if (!gameState.battlePending) { // Don't toggle during battle
             handleInfluenceToggle();
+        }
+    }
+
+    // Open settings with 'S' key
+    if (e.key === 's' || e.key === 'S') {
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        if (!settingsOverlay.classList.contains('active')) {
+            openSettings();
+        }
+    }
+
+    // Close settings with ESC key
+    if (e.key === 'Escape') {
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        if (settingsOverlay.classList.contains('active')) {
+            closeSettings();
         }
     }
 }
@@ -86,6 +114,24 @@ function handleInfluenceToggle() {
         showNotification('🗺️ Influence zones disabled');
     }
 }
+
+function openSettings() {
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    const gameTransparencySlider = document.getElementById('gameTransparencySlider');
+    const gameTransparencyValue = document.getElementById('gameTransparencyValue');
+
+    // Sync slider with current game state
+    const currentValue = Math.round(gameState.influenceTransparency * 100);
+    gameTransparencySlider.value = currentValue;
+    gameTransparencyValue.textContent = `${currentValue}%`;
+
+    settingsOverlay.classList.add('active');
+}
+
+window.closeSettings = function() {
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    settingsOverlay.classList.remove('active');
+};
 
 function handleMouseDown(e) {
     camera.isDragging = true;
