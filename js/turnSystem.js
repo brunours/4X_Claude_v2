@@ -145,18 +145,29 @@ export function handleShipArrival(shipGroup) {
     const targetPlanet = gameState.planets.find(p => p.id === shipGroup.targetPlanetId);
     if (!targetPlanet) return;
 
+    console.log('Ship arrival:', {
+        planetOwner: targetPlanet.owner,
+        planetName: targetPlanet.name,
+        shipGroupOwner: shipGroup.owner,
+        ships: shipGroup.ships.map(s => ({ type: s.type, owner: s.owner })),
+        existingShips: targetPlanet.ships.map(s => ({ type: s.type, owner: s.owner }))
+    });
+
     // Check for colonizer on neutral planet FIRST (before any enemy checks)
     // Only colonize if no enemy ships are present
     if (!targetPlanet.owner) {
         const hasEnemyShips = targetPlanet.ships.some(s => s.owner !== shipGroup.owner);
+        console.log('Neutral planet check:', { hasEnemyShips });
 
         if (!hasEnemyShips) {
             const colonizer = shipGroup.ships.find(s => s.type === 'colonizer');
+            console.log('Looking for colonizer:', { found: !!colonizer, colonizer });
             if (colonizer) {
                 targetPlanet.owner = shipGroup.owner;
                 targetPlanet.population = 10;
                 // Add all ships except colonizer
                 targetPlanet.ships.push(...shipGroup.ships.filter(s => s.id !== colonizer.id));
+                console.log('Planet colonized!', { owner: targetPlanet.owner, population: targetPlanet.population });
                 return;
             }
         }
