@@ -5,23 +5,24 @@
 // This module calculates and renders influence zones using Voronoi diagrams
 // to visualize territorial control across the galaxy map.
 //
-// Version: 1.0.3 - Initial implementation
+// Version: 1.0.6 - Rewritten for continuous territories
 //
 // Core Responsibilities:
-// - Calculate weighted influence for each owned planet
-// - Generate Voronoi diagram polygons for player and AI territories
-// - Render semi-transparent colored zones (blue for player, red for AI)
+// - Generate standard Voronoi diagram (equal-sized regions per planet)
+// - Create continuous merged territories per empire (like countries)
+// - Render semi-transparent colored zones using custom empire colors
 // - Support toggle visibility of influence zones
-// - Weight influence by planet strength (population, ships, production)
+// - Use nearest-neighbor algorithm for territory boundaries
 //
 // Influence Calculation:
-// - Planet strength = population + (ship count * 5) + (total production * 2)
-// - Stronger planets create larger influence zones
+// - One site per owned planet (no weighting)
+// - Voronoi cell = all points closer to that planet than any other
+// - Territories merge: all player planets form one region, all AI planets form another
 // - Neutral planets don't create zones (absorbed by nearest owner)
 //
 // Exports:
-// - calculateInfluenceZones(): Generates Voronoi polygons for owned planets
-// - renderInfluenceZones(ctx): Draws influence zones on canvas
+// - calculateInfluenceZones(): Generates Voronoi diagram data
+// - renderInfluenceZones(ctx): Draws continuous empire territories
 // - toggleInfluenceZones(): Shows/hides influence zone display
 //
 // Used by: renderer.js (main rendering loop), inputHandler.js (toggle control)
@@ -31,7 +32,7 @@ import { camera } from './gameState.js';
 import { SHIP_TYPES } from './config.js';
 
 // Influence zones state
-export let influenceZonesVisible = false;
+export let influenceZonesVisible = true;
 let cachedZones = null;
 let cacheInvalidated = true;
 
@@ -44,18 +45,7 @@ export function invalidateZoneCache() {
     cacheInvalidated = true;
 }
 
-// Calculate planet strength for weighted Voronoi
-function calculatePlanetStrength(planet) {
-    if (!planet.owner) return 0;
-
-    let strength = planet.population;
-    strength += planet.ships.length * 5;
-    strength += (planet.resources.energy + planet.resources.minerals + planet.resources.food) * 2;
-
-    return strength;
-}
-
-// Generate Voronoi diagram for influence zones
+// Generate Voronoi diagram for influence zones (standard, equal-sized regions)
 export function calculateInfluenceZones() {
     if (cachedZones && !cacheInvalidated) {
         return cachedZones;
@@ -63,109 +53,40 @@ export function calculateInfluenceZones() {
 
     const ownedPlanets = gameState.planets.filter(p => p.owner !== null);
     if (ownedPlanets.length === 0) {
-        cachedZones = [];
+        cachedZones = { playerSites: [], enemySites: [] };
         cacheInvalidated = false;
         return cachedZones;
     }
 
-    // Create weighted sites for Voronoi (replicate strong planets)
-    const sites = [];
+    // Create one site per owned planet (no weighting)
+    const playerSites = [];
+    const enemySites = [];
+
     for (const planet of ownedPlanets) {
-        const strength = calculatePlanetStrength(planet);
-        const weight = Math.max(1, Math.floor(strength / 20)); // 1 site per 20 strength
-
-        // Add multiple sites around the planet for weighted influence
-        for (let i = 0; i < weight; i++) {
-            const angle = (Math.PI * 2 * i) / weight;
-            const radius = 5 * Math.sqrt(weight); // Spread increases with weight
-            sites.push({
-                x: planet.x + Math.cos(angle) * radius,
-                y: planet.y + Math.sin(angle) * radius,
-                owner: planet.owner,
-                planet: planet
-            });
-        }
-    }
-
-    // Generate Voronoi cells using Fortune's algorithm (simplified)
-    const zones = generateVoronoiCells(sites);
-
-    cachedZones = zones;
-    cacheInvalidated = false;
-    return zones;
-}
-
-// Simplified Voronoi generation using pixel-based approach
-function generateVoronoiCells(sites) {
-    if (sites.length === 0) return [];
-
-    const zones = new Map(); // owner -> array of regions
-
-    // Define rendering bounds (entire map)
-    const padding = 200;
-    const bounds = {
-        minX: -padding,
-        minY: -padding,
-        maxX: canvas.width / camera.zoom + padding,
-        maxY: canvas.height / camera.zoom + padding
-    };
-
-    // Group sites by owner
-    const sitesByOwner = new Map();
-    for (const site of sites) {
-        if (!sitesByOwner.has(site.owner)) {
-            sitesByOwner.set(site.owner, []);
-        }
-        sitesByOwner.get(site.owner).push(site);
-    }
-
-    // For each owner, create a merged influence region
-    for (const [owner, ownerSites] of sitesByOwner) {
-        // Create convex hull approximation for this owner's territory
-        const region = {
-            owner: owner,
-            sites: ownerSites,
-            bounds: calculateRegionBounds(ownerSites)
+        const site = {
+            x: planet.x,
+            y: planet.y,
+            owner: planet.owner,
+            planet: planet
         };
 
-        if (!zones.has(owner)) {
-            zones.set(owner, []);
+        if (planet.owner === 'player') {
+            playerSites.push(site);
+        } else {
+            enemySites.push(site);
         }
-        zones.get(owner).push(region);
     }
 
-    return Array.from(zones.values()).flat();
-}
-
-function calculateRegionBounds(sites) {
-    if (sites.length === 0) return null;
-
-    let minX = Infinity, minY = Infinity;
-    let maxX = -Infinity, maxY = -Infinity;
-
-    for (const site of sites) {
-        minX = Math.min(minX, site.x);
-        minY = Math.min(minY, site.y);
-        maxX = Math.max(maxX, site.x);
-        maxY = Math.max(maxY, site.y);
-    }
-
-    // Add padding based on site density
-    const padding = 100 + sites.length * 20;
-
-    return {
-        minX: minX - padding,
-        minY: minY - padding,
-        maxX: maxX + padding,
-        maxY: maxY + padding
-    };
+    cachedZones = { playerSites, enemySites };
+    cacheInvalidated = false;
+    return cachedZones;
 }
 
 export function renderInfluenceZones(ctx) {
     if (!influenceZonesVisible) return;
 
     const zones = calculateInfluenceZones();
-    if (zones.length === 0) return;
+    if (!zones.playerSites.length && !zones.enemySites.length) return;
 
     ctx.save();
 
@@ -173,50 +94,82 @@ export function renderInfluenceZones(ctx) {
     ctx.translate(-camera.x, -camera.y);
     ctx.scale(camera.zoom, camera.zoom);
 
-    // Render each zone using nearest-site coloring
-    renderVoronoiRegions(ctx, zones);
+    // Render continuous territories using Voronoi nearest-neighbor algorithm
+    renderVoronoiTerritories(ctx, zones);
 
     ctx.restore();
 }
 
-function renderVoronoiRegions(ctx, zones) {
-    // Get all sites from all zones
-    const allSites = [];
-    for (const zone of zones) {
-        for (const site of zone.sites) {
-            allSites.push(site);
+function renderVoronoiTerritories(ctx, zones) {
+    const allSites = [...zones.playerSites, ...zones.enemySites];
+    if (allSites.length === 0) return;
+
+    // Determine rendering bounds (full map)
+    const bounds = {
+        minX: 0,
+        minY: 0,
+        maxX: gameState.worldWidth,
+        maxY: gameState.worldHeight
+    };
+
+    // Create pixel grid to determine territory ownership via nearest-neighbor
+    const resolution = 10; // Pixels per sample (lower = more detailed, slower)
+    const width = Math.ceil(bounds.maxX / resolution);
+    const height = Math.ceil(bounds.maxY / resolution);
+
+    // Build pixel-to-owner map using nearest-neighbor Voronoi
+    const ownerMap = new Map();
+
+    for (let py = 0; py < height; py++) {
+        for (let px = 0; px < width; px++) {
+            const worldX = px * resolution;
+            const worldY = py * resolution;
+
+            // Find nearest planet site
+            let nearestDist = Infinity;
+            let nearestOwner = null;
+
+            for (const site of allSites) {
+                const dx = worldX - site.x;
+                const dy = worldY - site.y;
+                const dist = dx * dx + dy * dy; // Squared distance (avoid sqrt)
+
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    nearestOwner = site.owner;
+                }
+            }
+
+            if (nearestOwner) {
+                ownerMap.set(`${px},${py}`, nearestOwner);
+            }
         }
     }
 
-    if (allSites.length === 0) return;
+    // Render territories as filled regions
+    const playerColor = getPlayerColor();
+    const enemyColor = getAIColor();
+    const alpha = gameState.influenceTransparency;
 
-    // Determine rendering bounds
-    const viewBounds = {
-        minX: camera.x / camera.zoom,
-        minY: camera.y / camera.zoom,
-        maxX: (camera.x + canvas.width) / camera.zoom,
-        maxY: (camera.y + canvas.height) / camera.zoom
-    };
-
-    // Sample the visible area and color based on nearest site
-    const sampleSize = 20; // Pixel size of each sample
-    const imageData = ctx.createImageData(
-        Math.ceil((viewBounds.maxX - viewBounds.minX) / sampleSize),
-        Math.ceil((viewBounds.maxY - viewBounds.minY) / sampleSize)
-    );
-
-    // Draw using metaballs/smooth regions
-    for (const site of allSites) {
-        const ownerColorData = site.owner === 'player' ? getPlayerColor() : getAIColor();
-        const rgba = ownerColorData.glowRgba;
-        const alpha = gameState.influenceTransparency;
-
-        // Draw circular influence region
-        ctx.fillStyle = `rgba(${rgba}, ${alpha})`;
-        ctx.beginPath();
-
-        const radius = 150; // Base influence radius
-        ctx.arc(site.x, site.y, radius, 0, Math.PI * 2);
-        ctx.fill();
+    // Draw player territory
+    ctx.fillStyle = `rgba(${playerColor.glowRgba}, ${alpha})`;
+    ctx.beginPath();
+    for (const [key, owner] of ownerMap) {
+        if (owner === 'player') {
+            const [px, py] = key.split(',').map(Number);
+            ctx.rect(px * resolution, py * resolution, resolution, resolution);
+        }
     }
+    ctx.fill();
+
+    // Draw enemy territory
+    ctx.fillStyle = `rgba(${enemyColor.glowRgba}, ${alpha})`;
+    ctx.beginPath();
+    for (const [key, owner] of ownerMap) {
+        if (owner === 'enemy') {
+            const [px, py] = key.split(',').map(Number);
+            ctx.rect(px * resolution, py * resolution, resolution, resolution);
+        }
+    }
+    ctx.fill();
 }

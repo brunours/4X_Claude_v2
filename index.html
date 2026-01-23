@@ -93,10 +93,9 @@
                 </div>
             </div>
             <div id="turnInfo">
+                <button id="settingsBtn" title="Settings (S)">⚙️</button>
                 <span>Turn <span id="turnCount">1</span></span>
                 <button id="endTurnBtn">END TURN</button>
-                <button id="influenceToggleBtn" title="Toggle Influence Zones (I)">🗺️</button>
-                <button id="settingsBtn" title="Settings (S)">⚙️</button>
             </div>
         </div>
 
@@ -109,12 +108,23 @@
                 </div>
                 <div class="settings-content">
                     <div class="setting-item">
+                        <h3>Influence Zones</h3>
+                        <div class="toggle-container">
+                            <span>OFF</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="influenceZonesToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>ON</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
                         <h3>Influence Zone Transparency</h3>
                         <div class="slider-container">
-                            <input type="range" id="gameTransparencySlider" min="2" max="25" value="15" step="1">
+                            <input type="range" id="gameTransparencySlider" min="2" max="25" value="4" step="1">
                             <div class="slider-labels">
                                 <span>Subtle (2%)</span>
-                                <span id="gameTransparencyValue">15%</span>
+                                <span id="gameTransparencyValue">4%</span>
                                 <span>Strong (25%)</span>
                             </div>
                         </div>
@@ -180,7 +190,7 @@
         <div id="zoomIndicator">Zoom: 100%</div>
 
         <!-- Version Display -->
-        <div id="versionDisplay">v1.0.5</div>
+        <div id="versionDisplay">v1.0.6</div>
 
         <!-- Game Over Screen -->
         <div id="gameOverScreen">

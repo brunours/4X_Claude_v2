@@ -42,7 +42,7 @@ import { endTurn, checkGameEnd } from './turnSystem.js';
 import { processAITurn } from './aiSystem.js';
 import { resolveBattleChoice, completeRetreat } from './combatSystem.js';
 import { SHIP_TYPES } from './config.js';
-import { toggleInfluenceZones, invalidateZoneCache } from './influenceZones.js';
+import { toggleInfluenceZones, invalidateZoneCache, influenceZonesVisible } from './influenceZones.js';
 
 export function setupEventListeners() {
     // Mouse events
@@ -59,7 +59,6 @@ export function setupEventListeners() {
 
     // UI buttons
     document.getElementById('endTurnBtn').addEventListener('click', handleEndTurn);
-    document.getElementById('influenceToggleBtn').addEventListener('click', handleInfluenceToggle);
     document.getElementById('settingsBtn').addEventListener('click', openSettings);
 
     // In-game transparency slider
@@ -73,18 +72,17 @@ export function setupEventListeners() {
         invalidateZoneCache(); // Force zone recalculation with new transparency
     });
 
+    // Influence zones toggle switch
+    const influenceZonesToggle = document.getElementById('influenceZonesToggle');
+    influenceZonesToggle.addEventListener('change', (e) => {
+        handleInfluenceToggle();
+    });
+
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyDown);
 }
 
 function handleKeyDown(e) {
-    // Toggle influence zones with 'I' key
-    if (e.key === 'i' || e.key === 'I') {
-        if (!gameState.battlePending) { // Don't toggle during battle
-            handleInfluenceToggle();
-        }
-    }
-
     // Open settings with 'S' key
     if (e.key === 's' || e.key === 'S') {
         const settingsOverlay = document.getElementById('settingsOverlay');
@@ -104,13 +102,16 @@ function handleKeyDown(e) {
 
 function handleInfluenceToggle() {
     const isVisible = toggleInfluenceZones();
-    const button = document.getElementById('influenceToggleBtn');
+    const toggle = document.getElementById('influenceZonesToggle');
+
+    // Update toggle state if it was changed programmatically
+    if (toggle.checked !== isVisible) {
+        toggle.checked = isVisible;
+    }
 
     if (isVisible) {
-        button.classList.add('active');
         showNotification('🗺️ Influence zones enabled');
     } else {
-        button.classList.remove('active');
         showNotification('🗺️ Influence zones disabled');
     }
 }
@@ -119,11 +120,15 @@ function openSettings() {
     const settingsOverlay = document.getElementById('settingsOverlay');
     const gameTransparencySlider = document.getElementById('gameTransparencySlider');
     const gameTransparencyValue = document.getElementById('gameTransparencyValue');
+    const influenceZonesToggle = document.getElementById('influenceZonesToggle');
 
     // Sync slider with current game state
     const currentValue = Math.round(gameState.influenceTransparency * 100);
     gameTransparencySlider.value = currentValue;
     gameTransparencyValue.textContent = `${currentValue}%`;
+
+    // Sync toggle with current game state
+    influenceZonesToggle.checked = influenceZonesVisible;
 
     settingsOverlay.classList.add('active');
 }

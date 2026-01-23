@@ -1,5 +1,54 @@
 # Release Notes
 
+## Version 1.0.6 - 24/01/2026 05:00
+
+### New Features: Continuous Territories and Improved Settings
+
+**Default Settings Changes**
+- Influence zones now visible by default on game start
+- Default transparency reduced to 4% (down from 15%) for more subtle appearance
+- More natural starting experience with territorial visualization
+
+**Settings Menu Reorganization**
+- Settings button moved to left of turn counter for better UI flow
+- Removed standalone influence toggle button (🗺️) from top UI bar
+- Added influence zones ON/OFF toggle switch inside settings menu
+- Removed 'I' keyboard shortcut (zones controlled via settings only)
+- Settings menu now centralized control point for all visual options
+
+**Improved Voronoi Territory Visualization**
+- Complete rewrite of Voronoi algorithm for continuous territories
+- Territories now display as unified regions per empire (like countries)
+- Changed from weighted zones to standard equal-sized Voronoi regions
+- Removed planet strength weighting system
+- Each planet contributes equally to territorial influence
+- Player and enemy territories form single continuous colored areas
+- More strategic and visually clear territorial representation
+
+**Territory Algorithm**
+- One site per owned planet (no artificial weighting)
+- Nearest-neighbor algorithm determines territory boundaries
+- Pixel-based rendering creates smooth continuous regions
+- Territories automatically merge all planets of same owner
+- Resolution: 10 pixels per sample for detailed boundaries
+
+### Visual Enhancements
+- Toggle switch styling with smooth animations
+- Cleaner top UI with fewer buttons
+- Settings panel shows both transparency slider and visibility toggle
+- More intuitive control scheme for visual preferences
+
+### Technical Implementation
+- Rewrote influenceZones.js Voronoi generation algorithm
+- Changed from circular metaballs to grid-based nearest-neighbor
+- Simplified zone calculation (removed strength weighting code)
+- Updated inputHandler.js event handlers for toggle switch
+- Added toggle switch CSS with checked/unchecked states
+- Updated default visibility state in influenceZones.js
+- Files modified: `js/influenceZones.js`, `js/inputHandler.js`, `js/gameState.js`, `index.html`, `css/style.css`
+
+---
+
 ## Version 1.0.5 - 24/01/2026 03:15
 
 ### New Features: Enhanced Color Options and In-Game Settings
