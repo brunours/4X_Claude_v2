@@ -33,6 +33,40 @@
                 </div>
             </div>
 
+            <div class="menu-section">
+                <h2>Your Empire Color</h2>
+                <div class="color-picker" id="playerColorPicker">
+                    <div class="color-tile" data-color="blue" style="background: #0096ff;"></div>
+                    <div class="color-tile" data-color="red" style="background: #ff3232;"></div>
+                    <div class="color-tile" data-color="green" style="background: #00ff88;"></div>
+                    <div class="color-tile" data-color="white" style="background: #ffffff;"></div>
+                    <div class="color-tile" data-color="orange" style="background: #ff8800;"></div>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h2>AI Empire Color</h2>
+                <div class="color-picker" id="aiColorPicker">
+                    <div class="color-tile" data-color="blue" style="background: #0096ff;"></div>
+                    <div class="color-tile" data-color="red" style="background: #ff3232;"></div>
+                    <div class="color-tile" data-color="green" style="background: #00ff88;"></div>
+                    <div class="color-tile" data-color="white" style="background: #ffffff;"></div>
+                    <div class="color-tile" data-color="orange" style="background: #ff8800;"></div>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <h2>Influence Zone Transparency</h2>
+                <div class="slider-container">
+                    <input type="range" id="transparencySlider" min="10" max="50" value="25" step="5">
+                    <div class="slider-labels">
+                        <span>Subtle</span>
+                        <span id="transparencyValue">25%</span>
+                        <span>Strong</span>
+                    </div>
+                </div>
+            </div>
+
             <button id="startBtn">LAUNCH</button>
         </div>
 
@@ -120,7 +154,7 @@
         <div id="zoomIndicator">Zoom: 100%</div>
 
         <!-- Version Display -->
-        <div id="versionDisplay">v1.0.3</div>
+        <div id="versionDisplay">v1.0.4</div>
 
         <!-- Game Over Screen -->
         <div id="gameOverScreen">

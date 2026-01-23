@@ -1,5 +1,47 @@
 # Release Notes
 
+## Version 1.0.4 - 24/01/2026 02:30
+
+### New Feature: Empire Color Customization
+- **Empire color selection**: Choose your empire's visual identity from 5 color options
+  - Color palette: Blue (default), Red, Green, White, Orange
+  - Visual color tiles in start menu for easy selection
+  - Selected colors apply to planets, ships, UI elements, and influence zones
+  - Mutual exclusion: Player and AI cannot share the same color
+
+- **AI empire color selection**: Customize the AI opponent's colors
+  - Same 5-color palette available
+  - Default color: Red
+  - Visual feedback: Color chosen by one empire shows as crossed/disabled for the other
+
+- **Influence zone transparency control**: Adjust visibility of territorial zones
+  - Slider control ranging from 10% (subtle) to 50% (strong)
+  - Real-time value display showing current transparency percentage
+  - Fine-tuned control with 5% increments
+
+- **Settings persistence**: Preferences saved automatically using localStorage
+  - Color choices and transparency settings remembered between sessions
+  - Settings restored automatically when returning to the game
+  - Consistent experience across play sessions
+
+### Visual Enhancements
+- Color tiles with hover effects and selection states
+- Crossed-out diagonal lines for disabled color options
+- Custom slider styling with player color theme
+- Planet glow effects now use custom empire colors
+- Influence zones render with selected colors and transparency
+
+### Technical Implementation
+- Added COLOR_OPTIONS configuration with hex and rgba values for each color
+- Implemented getPlayerColor(), getAIColor(), getOwnerColor() helper functions
+- Created saveSettings() and loadSettings() for localStorage persistence
+- Updated renderer.js to use dynamic colors for planet glows
+- Updated influenceZones.js to use custom colors and transparency
+- Added updateColorPickers() for mutual exclusion logic
+- Files modified: `js/gameState.js`, `js/renderer.js`, `js/influenceZones.js`, `index.html`, `css/style.css`
+
+---
+
 ## Version 1.0.3 - 24/01/2026 00:15
 
 ### New Feature: Influence Zones

@@ -26,7 +26,7 @@
 //
 // Used by: renderer.js (main rendering loop), inputHandler.js (toggle control)
 
-import { gameState, canvas } from './gameState.js';
+import { gameState, canvas, getPlayerColor, getAIColor } from './gameState.js';
 import { camera } from './gameState.js';
 import { SHIP_TYPES } from './config.js';
 
@@ -207,12 +207,12 @@ function renderVoronoiRegions(ctx, zones) {
 
     // Draw using metaballs/smooth regions
     for (const site of allSites) {
-        const color = site.owner === 'player' ?
-            { r: 0, g: 150, b: 255, a: 0.25 } : // Blue for player
-            { r: 255, g: 50, b: 50, a: 0.25 };   // Red for AI
+        const ownerColorData = site.owner === 'player' ? getPlayerColor() : getAIColor();
+        const rgba = ownerColorData.glowRgba;
+        const alpha = gameState.influenceTransparency;
 
         // Draw circular influence region
-        ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
+        ctx.fillStyle = `rgba(${rgba}, ${alpha})`;
         ctx.beginPath();
 
         const radius = 150; // Base influence radius

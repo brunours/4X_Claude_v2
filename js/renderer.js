@@ -23,7 +23,7 @@
 //
 // Used by: main.js (starts the game loop on initialization)
 
-import { gameState, camera, canvas, ctx, backgroundStars } from './gameState.js';
+import { gameState, camera, canvas, ctx, backgroundStars, getOwnerColor } from './gameState.js';
 import { SHIP_TYPES } from './config.js';
 import { renderInfluenceZones } from './influenceZones.js';
 
@@ -96,7 +96,8 @@ function drawPlanet(planet) {
 
     // Glow effect for owned planets
     if (planet.owner) {
-        const glowColor = planet.owner === 'player' ? 'rgba(0, 255, 136, 0.3)' : 'rgba(255, 68, 68, 0.3)';
+        const ownerColor = getOwnerColor(planet.owner);
+        const glowColor = ownerColor ? ownerColor.planetGlow : 'rgba(255, 255, 255, 0.3)';
         const glow = ctx.createRadialGradient(x, y, size * 0.5, x, y, size * 2);
         glow.addColorStop(0, glowColor);
         glow.addColorStop(1, 'transparent');

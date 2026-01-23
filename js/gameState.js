@@ -23,11 +23,23 @@
 
 import { MAP_SIZES, SHIP_TYPES } from './config.js';
 
+// Color palette configuration
+export const COLOR_OPTIONS = {
+    blue: { name: 'Blue', hex: '#0096ff', glowRgba: '0, 150, 255', planetGlow: 'rgba(0, 255, 136, 0.3)' },
+    red: { name: 'Red', hex: '#ff3232', glowRgba: '255, 50, 50', planetGlow: 'rgba(255, 68, 68, 0.3)' },
+    green: { name: 'Green', hex: '#00ff88', glowRgba: '0, 255, 136', planetGlow: 'rgba(0, 255, 136, 0.3)' },
+    white: { name: 'White', hex: '#ffffff', glowRgba: '255, 255, 255', planetGlow: 'rgba(255, 255, 255, 0.3)' },
+    orange: { name: 'Orange', hex: '#ff8800', glowRgba: '255, 136, 0', planetGlow: 'rgba(255, 136, 0, 0.3)' }
+};
+
 // Game state object
 export let gameState = {
     turn: 1,
     mapSize: 'compact',
     difficulty: 'easy',
+    playerColor: 'blue', // Empire color choice
+    aiColor: 'red', // AI color choice
+    influenceTransparency: 0.25, // 0.1 to 0.5
     worldWidth: 1500,
     worldHeight: 1200,
     planets: [],
@@ -89,6 +101,9 @@ export function resizeCanvas() {
 }
 
 export function setupStartScreen() {
+    // Load saved settings
+    loadSettings();
+
     // Size buttons
     document.querySelectorAll('[data-size]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -107,11 +122,80 @@ export function setupStartScreen() {
         });
     });
 
+    // Player color picker
+    const playerColorPicker = document.getElementById('playerColorPicker');
+    playerColorPicker.querySelectorAll('.color-tile').forEach(tile => {
+        tile.addEventListener('click', () => {
+            const color = tile.dataset.color;
+            if (!tile.classList.contains('disabled')) {
+                gameState.playerColor = color;
+                updateColorPickers();
+            }
+        });
+    });
+
+    // AI color picker
+    const aiColorPicker = document.getElementById('aiColorPicker');
+    aiColorPicker.querySelectorAll('.color-tile').forEach(tile => {
+        tile.addEventListener('click', () => {
+            const color = tile.dataset.color;
+            if (!tile.classList.contains('disabled')) {
+                gameState.aiColor = color;
+                updateColorPickers();
+            }
+        });
+    });
+
+    // Transparency slider
+    const transparencySlider = document.getElementById('transparencySlider');
+    const transparencyValue = document.getElementById('transparencyValue');
+    transparencySlider.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        gameState.influenceTransparency = value / 100;
+        transparencyValue.textContent = `${value}%`;
+    });
+
+    // Initialize UI with saved settings
+    updateColorPickers();
+    transparencySlider.value = Math.round(gameState.influenceTransparency * 100);
+    transparencyValue.textContent = `${Math.round(gameState.influenceTransparency * 100)}%`;
+
     // Start button
     document.getElementById('startBtn').addEventListener('click', startGame);
 }
 
+function updateColorPickers() {
+    // Update player color picker
+    const playerColorPicker = document.getElementById('playerColorPicker');
+    playerColorPicker.querySelectorAll('.color-tile').forEach(tile => {
+        const color = tile.dataset.color;
+        tile.classList.remove('selected', 'disabled');
+        if (color === gameState.playerColor) {
+            tile.classList.add('selected');
+        }
+        if (color === gameState.aiColor) {
+            tile.classList.add('disabled');
+        }
+    });
+
+    // Update AI color picker
+    const aiColorPicker = document.getElementById('aiColorPicker');
+    aiColorPicker.querySelectorAll('.color-tile').forEach(tile => {
+        const color = tile.dataset.color;
+        tile.classList.remove('selected', 'disabled');
+        if (color === gameState.aiColor) {
+            tile.classList.add('selected');
+        }
+        if (color === gameState.playerColor) {
+            tile.classList.add('disabled');
+        }
+    });
+}
+
 export function startGame() {
+    // Save settings before starting
+    saveSettings();
+
     const sizeConfig = MAP_SIZES[gameState.mapSize];
     gameState.worldWidth = sizeConfig.width;
     gameState.worldHeight = sizeConfig.height;
@@ -247,4 +331,43 @@ export function calculateScore(owner) {
                   (player.enemyShipsDestroyed * 20);
 
     return score;
+}
+
+// Helper functions for color management
+export function getPlayerColor() {
+    return COLOR_OPTIONS[gameState.playerColor];
+}
+
+export function getAIColor() {
+    return COLOR_OPTIONS[gameState.aiColor];
+}
+
+export function getOwnerColor(owner) {
+    if (owner === 'player') return getPlayerColor();
+    if (owner === 'enemy') return getAIColor();
+    return null;
+}
+
+// Settings persistence
+export function saveSettings() {
+    const settings = {
+        playerColor: gameState.playerColor,
+        aiColor: gameState.aiColor,
+        influenceTransparency: gameState.influenceTransparency
+    };
+    localStorage.setItem('4xSpaceSettings', JSON.stringify(settings));
+}
+
+export function loadSettings() {
+    const saved = localStorage.getItem('4xSpaceSettings');
+    if (saved) {
+        try {
+            const settings = JSON.parse(saved);
+            gameState.playerColor = settings.playerColor || 'blue';
+            gameState.aiColor = settings.aiColor || 'red';
+            gameState.influenceTransparency = settings.influenceTransparency || 0.25;
+        } catch (e) {
+            console.error('Failed to load settings:', e);
+        }
+    }
 }
