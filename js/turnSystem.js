@@ -163,11 +163,39 @@ export function handleShipArrival(shipGroup) {
             const colonizer = shipGroup.ships.find(s => s.type === 'colonizer');
             console.log('Looking for colonizer:', { found: !!colonizer, colonizer });
             if (colonizer) {
+                console.log('BEFORE colonization:', {
+                    planetId: targetPlanet.id,
+                    owner: targetPlanet.owner,
+                    population: targetPlanet.population,
+                    planetReference: targetPlanet
+                });
+
                 targetPlanet.owner = shipGroup.owner;
                 targetPlanet.population = 10;
+
+                console.log('AFTER setting owner/population:', {
+                    owner: targetPlanet.owner,
+                    population: targetPlanet.population
+                });
+
                 // Add all ships except colonizer
                 targetPlanet.ships.push(...shipGroup.ships.filter(s => s.id !== colonizer.id));
-                console.log('Planet colonized!', { owner: targetPlanet.owner, population: targetPlanet.population });
+
+                console.log('Planet colonized!', {
+                    owner: targetPlanet.owner,
+                    population: targetPlanet.population,
+                    ships: targetPlanet.ships.length
+                });
+
+                // Verify planet in gameState after modification
+                const verifyPlanet = gameState.planets.find(p => p.id === targetPlanet.id);
+                console.log('Verification check:', {
+                    foundPlanet: !!verifyPlanet,
+                    verifyOwner: verifyPlanet?.owner,
+                    verifyPopulation: verifyPlanet?.population,
+                    sameReference: verifyPlanet === targetPlanet
+                });
+
                 return;
             }
         }
@@ -255,6 +283,10 @@ export function processEmptyPlanets() {
 
         const ownerShips = planet.ships.filter(s => s.owner === planet.owner);
         if (ownerShips.length > 0) continue;
+
+        // Skip newly colonized planets (they have population but no ships yet)
+        // A planet with owner but no ships and positive population was just colonized
+        if (planet.population > 0) continue;
 
         // Check if ships are building that will complete next turn
         const buildingShips = planet.buildQueue.some(item => item.turnsRemaining === 1);
