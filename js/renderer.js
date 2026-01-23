@@ -5,9 +5,12 @@
 // This module handles all canvas rendering for the game, including the game loop,
 // background, planets, ships, travel routes, and UI overlays.
 //
+// Version: 1.0.3 - Added influence zones visualization
+//
 // Core Responsibilities:
 // - Main game loop using requestAnimationFrame for smooth 60fps rendering
 // - Draw background gradient and decorative stars
+// - Render influence zones using Voronoi diagrams (toggleable)
 // - Render all planets with ownership colors, names, and orbital effects
 // - Display ship icons and counts at planets
 // - Visualize traveling ship groups with animated routes
@@ -22,6 +25,7 @@
 
 import { gameState, camera, canvas, ctx, backgroundStars } from './gameState.js';
 import { SHIP_TYPES } from './config.js';
+import { renderInfluenceZones } from './influenceZones.js';
 
 export function gameLoop() {
     render();
@@ -53,6 +57,15 @@ export function render() {
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fill();
     }
+
+    ctx.restore();
+
+    // Draw influence zones (before planets, in screen space)
+    renderInfluenceZones(ctx);
+
+    ctx.save();
+    ctx.scale(camera.zoom, camera.zoom);
+    ctx.translate(-camera.x, -camera.y);
 
     // Draw travel routes
     for (const group of gameState.travelingShips) {

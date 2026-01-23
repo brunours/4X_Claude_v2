@@ -1,5 +1,30 @@
 # Release Notes
 
+## Version 1.0.3 - 24/01/2026 00:15
+
+### New Feature: Influence Zones
+- **Added Voronoi diagram visualization**: Display territorial influence zones across the galaxy
+  - Transparent blue zones for player-controlled territory
+  - Transparent red zones for AI-controlled territory
+  - Neutral planets don't create zones (absorbed by nearest owner)
+  - Influence zones weighted by planet strength (population + ships + production)
+  - Moderate opacity (25%) for clear visibility without obscuring the map
+
+- **Toggle controls**: Show/hide influence zones on demand
+  - Added 🗺️ button in top UI bar next to "End Turn"
+  - Keyboard shortcut: Press 'I' to toggle zones on/off
+  - Visual feedback when toggling (notification + button highlight)
+  - Zones update automatically each turn
+
+### Technical Implementation
+- Created new `influenceZones.js` module for zone calculations
+- Custom Voronoi diagram algorithm using weighted site distribution
+- Influence strength calculation: population + (ships × 5) + (production × 2)
+- Zone cache invalidation system for performance optimization
+- Files modified: `js/influenceZones.js` (new), `js/renderer.js`, `js/inputHandler.js`, `index.html`, `css/style.css`
+
+---
+
 ## Version 1.0.2 - 23/01/2026 23:45
 
 ### Combat System Overhaul

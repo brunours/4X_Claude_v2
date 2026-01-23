@@ -30,7 +30,9 @@
 //
 // Used by: main.js (called once during initialization)
 //
-// Version: 1.0.2 - Added completeRetreat function for tactical withdrawal destination selection
+// Version History:
+// - 1.0.3: Added influence zone toggle controls (button and 'I' keyboard shortcut)
+// - 1.0.2: Added completeRetreat function for tactical withdrawal destination selection
 
 import { gameState, camera, canvas } from './gameState.js';
 import { screenToWorld, clampCamera, updateZoomIndicator, getPlanetAt } from './camera.js';
@@ -40,6 +42,7 @@ import { endTurn, checkGameEnd } from './turnSystem.js';
 import { processAITurn } from './aiSystem.js';
 import { resolveBattleChoice, completeRetreat } from './combatSystem.js';
 import { SHIP_TYPES } from './config.js';
+import { toggleInfluenceZones, invalidateZoneCache } from './influenceZones.js';
 
 export function setupEventListeners() {
     // Mouse events
@@ -56,6 +59,32 @@ export function setupEventListeners() {
 
     // UI buttons
     document.getElementById('endTurnBtn').addEventListener('click', handleEndTurn);
+    document.getElementById('influenceToggleBtn').addEventListener('click', handleInfluenceToggle);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', handleKeyDown);
+}
+
+function handleKeyDown(e) {
+    // Toggle influence zones with 'I' key
+    if (e.key === 'i' || e.key === 'I') {
+        if (!gameState.battlePending) { // Don't toggle during battle
+            handleInfluenceToggle();
+        }
+    }
+}
+
+function handleInfluenceToggle() {
+    const isVisible = toggleInfluenceZones();
+    const button = document.getElementById('influenceToggleBtn');
+
+    if (isVisible) {
+        button.classList.add('active');
+        showNotification('🗺️ Influence zones enabled');
+    } else {
+        button.classList.remove('active');
+        showNotification('🗺️ Influence zones disabled');
+    }
 }
 
 function handleMouseDown(e) {
@@ -207,6 +236,9 @@ function handleTouchEnd(e) {
 
 function handleEndTurn() {
     endTurn();
+
+    // Invalidate influence zone cache
+    invalidateZoneCache();
 
     // Process AI turn
     processAITurn();

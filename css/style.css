@@ -1,13 +1,14 @@
         /*
          * 4X SPACE CONQUEST - STYLESHEET
-         * Version: 1.0.1
+         * Version: 1.0.3
          *
          * Complete styling for the 4X space strategy game including:
          * - Layout and responsive design
          * - Button styles and animations
          * - Canvas and UI overlays
          * - Battle dialog styling
-         * - Version display (v1.0.1 - added semi-transparent version text in bottom right)
+         * - Influence zone toggle button (v1.0.3)
+         * - Version display
          */
 
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap');
@@ -243,7 +244,31 @@
             transform: scale(1.05);
             box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
         }
-        
+
+        #influenceToggleBtn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 10px;
+        }
+
+        #influenceToggleBtn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        #influenceToggleBtn.active {
+            background: rgba(0, 170, 255, 0.3);
+            border-color: rgba(0, 170, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.4);
+        }
+
         /* Action Buttons Container */
         /* Unified Panel */
         #unifiedPanel {
