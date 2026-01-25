@@ -22,6 +22,7 @@
 // Used by: All game modules that need to read or modify game state
 
 import { MAP_SIZES, SHIP_TYPES } from './config.js';
+import { invalidateZoneCache } from './influenceZones.js';
 
 // Color palette configuration
 export const COLOR_OPTIONS = {
@@ -209,6 +210,9 @@ export function startGame() {
 
     generatePlanets(sizeConfig.planets);
     generateBackgroundStars();
+
+    // Initialize influence zones for immediate display
+    invalidateZoneCache();
 
     document.getElementById('startScreen').style.display = 'none';
     document.getElementById('ui').style.display = 'block';
