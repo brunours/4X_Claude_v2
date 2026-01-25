@@ -15,10 +15,10 @@
 // - Use nearest-neighbor algorithm for territory boundaries
 //
 // Influence Calculation:
-// - One site per owned planet (no weighting)
+// - One site per owned planet only (neutral planets completely excluded)
 // - Voronoi cell = all points closer to that planet than any other owned planet
 // - Territories merge: all player planets form one region, all AI planets form another
-// - Neutral planets are excluded from border calculations (zones expand around them)
+// - Neutral planets have NO zones - colored territories expand to fill all space
 // - Borders are equidistant between closest player and enemy planets
 //
 // Exports:
@@ -52,19 +52,19 @@ export function calculateInfluenceZones() {
         return cachedZones;
     }
 
-    const allPlanets = gameState.planets;
-    if (allPlanets.length === 0) {
-        cachedZones = { playerSites: [], enemySites: [], neutralSites: [] };
+    // Only process owned planets - neutral planets are completely excluded
+    const ownedPlanets = gameState.planets.filter(p => p.owner !== null);
+    if (ownedPlanets.length === 0) {
+        cachedZones = { playerSites: [], enemySites: [] };
         cacheInvalidated = false;
         return cachedZones;
     }
 
-    // Create one site per planet (including neutral for proper tracking)
+    // Create one site per owned planet only
     const playerSites = [];
     const enemySites = [];
-    const neutralSites = [];
 
-    for (const planet of allPlanets) {
+    for (const planet of ownedPlanets) {
         const site = {
             x: planet.x,
             y: planet.y,
@@ -76,12 +76,10 @@ export function calculateInfluenceZones() {
             playerSites.push(site);
         } else if (planet.owner === 'enemy') {
             enemySites.push(site);
-        } else {
-            neutralSites.push(site);
         }
     }
 
-    cachedZones = { playerSites, enemySites, neutralSites };
+    cachedZones = { playerSites, enemySites };
     cacheInvalidated = false;
     return cachedZones;
 }
