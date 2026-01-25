@@ -15,11 +15,12 @@
 // - Use nearest-neighbor algorithm for territory boundaries
 //
 // Influence Calculation:
-// - One site per owned planet only (neutral planets completely excluded)
-// - Voronoi cell = all points closer to that planet than any other owned planet
+// - Voronoi includes ALL planets (owned + neutral) for proper boundary calculation
+// - Neutral planets create Voronoi cells that act as barriers/holes
+// - Only owned planet cells are rendered with color (neutral cells invisible)
 // - Territories merge: all player planets form one region, all AI planets form another
-// - Neutral planets have NO zones - colored territories expand to fill all space
-// - Borders are equidistant between closest player and enemy planets
+// - Neutral planets block territory expansion (zones stop at neutral boundaries)
+// - Borders are equidistant between nearest planets (owned or neutral)
 //
 // Exports:
 // - calculateInfluenceZones(): Generates Voronoi diagram data
@@ -92,9 +93,9 @@ export function renderInfluenceZones(ctx) {
 
     ctx.save();
 
-    // Apply camera transformation
-    ctx.translate(-camera.x, -camera.y);
+    // Apply camera transformation (must match renderer.js order: scale then translate)
     ctx.scale(camera.zoom, camera.zoom);
+    ctx.translate(-camera.x, -camera.y);
 
     // Render continuous territories using Voronoi nearest-neighbor algorithm
     renderVoronoiTerritories(ctx, zones);
@@ -103,15 +104,20 @@ export function renderInfluenceZones(ctx) {
 }
 
 function renderVoronoiTerritories(ctx, zones) {
-    // Only use owned planets for border calculation (exclude neutral)
-    // This ensures borders are equidistant between player/enemy planets only
-    const allSites = [...zones.playerSites, ...zones.enemySites];
+    // Include ALL planets in Voronoi calculation (owned + neutral)
+    // This ensures neutral planets create boundaries that block territory expansion
+    const ownedSites = [...zones.playerSites, ...zones.enemySites];
+    const neutralSites = gameState.planets
+        .filter(p => p.owner === null)
+        .map(p => ({ x: p.x, y: p.y, owner: null, planet: p }));
+
+    const allSites = [...ownedSites, ...neutralSites];
     if (allSites.length === 0) return;
 
     // Use d3-delaunay for smooth Voronoi polygons
     if (typeof d3 === 'undefined' || !d3.Delaunay) {
         // Fallback to pixel-based rendering if library not loaded
-        renderVoronoiFallback(ctx, zones, allSites);
+        renderVoronoiFallback(ctx, zones, ownedSites, neutralSites);
         return;
     }
 
@@ -126,11 +132,14 @@ function renderVoronoiTerritories(ctx, zones) {
     const delaunay = d3.Delaunay.from(points);
     const voronoi = delaunay.voronoi([0, 0, gameState.worldWidth, gameState.worldHeight]);
 
-    // Render each Voronoi cell grouped by owner
+    // Render each Voronoi cell - ONLY for owned planets (skip neutral cells)
     for (let i = 0; i < allSites.length; i++) {
         const site = allSites[i];
-        const polygon = voronoi.cellPolygon(i);
 
+        // Skip rendering neutral planet cells (they create boundaries but no color)
+        if (site.owner === null) continue;
+
+        const polygon = voronoi.cellPolygon(i);
         if (!polygon) continue;
 
         // Set color based on owner
@@ -138,8 +147,6 @@ function renderVoronoiTerritories(ctx, zones) {
             ctx.fillStyle = `rgba(${playerColor.glowRgba}, ${alpha})`;
         } else if (site.owner === 'enemy') {
             ctx.fillStyle = `rgba(${enemyColor.glowRgba}, ${alpha})`;
-        } else {
-            continue; // Skip neutral
         }
 
         // Draw the smooth polygon
@@ -154,7 +161,8 @@ function renderVoronoiTerritories(ctx, zones) {
 }
 
 // Fallback pixel-based rendering (used if d3-delaunay not available)
-function renderVoronoiFallback(ctx, zones, allSites) {
+function renderVoronoiFallback(ctx, zones, ownedSites, neutralSites) {
+    const allSites = [...ownedSites, ...neutralSites];
     const resolution = 5;
     const width = Math.ceil(gameState.worldWidth / resolution);
     const height = Math.ceil(gameState.worldHeight / resolution);
@@ -180,7 +188,8 @@ function renderVoronoiFallback(ctx, zones, allSites) {
                 }
             }
 
-            if (nearestOwner) {
+            // Only store if it's an owned planet (skip neutral)
+            if (nearestOwner !== null) {
                 ownerMap.set(`${px},${py}`, nearestOwner);
             }
         }
