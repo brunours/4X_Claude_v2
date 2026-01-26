@@ -331,13 +331,13 @@ export function generatePlanets(count) {
 
 export function generateBackgroundStars() {
     backgroundStars = [];
-    // Use seeded random for reproducible star positions
+    // Use Math.random for background stars (decorative only, don't need to be reproducible)
     for (let i = 0; i < 500; i++) {
         backgroundStars.push({
-            x: gameRandom.random() * gameState.worldWidth,
-            y: gameRandom.random() * gameState.worldHeight,
-            size: gameRandom.random() * 2,
-            brightness: 0.3 + gameRandom.random() * 0.7
+            x: Math.random() * gameState.worldWidth,
+            y: Math.random() * gameState.worldHeight,
+            size: Math.random() * 2,
+            brightness: 0.3 + Math.random() * 0.7
         });
     }
 }
