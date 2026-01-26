@@ -342,11 +342,26 @@ export function showBattleDialog(attackingShips, planet, isDefending = false) {
 export function showGameOver(victory) {
     const screen = document.getElementById('gameOverScreen');
     screen.className = victory ? 'victory' : 'defeat';
-    screen.innerHTML = `
-        <h1>${victory ? 'VICTORY!' : 'DEFEAT'}</h1>
-        <p>${victory ? 'You have conquered the galaxy!' : 'Your empire has fallen...'}</p>
-        <p>Final Turn: ${gameState.turn}</p>
-        <button id="restartBtn" onclick="location.reload()">PLAY AGAIN</button>
+
+    // Update title and message
+    document.getElementById('gameOverTitle').textContent = victory ? 'VICTORY!' : 'DEFEAT';
+    document.getElementById('gameOverMessage').textContent = victory
+        ? 'You have conquered the galaxy!'
+        : 'Your empire has fallen...';
+
+    // Calculate and display final score
+    const finalScore = calculateScore('player');
+    const scoreDiv = document.getElementById('gameOverScore');
+    scoreDiv.innerHTML = `
+        <div class="final-score">Final Score: <span class="score-value">${finalScore.toLocaleString()}</span></div>
+        <div class="final-turn">Turn: ${gameState.turn}</div>
     `;
+
+    // Show/hide leaderboard button based on login status
+    const leaderboardBtn = document.getElementById('gameOverLeaderboardBtn');
+    if (leaderboardBtn) {
+        leaderboardBtn.style.display = gameState.userId ? 'block' : 'none';
+    }
+
     screen.style.display = 'flex';
 }

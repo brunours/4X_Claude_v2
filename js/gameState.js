@@ -23,6 +23,7 @@
 
 import { MAP_SIZES, SHIP_TYPES } from './config.js';
 import { invalidateZoneCache } from './influenceZones.js';
+import { SeededRandom, generateMapSeed } from './seededRandom.js';
 
 // Color palette configuration
 export const COLOR_OPTIONS = {
@@ -57,8 +58,17 @@ export let gameState = {
     sourcePlanet: null,
     selectedShipIds: new Set(), // Track individually selected ships
     battlePending: null, // Track pending battle for fight/withdraw choice
-    fleetTab: 'stationed' // Current fleet tab
+    fleetTab: 'stationed', // Current fleet tab
+    gameOver: false, // Track if game has ended
+    // New fields for Supabase integration
+    mapSeed: null, // Seed for reproducible map generation
+    currentSaveId: null, // UUID of active save (null for new/guest games)
+    userId: null, // Current authenticated user ID (null for guests)
+    username: null // Current authenticated username
 };
+
+// Seeded random instance for current game
+let gameRandom = null;
 
 // Camera/viewport
 export let camera = {
@@ -194,9 +204,34 @@ function updateColorPickers() {
     });
 }
 
-export function startGame() {
+export function startGame(providedSeed = null) {
     // Save settings before starting
     saveSettings();
+
+    // Generate or use provided map seed
+    gameState.mapSeed = providedSeed || generateMapSeed();
+    gameRandom = new SeededRandom(gameState.mapSeed);
+
+    // Reset save ID for new games (unless loading a saved game)
+    if (!providedSeed) {
+        gameState.currentSaveId = null;
+    }
+
+    // Reset game state for new game
+    gameState.turn = 1;
+    gameState.travelingShips = [];
+    gameState.pendingConquests = [];
+    gameState.players = {
+        player: { energy: 100, minerals: 100, food: 100, score: 0, shipsBuilt: 0, enemyShipsDestroyed: 0 },
+        enemy: { energy: 100, minerals: 100, food: 100, score: 0, shipsBuilt: 0, enemyShipsDestroyed: 0 }
+    };
+    gameState.selectedPlanet = null;
+    gameState.selectingDestination = false;
+    gameState.shipsToSend = null;
+    gameState.sourcePlanet = null;
+    gameState.selectedShipIds = new Set();
+    gameState.battlePending = null;
+    gameState.fleetTab = 'stationed';
 
     const sizeConfig = MAP_SIZES[gameState.mapSize];
     gameState.worldWidth = sizeConfig.width;
@@ -215,9 +250,8 @@ export function startGame() {
     invalidateZoneCache();
 
     document.getElementById('startScreen').style.display = 'none';
-    document.getElementById('ui').style.display = 'block';
+    document.getElementById('ui').style.display = 'flex';
     document.getElementById('zoomIndicator').style.display = 'block';
-    document.getElementById('actionButtons').style.display = 'flex';
 }
 
 export function generatePlanets(count) {
@@ -234,8 +268,9 @@ export function generatePlanets(count) {
         let attempts = 0;
 
         do {
-            x = padding + Math.random() * (gameState.worldWidth - padding * 2);
-            y = padding + Math.random() * (gameState.worldHeight - padding * 2);
+            // Use seeded random for reproducible maps
+            x = padding + gameRandom.random() * (gameState.worldWidth - padding * 2);
+            y = padding + gameRandom.random() * (gameState.worldHeight - padding * 2);
             valid = true;
 
             for (const planet of gameState.planets) {
@@ -248,7 +283,7 @@ export function generatePlanets(count) {
             attempts++;
         } while (!valid && attempts < 100);
 
-        const size = 20 + Math.random() * 25;
+        const size = 20 + gameRandom.random() * 25;
         const planet = {
             id: i,
             name: planetNames[i] || `Planet-${i}`,
@@ -257,13 +292,13 @@ export function generatePlanets(count) {
             population: 0,
             maxPopulation: Math.floor(size * 4),
             resources: {
-                energy: Math.floor(Math.random() * 10) + 5,
-                minerals: Math.floor(Math.random() * 10) + 5,
-                food: Math.floor(Math.random() * 10) + 5
+                energy: Math.floor(gameRandom.random() * 10) + 5,
+                minerals: Math.floor(gameRandom.random() * 10) + 5,
+                food: Math.floor(gameRandom.random() * 10) + 5
             },
             ships: [],
             buildQueue: [],
-            color: `hsl(${Math.random() * 360}, 60%, 50%)`
+            color: `hsl(${gameRandom.random() * 360}, 60%, 50%)`
         };
 
         gameState.planets.push(planet);
@@ -296,12 +331,13 @@ export function generatePlanets(count) {
 
 export function generateBackgroundStars() {
     backgroundStars = [];
+    // Use seeded random for reproducible star positions
     for (let i = 0; i < 500; i++) {
         backgroundStars.push({
-            x: Math.random() * gameState.worldWidth,
-            y: Math.random() * gameState.worldHeight,
-            size: Math.random() * 2,
-            brightness: 0.3 + Math.random() * 0.7
+            x: gameRandom.random() * gameState.worldWidth,
+            y: gameRandom.random() * gameState.worldHeight,
+            size: gameRandom.random() * 2,
+            brightness: 0.3 + gameRandom.random() * 0.7
         });
     }
 }
@@ -375,4 +411,159 @@ export function loadSettings() {
             console.error('Failed to load settings:', e);
         }
     }
+}
+
+// ============================================
+// SERIALIZATION FOR SAVE/LOAD
+// ============================================
+
+// Serialize game state for saving to Supabase
+export function serializeGameState() {
+    return {
+        turn: gameState.turn,
+        mapSize: gameState.mapSize,
+        difficulty: gameState.difficulty,
+        playerColor: gameState.playerColor,
+        aiColor: gameState.aiColor,
+        influenceTransparency: gameState.influenceTransparency,
+        worldWidth: gameState.worldWidth,
+        worldHeight: gameState.worldHeight,
+        mapSeed: gameState.mapSeed,
+        planets: gameState.planets.map(p => ({
+            ...p,
+            ships: [...p.ships],
+            buildQueue: [...p.buildQueue]
+        })),
+        travelingShips: gameState.travelingShips.map(g => ({
+            ...g,
+            ships: [...g.ships]
+        })),
+        pendingConquests: [...gameState.pendingConquests],
+        players: {
+            player: { ...gameState.players.player },
+            enemy: { ...gameState.players.enemy }
+        },
+        // Convert Set to Array for JSON serialization
+        selectedShipIds: Array.from(gameState.selectedShipIds),
+        selectedPlanetId: gameState.selectedPlanet?.id ?? null,
+        fleetTab: gameState.fleetTab
+    };
+}
+
+// Deserialize game state from Supabase save
+export function deserializeGameState(data) {
+    gameState.turn = data.turn;
+    gameState.mapSize = data.mapSize;
+    gameState.difficulty = data.difficulty;
+    gameState.playerColor = data.playerColor;
+    gameState.aiColor = data.aiColor;
+    gameState.influenceTransparency = data.influenceTransparency;
+    gameState.worldWidth = data.worldWidth;
+    gameState.worldHeight = data.worldHeight;
+    gameState.mapSeed = data.mapSeed;
+    gameState.planets = data.planets;
+    gameState.travelingShips = data.travelingShips;
+    gameState.pendingConquests = data.pendingConquests;
+    gameState.players = data.players;
+    gameState.selectedShipIds = new Set(data.selectedShipIds || []);
+    gameState.selectedPlanet = data.selectedPlanetId !== null
+        ? gameState.planets.find(p => p.id === data.selectedPlanetId)
+        : null;
+    gameState.fleetTab = data.fleetTab || 'stationed';
+    gameState.selectingDestination = false;
+    gameState.shipsToSend = null;
+    gameState.sourcePlanet = null;
+    gameState.battlePending = null;
+
+    // Reinitialize seeded random (not needed for loaded games, but good for consistency)
+    gameRandom = new SeededRandom(gameState.mapSeed);
+}
+
+// Get a minimal map state for completed game records (leaderboard viewing)
+export function getMinimalMapState() {
+    return {
+        mapSeed: gameState.mapSeed,
+        mapSize: gameState.mapSize,
+        worldWidth: gameState.worldWidth,
+        worldHeight: gameState.worldHeight,
+        planets: gameState.planets.map(p => ({
+            id: p.id,
+            name: p.name,
+            x: p.x,
+            y: p.y,
+            size: p.size,
+            owner: p.owner,
+            population: p.population,
+            maxPopulation: p.maxPopulation,
+            color: p.color,
+            shipCount: p.ships.length
+        })),
+        playerColor: gameState.playerColor,
+        aiColor: gameState.aiColor,
+        influenceTransparency: gameState.influenceTransparency
+    };
+}
+
+// Restart game with the same map seed (replay feature)
+export function restartWithSameSeed() {
+    const currentSeed = gameState.mapSeed;
+    const currentMapSize = gameState.mapSize;
+    const currentDifficulty = gameState.difficulty;
+
+    // Reset game state but keep the seed
+    gameState.mapSize = currentMapSize;
+    gameState.difficulty = currentDifficulty;
+
+    // Start game with the same seed
+    startGame(currentSeed);
+}
+
+// Start game from a completed game's map state (replay from leaderboard)
+export function startGameFromMapState(mapState) {
+    gameState.mapSize = mapState.mapSize;
+    gameState.playerColor = mapState.playerColor;
+    gameState.aiColor = mapState.aiColor;
+    gameState.influenceTransparency = mapState.influenceTransparency;
+
+    startGame(mapState.mapSeed);
+}
+
+// Set user info after authentication
+export function setUserInfo(userId, username) {
+    gameState.userId = userId;
+    gameState.username = username;
+}
+
+// Clear user info on logout
+export function clearUserInfo() {
+    gameState.userId = null;
+    gameState.username = null;
+    gameState.currentSaveId = null;
+}
+
+// Set map seed for replay from leaderboard
+export function setMapSeed(seed) {
+    gameState.mapSeed = seed;
+}
+
+// Reset game state (for returning to main menu)
+export function resetGameState() {
+    gameState.turn = 1;
+    gameState.planets = [];
+    gameState.travelingShips = [];
+    gameState.pendingConquests = [];
+    gameState.players = {
+        player: { energy: 100, minerals: 100, food: 100, score: 0, shipsBuilt: 0, enemyShipsDestroyed: 0 },
+        enemy: { energy: 100, minerals: 100, food: 100, score: 0, shipsBuilt: 0, enemyShipsDestroyed: 0 }
+    };
+    gameState.selectedPlanet = null;
+    gameState.selectingDestination = false;
+    gameState.shipsToSend = null;
+    gameState.sourcePlanet = null;
+    gameState.selectedShipIds = new Set();
+    gameState.battlePending = null;
+    gameState.fleetTab = 'stationed';
+    gameState.mapSeed = null;
+    gameState.currentSaveId = null;
+    gameState.gameOver = false;
 }

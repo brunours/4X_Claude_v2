@@ -1510,3 +1510,799 @@
             font-family: 'Orbitron', monospace;
             font-size: 0.85rem;
         }
+
+        /* ============================================
+           AUTH SCREEN STYLES
+           ============================================ */
+        #authScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 30% 20%, #0a1628 0%, #050a12 50%, #000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        #authScreen h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #00f0ff, #0080ff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px rgba(0, 240, 255, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+        }
+
+        #authScreen .subtitle {
+            font-size: clamp(0.8rem, 3vw, 1.2rem);
+            color: #667;
+            margin-bottom: 40px;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 0 20px;
+        }
+
+        .auth-form {
+            background: rgba(5, 15, 30, 0.95);
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .auth-form h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            color: #0af;
+            margin-bottom: 25px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(30, 40, 60, 0.8);
+            border: 1px solid rgba(0, 170, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0af;
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.3);
+        }
+
+        .form-group input::placeholder {
+            color: #667;
+        }
+
+        .auth-error {
+            color: #f44;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            min-height: 20px;
+            text-align: center;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #0080ff, #00f0ff);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .auth-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .auth-switch a {
+            color: #0af;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .auth-switch a:hover {
+            color: #0ff;
+            text-decoration: underline;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-divider span {
+            padding: 0 15px;
+            color: #667;
+            font-size: 0.9rem;
+        }
+
+        .guest-btn {
+            width: 100%;
+            padding: 15px;
+            background: rgba(100, 100, 100, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #aaa;
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .guest-btn:hover {
+            background: rgba(100, 100, 100, 0.5);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #fff;
+        }
+
+        .guest-note {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        /* ============================================
+           START SCREEN HEADER & USER INFO
+           ============================================ */
+        .start-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .start-header h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #00f0ff, #0080ff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px rgba(0, 240, 255, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+        }
+
+        .start-header .subtitle {
+            font-size: clamp(0.8rem, 3vw, 1.2rem);
+            color: #667;
+            margin-bottom: 20px;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #0af;
+        }
+
+        .logout-btn {
+            padding: 6px 15px;
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid rgba(255, 68, 68, 0.4);
+            border-radius: 5px;
+            color: #f66;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 68, 68, 0.4);
+            color: #fff;
+        }
+
+        /* ============================================
+           SAVED GAMES SECTION
+           ============================================ */
+        .saved-games-section {
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .saved-games-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(5, 15, 30, 0.8);
+            border: 1px solid rgba(0, 170, 255, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .saved-games-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .saved-games-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 170, 255, 0.5);
+            border-radius: 3px;
+        }
+
+        .saved-game-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: rgba(30, 40, 60, 0.5);
+            border: 1px solid rgba(0, 170, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .saved-game-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .saved-game-item:hover {
+            background: rgba(30, 40, 60, 0.8);
+            border-color: rgba(0, 170, 255, 0.3);
+        }
+
+        .saved-game-info {
+            flex: 1;
+        }
+
+        .saved-game-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            color: #0af;
+            margin-bottom: 4px;
+        }
+
+        .saved-game-details {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .saved-game-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .resume-btn {
+            padding: 8px 16px;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            border-radius: 5px;
+            color: #0f8;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .resume-btn:hover {
+            background: rgba(0, 255, 136, 0.4);
+            color: #fff;
+        }
+
+        .delete-save-btn {
+            padding: 8px 12px;
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid rgba(255, 68, 68, 0.4);
+            border-radius: 5px;
+            color: #f66;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .delete-save-btn:hover {
+            background: rgba(255, 68, 68, 0.4);
+            color: #fff;
+        }
+
+        .no-saves {
+            text-align: center;
+            color: #555;
+            font-size: 0.9rem;
+            padding: 20px;
+        }
+
+        .new-game-divider {
+            display: flex;
+            align-items: center;
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        .new-game-divider::before,
+        .new-game-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 170, 255, 0.4), transparent);
+        }
+
+        .new-game-divider span {
+            padding: 0 20px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            color: #0af;
+            letter-spacing: 2px;
+        }
+
+        /* ============================================
+           LEADERBOARD BUTTON
+           ============================================ */
+        .leaderboard-btn {
+            padding: 15px 30px;
+            background: rgba(168, 85, 247, 0.2);
+            border: 2px solid rgba(168, 85, 247, 0.4);
+            border-radius: 10px;
+            color: #a855f7;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .leaderboard-btn:hover {
+            background: rgba(168, 85, 247, 0.4);
+            border-color: #a855f7;
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+            color: #fff;
+        }
+
+        /* ============================================
+           OVERLAY PANEL (shared styles)
+           ============================================ */
+        .overlay-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        .panel-content {
+            background: rgba(5, 15, 30, 0.98);
+            border: 2px solid rgba(0, 170, 255, 0.5);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 50px rgba(0, 170, 255, 0.3);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 170, 255, 0.3);
+        }
+
+        .panel-header h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            color: #0af;
+            margin: 0;
+        }
+
+        /* ============================================
+           LEADERBOARD PANEL
+           ============================================ */
+        .leaderboard-content {
+            width: 500px;
+        }
+
+        .leaderboard-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-tab {
+            flex: 1;
+            padding: 12px 20px;
+            background: rgba(0, 170, 255, 0.1);
+            border: 1px solid rgba(0, 170, 255, 0.2);
+            border-radius: 8px;
+            color: #0af;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .leaderboard-tab:hover {
+            background: rgba(0, 170, 255, 0.2);
+        }
+
+        .leaderboard-tab.active {
+            background: rgba(0, 170, 255, 0.3);
+            border-color: #0af;
+            color: #fff;
+        }
+
+        .leaderboard-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(30, 40, 60, 0.5);
+            border: 1px solid rgba(0, 170, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .leaderboard-entry:hover {
+            background: rgba(30, 40, 60, 0.8);
+            border-color: rgba(0, 170, 255, 0.4);
+        }
+
+        .leaderboard-rank {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fc0;
+            width: 40px;
+            text-align: center;
+        }
+
+        .leaderboard-rank.gold { color: #ffd700; }
+        .leaderboard-rank.silver { color: #c0c0c0; }
+        .leaderboard-rank.bronze { color: #cd7f32; }
+
+        .leaderboard-player {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .leaderboard-player-name {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        .leaderboard-player-details {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .leaderboard-score {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            color: #0f8;
+        }
+
+        .leaderboard-hint {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #555;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            color: #888;
+            padding: 40px;
+        }
+
+        /* ============================================
+           MAP VIEWER MODAL
+           ============================================ */
+        .map-viewer-content {
+            width: 700px;
+        }
+
+        .map-viewer-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(30, 40, 60, 0.5);
+            border-radius: 8px;
+        }
+
+        .map-viewer-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-viewer-stat-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .map-viewer-stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            color: #0af;
+        }
+
+        .map-viewer-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #000;
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #mapViewerCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-viewer-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .replay-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #0f8, #0c6);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .replay-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        /* ============================================
+           DELETE CONFIRMATION DIALOG
+           ============================================ */
+        .confirm-content {
+            width: 350px;
+            text-align: center;
+        }
+
+        .confirm-content h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            color: #f66;
+            margin-bottom: 15px;
+        }
+
+        .confirm-content p {
+            color: #888;
+            margin-bottom: 25px;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .confirm-btn.danger {
+            background: linear-gradient(135deg, #f44, #ff6600);
+            color: #fff;
+        }
+
+        .confirm-btn.danger:hover {
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.5);
+            transform: scale(1.05);
+        }
+
+        .confirm-btn:not(.danger) {
+            background: rgba(100, 100, 100, 0.5);
+            border: 1px solid #666;
+            color: #aaa;
+        }
+
+        .confirm-btn:not(.danger):hover {
+            background: rgba(100, 100, 100, 0.8);
+            color: #fff;
+        }
+
+        /* ============================================
+           GAME OVER SCREEN ENHANCEMENTS
+           ============================================ */
+        .game-over-score {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(30, 40, 60, 0.5);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .game-over-score .score-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            color: #0f8;
+        }
+
+        .game-over-score .score-label {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .game-over-score .final-score {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .game-over-score .final-turn {
+            font-size: 1rem;
+            color: #888;
+        }
+
+        .game-over-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .game-over-btn {
+            padding: 15px 40px;
+            min-width: 250px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .game-over-btn:not(.secondary) {
+            background: linear-gradient(135deg, #0080ff, #00f0ff);
+            color: #000;
+        }
+
+        .game-over-btn:not(.secondary):hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+        }
+
+        .game-over-btn.secondary {
+            background: rgba(100, 100, 100, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #aaa;
+        }
+
+        .game-over-btn.secondary:hover {
+            background: rgba(100, 100, 100, 0.5);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #fff;
+        }
+
+        /* In-game Transparency Slider */
+        #gameTransparencySlider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, rgba(0, 150, 255, 0.1), rgba(0, 150, 255, 0.5));
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        #gameTransparencySlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        #gameTransparencySlider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+
+        #gameTransparencySlider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0ff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        #gameTransparencyValue {
+            color: #0ff;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }

@@ -32,12 +32,14 @@
 // Version History:
 // - 1.0.2: Added retreat options to battlePending for tactical withdrawals
 // - 1.0.1: Fixed colonization bug where newly colonized planets were incorrectly neutralized
+// - 1.0.7: Added auto-save integration for authenticated users
 
 import { gameState, generateId } from './gameState.js';
 import { SHIP_TYPES } from './config.js';
 import { resolveCombat, processPendingConquests } from './combatSystem.js';
+import { autoSaveGame } from './saveSystem.js';
 
-export function endTurn() {
+export async function endTurn() {
     gameState.turn++;
 
     processBuildQueues();
@@ -52,6 +54,11 @@ export function endTurn() {
 
     // Check victory/defeat (will be handled by main or uiManager)
     // checkGameEnd();
+
+    // Auto-save for authenticated users (runs async, doesn't block)
+    if (gameState.userId && !gameState.gameOver) {
+        autoSaveGame().catch(err => console.error('Auto-save failed:', err));
+    }
 
     // UI updates will be handled by uiManager
 }

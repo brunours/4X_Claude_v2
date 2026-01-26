@@ -11,10 +11,79 @@
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
 
-        <!-- Start Screen -->
-        <div id="startScreen">
+        <!-- Auth Screen -->
+        <div id="authScreen">
             <h1>4X SPACE</h1>
             <div class="subtitle">Conquest</div>
+
+            <div class="auth-container">
+                <!-- Login Form -->
+                <div id="loginForm" class="auth-form">
+                    <h2>Login</h2>
+                    <div class="form-group">
+                        <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+                    </div>
+                    <div id="loginError" class="auth-error"></div>
+                    <button id="loginBtn" class="auth-btn">LOGIN</button>
+                    <p class="auth-switch">Don't have an account? <a href="#" id="showRegister">Register</a></p>
+                </div>
+
+                <!-- Register Form -->
+                <div id="registerForm" class="auth-form" style="display: none;">
+                    <h2>Register</h2>
+                    <div class="form-group">
+                        <input type="text" id="registerUsername" placeholder="Username" autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="registerEmail" placeholder="Email" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="registerPassword" placeholder="Password (min 6 characters)" autocomplete="new-password">
+                    </div>
+                    <div id="registerError" class="auth-error"></div>
+                    <button id="registerBtn" class="auth-btn">REGISTER</button>
+                    <p class="auth-switch">Already have an account? <a href="#" id="showLogin">Login</a></p>
+                </div>
+
+                <div class="auth-divider">
+                    <span>or</span>
+                </div>
+
+                <button id="guestBtn" class="guest-btn">PLAY AS GUEST</button>
+                <p class="guest-note">Guest mode: No saves or leaderboards</p>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="startScreen" style="display: none;">
+            <div class="start-header">
+                <h1>4X SPACE</h1>
+                <div class="subtitle">Conquest</div>
+                <div id="userInfo" class="user-info" style="display: none;">
+                    <span>Welcome, <span id="usernameDisplay"></span>!</span>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+            </div>
+
+            <!-- Saved Games Section (only shown when logged in) -->
+            <div id="savedGamesSection" class="menu-section saved-games-section" style="display: none;">
+                <h2>Saved Games</h2>
+                <div id="savedGamesList" class="saved-games-list">
+                    <p class="no-saves">No saved games</p>
+                </div>
+            </div>
+
+            <!-- Leaderboard Button (only shown when logged in) -->
+            <div id="leaderboardBtnContainer" class="menu-section" style="display: none;">
+                <button id="leaderboardBtn" class="leaderboard-btn">VIEW LEADERBOARDS</button>
+            </div>
+
+            <div class="new-game-divider" id="newGameDivider" style="display: none;">
+                <span>New Game</span>
+            </div>
 
             <div class="menu-section">
                 <h2>Galaxy Size</h2>
@@ -191,13 +260,66 @@
         <div id="zoomIndicator">Zoom: 100%</div>
 
         <!-- Version Display -->
-        <div id="versionDisplay">v1.0.6</div>
+        <div id="versionDisplay">v2.0.0</div>
 
         <!-- Game Over Screen -->
         <div id="gameOverScreen">
             <h1 id="gameOverTitle">VICTORY</h1>
             <p id="gameOverMessage">You have conquered the galaxy!</p>
-            <button id="restartBtn" onclick="location.reload()">PLAY AGAIN</button>
+            <div id="gameOverScore" class="game-over-score"></div>
+            <div class="game-over-buttons">
+                <button id="replaySameMapBtn" class="game-over-btn">REPLAY SAME MAP</button>
+                <button id="newGameBtn" class="game-over-btn">NEW GAME</button>
+                <button id="gameOverLeaderboardBtn" class="game-over-btn">LEADERBOARDS</button>
+                <button id="mainMenuBtn" class="game-over-btn secondary">MAIN MENU</button>
+            </div>
+        </div>
+
+        <!-- Leaderboard Panel -->
+        <div id="leaderboardPanel" class="overlay-panel" style="display: none;">
+            <div class="panel-content leaderboard-content">
+                <div class="panel-header">
+                    <h2>Leaderboards</h2>
+                    <button class="close-btn" onclick="closeLeaderboard()">&times;</button>
+                </div>
+                <div class="leaderboard-tabs">
+                    <button class="leaderboard-tab active" data-tab="personal" onclick="switchLeaderboardTab('personal')">Personal Best</button>
+                    <button class="leaderboard-tab" data-tab="global" onclick="switchLeaderboardTab('global')">Global Top 10</button>
+                </div>
+                <div id="leaderboardContent" class="leaderboard-list">
+                    <p class="loading">Loading...</p>
+                </div>
+                <p class="leaderboard-hint">Click on a game to view the final map</p>
+            </div>
+        </div>
+
+        <!-- Map Viewer Modal -->
+        <div id="mapViewerModal" class="overlay-panel" style="display: none;">
+            <div class="panel-content map-viewer-content">
+                <div class="panel-header">
+                    <h2 id="mapViewerTitle">Game Details</h2>
+                    <button class="close-btn" onclick="closeMapViewer()">&times;</button>
+                </div>
+                <div class="map-viewer-info" id="mapViewerInfo"></div>
+                <div class="map-viewer-container">
+                    <canvas id="mapViewerCanvas"></canvas>
+                </div>
+                <div class="map-viewer-controls">
+                    <button id="replayFromViewerBtn" class="replay-btn">REPLAY THIS MAP</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Dialog -->
+        <div id="deleteConfirmDialog" class="overlay-panel" style="display: none;">
+            <div class="panel-content confirm-content">
+                <h2>Delete Saved Game?</h2>
+                <p>This action cannot be undone.</p>
+                <div class="confirm-buttons">
+                    <button id="confirmDeleteBtn" class="confirm-btn danger">DELETE</button>
+                    <button id="cancelDeleteBtn" class="confirm-btn">CANCEL</button>
+                </div>
+            </div>
         </div>
     </div>
 

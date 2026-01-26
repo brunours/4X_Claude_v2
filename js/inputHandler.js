@@ -43,6 +43,7 @@ import { processAITurn } from './aiSystem.js';
 import { resolveBattleChoice, completeRetreat } from './combatSystem.js';
 import { SHIP_TYPES } from './config.js';
 import { toggleInfluenceZones, invalidateZoneCache, influenceZonesVisible } from './influenceZones.js';
+import { completeGame } from './saveSystem.js';
 
 export function setupEventListeners() {
     // Mouse events
@@ -285,8 +286,8 @@ function handleTouchEnd(e) {
     }
 }
 
-function handleEndTurn() {
-    endTurn();
+async function handleEndTurn() {
+    await endTurn();
 
     // Invalidate influence zone cache
     invalidateZoneCache();
@@ -297,6 +298,11 @@ function handleEndTurn() {
     // Check game end
     const result = checkGameEnd();
     if (result.gameOver) {
+        gameState.gameOver = true;
+        // Save to leaderboard (for authenticated users, victories only)
+        if (gameState.userId) {
+            completeGame(result.victory).catch(err => console.error('Failed to save game completion:', err));
+        }
         showGameOver(result.victory);
     }
 
