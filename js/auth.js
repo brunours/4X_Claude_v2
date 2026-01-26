@@ -200,14 +200,19 @@ export async function isAuthenticated() {
 
 // Initialize auth state on page load
 export async function initAuth() {
-    const session = await getSession();
-    if (session?.user) {
-        const profile = await getProfile();
-        if (profile) {
-            setUserInfo(session.user.id, profile.username);
-            applyProfileToGameState(profile);
-            return { authenticated: true, profile };
+    try {
+        const session = await getSession();
+        if (session?.user) {
+            const profile = await getProfile();
+            if (profile) {
+                setUserInfo(session.user.id, profile.username);
+                applyProfileToGameState(profile);
+                return { authenticated: true, profile };
+            }
         }
+        return { authenticated: false, profile: null };
+    } catch (error) {
+        console.error('Error initializing auth:', error);
+        return { authenticated: false, profile: null };
     }
-    return { authenticated: false, profile: null };
 }

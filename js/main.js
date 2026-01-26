@@ -52,22 +52,28 @@ window.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     gameLoop();
 
-    // Check authentication state
-    const authResult = await initAuth();
-
-    if (authResult.authenticated) {
-        // User is logged in - show start screen with saved games
-        showStartScreen(authResult.profile);
-    } else {
-        // Show auth screen
-        showAuthScreen();
-    }
-
-    // Setup auth form handlers
+    // Setup all handlers FIRST (before any async operations)
     setupAuthHandlers();
     setupStartScreenHandlers();
     setupLeaderboardHandlers();
     setupGameOverHandlers();
+
+    // Check authentication state
+    try {
+        const authResult = await initAuth();
+
+        if (authResult.authenticated) {
+            // User is logged in - show start screen with saved games
+            showStartScreen(authResult.profile);
+        } else {
+            // Show auth screen
+            showAuthScreen();
+        }
+    } catch (error) {
+        console.error('Auth initialization failed:', error);
+        // Show auth screen anyway so user can still try to login/register
+        showAuthScreen();
+    }
 
     console.log('Game initialized successfully!');
 });
