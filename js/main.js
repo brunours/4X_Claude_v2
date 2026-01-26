@@ -47,16 +47,28 @@ let currentMapViewerData = null;
 window.addEventListener('DOMContentLoaded', async () => {
     console.log('Initializing 4X Space Game...');
 
-    // Initialize canvas and basic state first
-    init();
-    setupEventListeners();
-    gameLoop();
+    try {
+        // Initialize canvas and basic state first
+        console.log('Calling init()...');
+        init();
+        console.log('Calling setupEventListeners()...');
+        setupEventListeners();
+        console.log('Calling gameLoop()...');
+        gameLoop();
 
-    // Setup all handlers FIRST (before any async operations)
-    setupAuthHandlers();
-    setupStartScreenHandlers();
-    setupLeaderboardHandlers();
-    setupGameOverHandlers();
+        // Setup all handlers FIRST (before any async operations)
+        console.log('Setting up auth handlers...');
+        setupAuthHandlers();
+        console.log('Setting up start screen handlers...');
+        setupStartScreenHandlers();
+        console.log('Setting up leaderboard handlers...');
+        setupLeaderboardHandlers();
+        console.log('Setting up game over handlers...');
+        setupGameOverHandlers();
+        console.log('All handlers setup complete!');
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
 
     // Check authentication state
     try {
