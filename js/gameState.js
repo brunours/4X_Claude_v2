@@ -208,6 +208,9 @@ export function startGame(providedSeed = null) {
     // Save settings before starting
     saveSettings();
 
+    // Ensure canvas has correct dimensions before calculating anything
+    resizeCanvas();
+
     // Generate or use provided map seed
     gameState.mapSeed = providedSeed || generateMapSeed();
     gameRandom = new SeededRandom(gameState.mapSeed);
