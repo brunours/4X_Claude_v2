@@ -34,7 +34,7 @@ import { init, gameState, setMapSeed, restartWithSameSeed, resetGameState } from
 import { setupEventListeners } from './inputHandler.js';
 import { gameLoop } from './renderer.js';
 import { updateDisplay } from './uiManager.js';
-import { initAuth, signIn, signUp, signOut, getProfile, applyProfileToGameState, saveSettingsToProfile } from './auth.js';
+import { initAuth, signIn, signUp, signOut, getProfile, applyProfileToGameState, saveSettingsToProfile, updateProfile } from './auth.js';
 import { listSavedGames, loadSavedGame, deleteSavedGame, completeGame, clearCurrentSave } from './saveSystem.js';
 import { getPersonalTop10, getGlobalTop10, getCompletedGameDetails, renderLeaderboardEntries, renderMapViewerInfo, drawMapPreview } from './leaderboard.js';
 import { invalidateZoneCache } from './influenceZones.js';
@@ -102,14 +102,12 @@ function showStartScreen(profile = null) {
     document.getElementById('ui').style.display = 'none';
 
     if (profile) {
-        // Show user info
+        // Show user info with nickname
         document.getElementById('userInfo').style.display = 'flex';
-        document.getElementById('usernameDisplay').textContent = profile.username;
+        document.getElementById('nicknameDisplay').textContent = profile.nickname || profile.username;
 
-        // Show saved games section and leaderboard button
-        document.getElementById('savedGamesSection').style.display = 'block';
-        document.getElementById('leaderboardBtnContainer').style.display = 'block';
-        document.getElementById('newGameDivider').style.display = 'flex';
+        // Show right column with saved games and leaderboard
+        document.getElementById('rightColumn').style.display = 'flex';
 
         // Load saved games
         loadAndDisplaySavedGames();
@@ -119,9 +117,7 @@ function showStartScreen(profile = null) {
     } else {
         // Guest mode - hide authenticated-only features
         document.getElementById('userInfo').style.display = 'none';
-        document.getElementById('savedGamesSection').style.display = 'none';
-        document.getElementById('leaderboardBtnContainer').style.display = 'none';
-        document.getElementById('newGameDivider').style.display = 'none';
+        document.getElementById('rightColumn').style.display = 'none';
     }
 }
 
@@ -283,6 +279,45 @@ function setupStartScreenHandlers() {
     document.getElementById('leaderboardBtn').addEventListener('click', () => {
         openLeaderboard();
     });
+
+    // Edit nickname button
+    document.getElementById('editNicknameBtn').addEventListener('click', () => {
+        const currentNickname = document.getElementById('nicknameDisplay').textContent;
+        document.getElementById('nicknameInput').value = currentNickname;
+        document.getElementById('nicknameError').textContent = '';
+        document.getElementById('nicknameEditDialog').style.display = 'flex';
+    });
+
+    // Save nickname button
+    document.getElementById('saveNicknameBtn').addEventListener('click', async () => {
+        const newNickname = document.getElementById('nicknameInput').value.trim();
+        const errorDiv = document.getElementById('nicknameError');
+
+        if (!newNickname) {
+            errorDiv.textContent = 'Nickname cannot be empty';
+            return;
+        }
+
+        if (newNickname.length > 20) {
+            errorDiv.textContent = 'Nickname must be 20 characters or less';
+            return;
+        }
+
+        errorDiv.textContent = '';
+        const result = await updateProfile({ nickname: newNickname });
+
+        if (result.success) {
+            document.getElementById('nicknameDisplay').textContent = newNickname;
+            document.getElementById('nicknameEditDialog').style.display = 'none';
+        } else {
+            errorDiv.textContent = 'Failed to update nickname';
+        }
+    });
+
+    // Cancel nickname button
+    document.getElementById('cancelNicknameBtn').addEventListener('click', () => {
+        document.getElementById('nicknameEditDialog').style.display = 'none';
+    });
 }
 
 function setupLeaderboardHandlers() {
@@ -326,15 +361,13 @@ function setupGameOverHandlers() {
     document.getElementById('newGameBtn').addEventListener('click', () => {
         document.getElementById('gameOverScreen').style.display = 'none';
         clearCurrentSave();
-        showStartScreen(gameState.userId ? { username: gameState.username } : null);
-        // Reload saved games and profile if logged in
+        // Reload profile and show start screen if logged in
         if (gameState.userId) {
             getProfile().then(profile => {
-                if (profile) {
-                    applyProfileToUI(profile);
-                    loadAndDisplaySavedGames();
-                }
+                showStartScreen(profile);
             });
+        } else {
+            showStartScreen(null);
         }
     });
 

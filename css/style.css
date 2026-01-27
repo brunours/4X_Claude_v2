@@ -2306,3 +2306,164 @@
             font-weight: 600;
             font-size: 0.9rem;
         }
+
+        /* ============================================
+           START SCREEN 2-COLUMN LAYOUT
+           ============================================ */
+        .start-screen-content {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 1200px;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .start-column {
+            flex: 1;
+            max-width: 500px;
+        }
+
+        .left-column {
+            text-align: center;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Adjust saved games section for right column */
+        .right-column .saved-games-section {
+            margin: 0;
+            max-width: none;
+        }
+
+        .right-column .saved-games-list {
+            max-height: 300px;
+        }
+
+        /* Leaderboard button container in right column */
+        #leaderboardBtnContainer {
+            text-align: center;
+        }
+
+        /* Responsive: Stack columns on smaller screens */
+        @media (max-width: 900px) {
+            .start-screen-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .start-column {
+                max-width: 500px;
+                width: 100%;
+            }
+
+            .right-column {
+                order: -1; /* Show saved games above new game options on mobile */
+            }
+        }
+
+        /* ============================================
+           EDIT NICKNAME BUTTON & DIALOG
+           ============================================ */
+        .edit-nickname-btn {
+            padding: 4px 8px;
+            background: transparent;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+
+        .edit-nickname-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* Nickname edit dialog styling */
+        #nicknameEditDialog .panel-content {
+            border-color: rgba(0, 170, 255, 0.5);
+        }
+
+        #nicknameEditDialog h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            color: #0af;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #nicknameInput {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(30, 40, 60, 0.8);
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        #nicknameInput:focus {
+            outline: none;
+            border-color: #0af;
+            box-shadow: 0 0 15px rgba(0, 170, 255, 0.3);
+        }
+
+        /* Save info display adjustments */
+        .save-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .save-turn {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            color: #0af;
+        }
+
+        .save-details {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: capitalize;
+        }
+
+        .save-date {
+            font-size: 0.7rem;
+            color: #555;
+        }
+
+        .save-stats {
+            display: flex;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .save-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delete-btn {
+            padding: 6px 10px;
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            border-radius: 5px;
+            color: #f66;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 68, 68, 0.4);
+            color: #fff;
+        }

@@ -63,83 +63,103 @@
                 <h1>4X SPACE</h1>
                 <div class="subtitle">Conquest</div>
                 <div id="userInfo" class="user-info" style="display: none;">
-                    <span>Welcome, <span id="usernameDisplay"></span>!</span>
+                    <span>Welcome, <span id="nicknameDisplay"></span>!</span>
+                    <button id="editNicknameBtn" class="edit-nickname-btn" title="Edit nickname">✏️</button>
                     <button id="logoutBtn" class="logout-btn">Logout</button>
                 </div>
             </div>
 
-            <!-- Saved Games Section (only shown when logged in) -->
-            <div id="savedGamesSection" class="menu-section saved-games-section" style="display: none;">
-                <h2>Saved Games</h2>
-                <div id="savedGamesList" class="saved-games-list">
-                    <p class="no-saves">No saved games</p>
+            <div class="start-screen-content">
+                <!-- Left Column: New Game Options -->
+                <div class="start-column left-column">
+                    <div class="menu-section">
+                        <h2>Galaxy Size</h2>
+                        <div class="option-group">
+                            <button class="option-btn selected" data-size="compact">Compact</button>
+                            <button class="option-btn" data-size="standard">Standard</button>
+                            <button class="option-btn" data-size="vast">Vast</button>
+                        </div>
+                    </div>
+
+                    <div class="menu-section">
+                        <h2>AI Difficulty</h2>
+                        <div class="option-group">
+                            <button class="option-btn difficulty-easy selected" data-difficulty="easy">Easy</button>
+                            <button class="option-btn difficulty-medium" data-difficulty="medium">Medium</button>
+                            <button class="option-btn difficulty-hard" data-difficulty="hard">Hard</button>
+                        </div>
+                    </div>
+
+                    <div class="menu-section">
+                        <h2>Your Empire Color</h2>
+                        <div class="color-picker" id="playerColorPicker">
+                            <div class="color-tile" data-color="blue" style="background: #0096ff;"></div>
+                            <div class="color-tile" data-color="red" style="background: #ff3232;"></div>
+                            <div class="color-tile" data-color="purple" style="background: #a855f7;"></div>
+                            <div class="color-tile" data-color="green" style="background: #00ff88;"></div>
+                            <div class="color-tile" data-color="white" style="background: #ffffff;"></div>
+                            <div class="color-tile" data-color="orange" style="background: #ff8800;"></div>
+                        </div>
+                    </div>
+
+                    <div class="menu-section">
+                        <h2>AI Empire Color</h2>
+                        <div class="color-picker" id="aiColorPicker">
+                            <div class="color-tile" data-color="blue" style="background: #0096ff;"></div>
+                            <div class="color-tile" data-color="red" style="background: #ff3232;"></div>
+                            <div class="color-tile" data-color="purple" style="background: #a855f7;"></div>
+                            <div class="color-tile" data-color="green" style="background: #00ff88;"></div>
+                            <div class="color-tile" data-color="white" style="background: #ffffff;"></div>
+                            <div class="color-tile" data-color="orange" style="background: #ff8800;"></div>
+                        </div>
+                    </div>
+
+                    <div class="menu-section">
+                        <h2>Influence Zone Transparency</h2>
+                        <div class="slider-container">
+                            <input type="range" id="transparencySlider" min="2" max="25" value="15" step="1">
+                            <div class="slider-labels">
+                                <span>Subtle</span>
+                                <span id="transparencyValue">15%</span>
+                                <span>Strong</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="startBtn">LAUNCH</button>
                 </div>
-            </div>
 
-            <!-- Leaderboard Button (only shown when logged in) -->
-            <div id="leaderboardBtnContainer" class="menu-section" style="display: none;">
-                <button id="leaderboardBtn" class="leaderboard-btn">VIEW LEADERBOARDS</button>
-            </div>
+                <!-- Right Column: Saved Games & Leaderboards (only shown when logged in) -->
+                <div id="rightColumn" class="start-column right-column" style="display: none;">
+                    <!-- Saved Games Section -->
+                    <div id="savedGamesSection" class="menu-section saved-games-section">
+                        <h2>Saved Games</h2>
+                        <div id="savedGamesList" class="saved-games-list">
+                            <p class="no-saves">No saved games</p>
+                        </div>
+                    </div>
 
-            <div class="new-game-divider" id="newGameDivider" style="display: none;">
-                <span>New Game</span>
-            </div>
-
-            <div class="menu-section">
-                <h2>Galaxy Size</h2>
-                <div class="option-group">
-                    <button class="option-btn selected" data-size="compact">Compact</button>
-                    <button class="option-btn" data-size="standard">Standard</button>
-                    <button class="option-btn" data-size="vast">Vast</button>
-                </div>
-            </div>
-
-            <div class="menu-section">
-                <h2>AI Difficulty</h2>
-                <div class="option-group">
-                    <button class="option-btn difficulty-easy selected" data-difficulty="easy">Easy</button>
-                    <button class="option-btn difficulty-medium" data-difficulty="medium">Medium</button>
-                    <button class="option-btn difficulty-hard" data-difficulty="hard">Hard</button>
-                </div>
-            </div>
-
-            <div class="menu-section">
-                <h2>Your Empire Color</h2>
-                <div class="color-picker" id="playerColorPicker">
-                    <div class="color-tile" data-color="blue" style="background: #0096ff;"></div>
-                    <div class="color-tile" data-color="red" style="background: #ff3232;"></div>
-                    <div class="color-tile" data-color="purple" style="background: #a855f7;"></div>
-                    <div class="color-tile" data-color="green" style="background: #00ff88;"></div>
-                    <div class="color-tile" data-color="white" style="background: #ffffff;"></div>
-                    <div class="color-tile" data-color="orange" style="background: #ff8800;"></div>
-                </div>
-            </div>
-
-            <div class="menu-section">
-                <h2>AI Empire Color</h2>
-                <div class="color-picker" id="aiColorPicker">
-                    <div class="color-tile" data-color="blue" style="background: #0096ff;"></div>
-                    <div class="color-tile" data-color="red" style="background: #ff3232;"></div>
-                    <div class="color-tile" data-color="purple" style="background: #a855f7;"></div>
-                    <div class="color-tile" data-color="green" style="background: #00ff88;"></div>
-                    <div class="color-tile" data-color="white" style="background: #ffffff;"></div>
-                    <div class="color-tile" data-color="orange" style="background: #ff8800;"></div>
-                </div>
-            </div>
-
-            <div class="menu-section">
-                <h2>Influence Zone Transparency</h2>
-                <div class="slider-container">
-                    <input type="range" id="transparencySlider" min="2" max="25" value="15" step="1">
-                    <div class="slider-labels">
-                        <span>Subtle</span>
-                        <span id="transparencyValue">15%</span>
-                        <span>Strong</span>
+                    <!-- Leaderboard Button -->
+                    <div id="leaderboardBtnContainer" class="menu-section">
+                        <button id="leaderboardBtn" class="leaderboard-btn">VIEW LEADERBOARDS</button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <button id="startBtn">LAUNCH</button>
+        <!-- Nickname Edit Dialog -->
+        <div id="nicknameEditDialog" class="overlay-panel" style="display: none;">
+            <div class="panel-content confirm-content">
+                <h2>Edit Nickname</h2>
+                <div class="form-group">
+                    <input type="text" id="nicknameInput" placeholder="Enter nickname" maxlength="20">
+                </div>
+                <div id="nicknameError" class="auth-error"></div>
+                <div class="confirm-buttons">
+                    <button id="saveNicknameBtn" class="confirm-btn">SAVE</button>
+                    <button id="cancelNicknameBtn" class="confirm-btn">CANCEL</button>
+                </div>
+            </div>
         </div>
 
         <!-- Game UI -->

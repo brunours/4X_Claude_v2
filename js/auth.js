@@ -38,7 +38,8 @@ export async function getSession() {
 }
 
 // Sign up a new user with email and password
-export async function signUp(email, password, username) {
+// nickname is optional - defaults to username if not provided
+export async function signUp(email, password, username, nickname = null) {
     // First check if username is already taken
     const { data: existingUser, error: checkError } = await supabase
         .from('profiles')
@@ -62,11 +63,14 @@ export async function signUp(email, password, username) {
 
     if (data.user) {
         // Create profile for the new user
+        // Use nickname if provided, otherwise default to username
+        const displayName = nickname || username;
         const { error: profileError } = await supabase
             .from('profiles')
             .insert({
                 id: data.user.id,
                 username: username,
+                nickname: displayName,
                 preferred_player_color: 'blue',
                 preferred_ai_color: 'red',
                 preferred_map_size: 'compact',
@@ -79,8 +83,8 @@ export async function signUp(email, password, username) {
             return { user: data.user, error: profileError };
         }
 
-        // Set user info in game state
-        setUserInfo(data.user.id, username);
+        // Set user info in game state (use nickname for display)
+        setUserInfo(data.user.id, displayName);
     }
 
     return { user: data.user, error: null };
@@ -98,10 +102,10 @@ export async function signIn(email, password) {
     }
 
     if (data.user) {
-        // Load profile and set user info
+        // Load profile and set user info (use nickname for display)
         const profile = await getProfile();
         if (profile) {
-            setUserInfo(data.user.id, profile.username);
+            setUserInfo(data.user.id, profile.nickname || profile.username);
         }
     }
 
@@ -144,6 +148,7 @@ export async function updateProfile(preferences) {
     if (!user) return { success: false, error: 'Not authenticated' };
 
     const updateData = {};
+    if (preferences.nickname !== undefined) updateData.nickname = preferences.nickname;
     if (preferences.playerColor !== undefined) updateData.preferred_player_color = preferences.playerColor;
     if (preferences.aiColor !== undefined) updateData.preferred_ai_color = preferences.aiColor;
     if (preferences.mapSize !== undefined) updateData.preferred_map_size = preferences.mapSize;
@@ -205,7 +210,7 @@ export async function initAuth() {
         if (session?.user) {
             const profile = await getProfile();
             if (profile) {
-                setUserInfo(session.user.id, profile.username);
+                setUserInfo(session.user.id, profile.nickname || profile.username);
                 applyProfileToGameState(profile);
                 return { authenticated: true, profile };
             }
