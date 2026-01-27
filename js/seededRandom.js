@@ -6,13 +6,10 @@ export class SeededRandom {
         // Convert string seed to number if necessary
         if (typeof seed === 'string') {
             this.seed = this.hashString(seed);
-            console.log(`SeededRandom: string seed "${seed}" hashed to ${this.seed}`);
         } else {
             this.seed = seed;
-            console.log(`SeededRandom: numeric seed ${seed}`);
         }
         this.state = this.seed;
-        console.log(`SeededRandom initialized: seed=${this.seed}, state=${this.state}`);
     }
 
     // Hash a string to a 32-bit integer
@@ -31,14 +28,7 @@ export class SeededRandom {
         let t = this.state += 0x6D2B79F5;
         t = Math.imul(t ^ t >>> 15, t | 1);
         t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-        const result = ((t ^ t >>> 14) >>> 0) / 4294967296;
-        // Debug: log first few random values
-        if (this._debugCount === undefined) this._debugCount = 0;
-        if (this._debugCount < 20) {
-            console.log(`SeededRandom[${this._debugCount}]: seed=${this.seed}, state=${this.state}, result=${result}`);
-            this._debugCount++;
-        }
-        return result;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
     }
 
     // Get random integer between min (inclusive) and max (exclusive)
