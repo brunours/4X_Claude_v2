@@ -237,8 +237,10 @@ export function startGame(providedSeed = null) {
     gameState.fleetTab = 'stationed';
 
     const sizeConfig = MAP_SIZES[gameState.mapSize];
+    console.log(`startGame: mapSize=${gameState.mapSize}, sizeConfig=`, sizeConfig);
     gameState.worldWidth = sizeConfig.width;
     gameState.worldHeight = sizeConfig.height;
+    console.log(`startGame: worldWidth=${gameState.worldWidth}, worldHeight=${gameState.worldHeight}`);
 
     // Reset camera
     camera.minZoom = Math.min(canvas.width / gameState.worldWidth, canvas.height / gameState.worldHeight);
@@ -272,8 +274,14 @@ export function generatePlanets(count) {
 
         do {
             // Use seeded random for reproducible maps
-            x = padding + gameRandom.random() * (gameState.worldWidth - padding * 2);
-            y = padding + gameRandom.random() * (gameState.worldHeight - padding * 2);
+            const randX = gameRandom.random();
+            const randY = gameRandom.random();
+            x = padding + randX * (gameState.worldWidth - padding * 2);
+            y = padding + randY * (gameState.worldHeight - padding * 2);
+            // Debug: log planet position calculation
+            if (i < 5) {
+                console.log(`Planet ${i}: randX=${randX}, randY=${randY}, worldWidth=${gameState.worldWidth}, worldHeight=${gameState.worldHeight}, x=${x}, y=${y}`);
+            }
             valid = true;
 
             for (const planet of gameState.planets) {
