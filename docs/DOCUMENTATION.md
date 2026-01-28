@@ -198,7 +198,9 @@ Four distinct ship classes with different roles:
    - Each ship deals damage = Attack × (0.5 + random 0.5)
    - Damage reduced by target's Defense stat
    - Combat continues until one side has no military ships
-   - Colonizers are destroyed instantly, cannot fight back
+   - Colonizers do not participate in combat (0 attack power)
+   - Colonizers without military escort are destroyed automatically
+   - When an army is defeated, all colonizers from that army are destroyed
 3. If withdrawing:
    - Ships return to origin planet (no losses)
 
@@ -1203,22 +1205,20 @@ When modifying the game:
 
 ---
 
-**Last Updated**: 2026-01-23
-**Version**: 1.0.1
+**Last Updated**: 2026-01-28
+**Version**: 2.0.4
 **Documentation**: Complete
 
 ---
 
-## Recent Changes (v1.0.1)
+## Recent Changes (v2.0.4)
 
 ### Bug Fixes
-- Fixed colonization bug where colonizers would disappear without colonizing neutral planets
-- The issue occurred when `processEmptyPlanets()` ran after colonization and reverted newly colonized planets back to neutral
-- Added population check to prevent newly colonized planets from being incorrectly neutralized
+- Fixed colonizer destruction logic: Colonizers are now properly destroyed when their army is defeated in battle
+- Previously, colonizers from the losing side would incorrectly survive battles because `simulateCombat()` unconditionally added them to survivors
+- Now colonizers only survive if their side has surviving military ships; otherwise they are added to the destroyed list
 
-### Features
-- Added version display in bottom right corner (semi-transparent small text)
-
-### Documentation
-- Moved all documentation to `docs/` folder
-- Added `RELEASE_NOTES.md` for tracking version changes
+### Technical Details
+- Modified `simulateCombat()` function in `combatSystem.js` to check for surviving military ships before adding colonizers to survivors
+- Colonizers from defeated armies are now properly tracked in `destroyedAttackers` or `destroyedDefenders` arrays
+- This ensures colonizers without friendly ships at a planet are automatically destroyed as intended

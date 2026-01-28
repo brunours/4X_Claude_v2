@@ -1,5 +1,22 @@
 # Release Notes
 
+## Version 2.0.4 - 28/01/2026
+
+### Bug Fixes
+- **Fixed colonizer destruction logic**: Colonizers are now properly destroyed when their army is defeated in battle
+  - Issue: When an attacking or defending army was defeated, colonizers from the losing side would incorrectly survive the battle
+  - Root cause: The `simulateCombat()` function unconditionally added colonizers back to the survivors list, regardless of whether their military escort had been eliminated
+  - Solution: Colonizers are now only added to survivors if their side has surviving military ships; otherwise, they are added to the destroyed list
+  - This ensures colonizers without friendly ships at a planet are automatically destroyed as intended
+  - Files modified: `js/combatSystem.js`
+
+### Technical Implementation
+- Modified `simulateCombat()` function to check for surviving military ships before adding colonizers to survivors
+- Colonizers from defeated armies are now properly tracked in the `destroyedAttackers` or `destroyedDefenders` arrays
+- Updated combatSystem.js documentation comments to reflect this behavior
+
+---
+
 ## Version 1.0.6 - 24/01/2026 05:00
 
 ### New Features: Continuous Territories and Improved Settings

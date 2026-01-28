@@ -5,7 +5,7 @@
 // This module handles all combat mechanics, including battle resolution,
 // casualty calculations, conquest mechanics, and battle result displays.
 //
-// Version: 1.0.2 - Combat system overhaul with HP-based calculations
+// Version: 2.0.4 - Fixed colonizer destruction when army is defeated
 //
 // Core Responsibilities:
 // - Resolve combat using realistic HP-based round-by-round calculations
@@ -14,7 +14,7 @@
 // - Distribute damage across fleets weighted by HP (bigger ships = bigger targets)
 // - Process planet conquest with colonizer mechanics (3-turn timer)
 // - Track battle casualties and damaged ships for result displays
-// - Handle special cases (colonizers auto-destroyed without escorts)
+// - Handle special cases (colonizers auto-destroyed without escorts or when army defeated)
 // - Manage planet ownership changes and neutralization after successful attacks
 // - Implement tactical withdrawal with damage and destination selection
 //
@@ -444,15 +444,35 @@ function simulateCombat(attackers, defenders, attackerWinChance) {
         survivingDefenders.push(ship);
     }
 
-    // Add colonizers to survivors (they don't participate in combat)
-    for (const ship of attackers) {
-        if (ship.type === 'colonizer') {
-            survivingAttackers.push(ship);
+    // Add colonizers to survivors ONLY if their side won (has surviving military ships)
+    // Colonizers without friendly escort are destroyed when their army is defeated
+    if (attackerShips.length > 0) {
+        for (const ship of attackers) {
+            if (ship.type === 'colonizer') {
+                survivingAttackers.push(ship);
+            }
+        }
+    } else {
+        // Army defeated - colonizers are destroyed (added to destroyedAttackers)
+        for (const ship of attackers) {
+            if (ship.type === 'colonizer') {
+                destroyedAttackers.push({ type: ship.type, owner: ship.owner });
+            }
         }
     }
-    for (const ship of defenders) {
-        if (ship.type === 'colonizer') {
-            survivingDefenders.push(ship);
+
+    if (defenderShips.length > 0) {
+        for (const ship of defenders) {
+            if (ship.type === 'colonizer') {
+                survivingDefenders.push(ship);
+            }
+        }
+    } else {
+        // Army defeated - colonizers are destroyed (added to destroyedDefenders)
+        for (const ship of defenders) {
+            if (ship.type === 'colonizer') {
+                destroyedDefenders.push({ type: ship.type, owner: ship.owner });
+            }
         }
     }
 
