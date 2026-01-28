@@ -106,10 +106,37 @@ export function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Update min zoom to see whole map
-    const minZoomX = canvas.width / gameState.worldWidth;
-    const minZoomY = canvas.height / gameState.worldHeight;
-    camera.minZoom = Math.min(minZoomX, minZoomY, 0.25);
+    // Only update camera constraints if world has been initialized (game started)
+    if (gameState.worldWidth > 0 && gameState.worldHeight > 0) {
+        // Update min zoom - at minZoom, the world should fill the entire viewport
+        // Using max ensures the world fills viewport even on non-matching aspect ratios
+        const minZoomX = canvas.width / gameState.worldWidth;
+        const minZoomY = canvas.height / gameState.worldHeight;
+        camera.minZoom = Math.max(minZoomX, minZoomY);
+
+        // Clamp current zoom if below new minimum
+        if (camera.zoom < camera.minZoom) {
+            camera.zoom = camera.minZoom;
+        }
+
+        // Constrain camera position after resize
+        constrainCamera();
+    }
+}
+
+// Constrain camera to keep the world filling the viewport
+export function constrainCamera() {
+    // Calculate visible area at current zoom
+    const visibleWidth = canvas.width / camera.zoom;
+    const visibleHeight = canvas.height / camera.zoom;
+
+    // Calculate bounds - ensure we can't see beyond the world edges
+    const maxX = gameState.worldWidth - visibleWidth;
+    const maxY = gameState.worldHeight - visibleHeight;
+
+    // Clamp camera position
+    camera.x = Math.max(0, Math.min(camera.x, maxX));
+    camera.y = Math.max(0, Math.min(camera.y, maxY));
 }
 
 export function setupStartScreen() {
@@ -237,14 +264,30 @@ export function startGame(providedSeed = null) {
     gameState.fleetTab = 'stationed';
 
     const sizeConfig = MAP_SIZES[gameState.mapSize];
-    gameState.worldWidth = sizeConfig.width;
-    gameState.worldHeight = sizeConfig.height;
 
-    // Reset camera
-    camera.minZoom = Math.min(canvas.width / gameState.worldWidth, canvas.height / gameState.worldHeight);
-    camera.zoom = 1;
-    camera.x = gameState.worldWidth / 2 - canvas.width / 2;
-    camera.y = gameState.worldHeight / 2 - canvas.height / 2;
+    // Calculate world dimensions to match viewport aspect ratio
+    // This ensures the map fills the entire screen without black borders
+    const viewportAspect = canvas.width / canvas.height;
+    const baseArea = sizeConfig.baseArea;
+
+    // Calculate dimensions that match viewport aspect ratio while preserving total area
+    // area = width * height, aspect = width / height
+    // width = sqrt(area * aspect), height = sqrt(area / aspect)
+    gameState.worldWidth = Math.sqrt(baseArea * viewportAspect);
+    gameState.worldHeight = Math.sqrt(baseArea / viewportAspect);
+
+    // Reset camera - use max to ensure world fills the entire viewport (no black borders)
+    camera.minZoom = Math.max(canvas.width / gameState.worldWidth, canvas.height / gameState.worldHeight);
+    camera.zoom = camera.minZoom; // Start at minZoom to show the full map
+
+    // Center camera on the world
+    const visibleWidth = canvas.width / camera.zoom;
+    const visibleHeight = canvas.height / camera.zoom;
+    camera.x = (gameState.worldWidth - visibleWidth) / 2;
+    camera.y = (gameState.worldHeight - visibleHeight) / 2;
+
+    // Constrain camera to ensure no black borders
+    constrainCamera();
 
     generatePlanets(sizeConfig.planets);
     generateBackgroundStars();

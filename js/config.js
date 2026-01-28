@@ -29,10 +29,12 @@ export const SHIP_TYPES = {
     battleship: { name: 'Battleship', icon: '🛡️', color: '#ff0088', speed: 0.9, attack: 15, defense: 0, maxHitPoints: 10, cost: { energy: 50, minerals: 60, food: 10 }, baseBuildTime: 8, minBuildTime: 4 }
 };
 
+// Map sizes now use a base area for density calculations
+// The actual width/height will be calculated dynamically to fit the viewport
 export const MAP_SIZES = {
-    compact: { planets: 12, width: 1500, height: 1200 },
-    standard: { planets: 20, width: 2500, height: 2000 },
-    vast: { planets: 30, width: 4000, height: 3200 }
+    compact: { planets: 12, baseArea: 1800000 },   // ~1500x1200
+    standard: { planets: 20, baseArea: 5000000 },  // ~2500x2000
+    vast: { planets: 30, baseArea: 12800000 }      // ~4000x3200
 };
 
 export const AI_CONFIG = {

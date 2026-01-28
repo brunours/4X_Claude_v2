@@ -19,14 +19,11 @@
 //
 // Used by: inputHandler (mouse/touch events), renderer (drawing positions)
 
-import { gameState, camera, canvas } from './gameState.js';
+import { gameState, camera, canvas, constrainCamera } from './gameState.js';
 
 export function clampCamera() {
-    const viewWidth = canvas.width / camera.zoom;
-    const viewHeight = canvas.height / camera.zoom;
-
-    camera.x = Math.max(-viewWidth * 0.2, Math.min(gameState.worldWidth - viewWidth * 0.8, camera.x));
-    camera.y = Math.max(-viewHeight * 0.2, Math.min(gameState.worldHeight - viewHeight * 0.8, camera.y));
+    // Use the constrainCamera function from gameState to ensure no black borders
+    constrainCamera();
 }
 
 export function updateZoomIndicator() {
