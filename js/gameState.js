@@ -2,12 +2,15 @@
 // GAME STATE & INITIALIZATION
 // ============================================
 //
+// Version: 2.0.6
+// Last Modified: 04/02/2026
+//
 // This module manages the central game state and handles game initialization,
 // including planet generation, canvas setup, and start screen configuration.
 //
 // Core Responsibilities:
 // - Maintains the gameState object (turn counter, planets, ships, players, resources)
-// - Manages camera viewport and background stars
+// - Manages camera viewport and background stars with dynamic zoom constraints
 // - Generates random galaxy with planets and resource distributions
 // - Handles canvas resizing and coordinate system setup
 // - Processes start screen options (difficulty, map size)
@@ -75,8 +78,8 @@ export let camera = {
     x: 0,
     y: 0,
     zoom: 1,
-    minZoom: 0.25,
-    maxZoom: 4,
+    minZoom: 0.1, // Allow zooming out further to see entire galaxy
+    maxZoom: 3, // Reasonable max zoom for detail viewing
     isDragging: false,
     lastX: 0,
     lastY: 0,
@@ -108,16 +111,14 @@ export function resizeCanvas() {
 
     // Only update camera constraints if world has been initialized (game started)
     if (gameState.worldWidth > 0 && gameState.worldHeight > 0) {
-        // Update min zoom - at minZoom, the world should fill the entire viewport
-        // Using max ensures the world fills viewport even on non-matching aspect ratios
-        const minZoomX = canvas.width / gameState.worldWidth;
-        const minZoomY = canvas.height / gameState.worldHeight;
-        camera.minZoom = Math.max(minZoomX, minZoomY);
+        // Calculate the zoom level needed to fit the world in the viewport
+        // This is used as the initial/default zoom, but not enforced as minimum
+        const fitZoomX = canvas.width / gameState.worldWidth;
+        const fitZoomY = canvas.height / gameState.worldHeight;
+        const fitToScreenZoom = Math.max(fitZoomX, fitZoomY);
 
-        // Clamp current zoom if below new minimum
-        if (camera.zoom < camera.minZoom) {
-            camera.zoom = camera.minZoom;
-        }
+        // Store fit-to-screen zoom for reference (can be used for "reset zoom" feature)
+        camera.fitToScreenZoom = fitToScreenZoom;
 
         // Constrain camera position after resize
         constrainCamera();
@@ -130,13 +131,22 @@ export function constrainCamera() {
     const visibleWidth = canvas.width / camera.zoom;
     const visibleHeight = canvas.height / camera.zoom;
 
-    // Calculate bounds - ensure we can't see beyond the world edges
-    const maxX = gameState.worldWidth - visibleWidth;
-    const maxY = gameState.worldHeight - visibleHeight;
+    // When zoomed out far enough that the world is smaller than viewport, center it
+    if (visibleWidth >= gameState.worldWidth) {
+        camera.x = (gameState.worldWidth - visibleWidth) / 2;
+    } else {
+        // Normal constraint: keep camera within world bounds
+        const maxX = gameState.worldWidth - visibleWidth;
+        camera.x = Math.max(0, Math.min(camera.x, maxX));
+    }
 
-    // Clamp camera position
-    camera.x = Math.max(0, Math.min(camera.x, maxX));
-    camera.y = Math.max(0, Math.min(camera.y, maxY));
+    if (visibleHeight >= gameState.worldHeight) {
+        camera.y = (gameState.worldHeight - visibleHeight) / 2;
+    } else {
+        // Normal constraint: keep camera within world bounds
+        const maxY = gameState.worldHeight - visibleHeight;
+        camera.y = Math.max(0, Math.min(camera.y, maxY));
+    }
 }
 
 export function setupStartScreen() {
@@ -276,9 +286,16 @@ export function startGame(providedSeed = null) {
     gameState.worldWidth = Math.sqrt(baseArea * viewportAspect);
     gameState.worldHeight = Math.sqrt(baseArea / viewportAspect);
 
-    // Reset camera - use max to ensure world fills the entire viewport (no black borders)
-    camera.minZoom = Math.max(canvas.width / gameState.worldWidth, canvas.height / gameState.worldHeight);
-    camera.zoom = camera.minZoom; // Start at minZoom to show the full map
+    // Calculate fit-to-screen zoom (fills viewport without black borders)
+    const fitZoomX = canvas.width / gameState.worldWidth;
+    const fitZoomY = canvas.height / gameState.worldHeight;
+    const fitToScreenZoom = Math.max(fitZoomX, fitZoomY);
+
+    // Store fit-to-screen zoom for reference
+    camera.fitToScreenZoom = fitToScreenZoom;
+
+    // Start at fit-to-screen zoom (fills viewport nicely)
+    camera.zoom = fitToScreenZoom;
 
     // Center camera on the world
     const visibleWidth = canvas.width / camera.zoom;
@@ -286,7 +303,7 @@ export function startGame(providedSeed = null) {
     camera.x = (gameState.worldWidth - visibleWidth) / 2;
     camera.y = (gameState.worldHeight - visibleHeight) / 2;
 
-    // Constrain camera to ensure no black borders
+    // Constrain camera to ensure proper centering
     constrainCamera();
 
     generatePlanets(sizeConfig.planets);
@@ -415,9 +432,9 @@ export function calculateScore(owner) {
     // - 10 points per ship in service
     // - 20 points per enemy ship destroyed
     const score = (ownedPlanets.length * 100) +
-                  totalPopulation +
-                  (totalShips * 10) +
-                  (player.enemyShipsDestroyed * 20);
+        totalPopulation +
+        (totalShips * 10) +
+        (player.enemyShipsDestroyed * 20);
 
     return score;
 }

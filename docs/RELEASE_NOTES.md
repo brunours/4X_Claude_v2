@@ -1,5 +1,33 @@
 # Release Notes
 
+## Version 2.0.6 - 04/02/2026
+
+### Bug Fixes
+
+- **Fixed camera zoom constraints for multi-device support**: Users can now zoom out far enough to see all planets on any device (PC, iPad, etc.)
+  - Issue: Unable to zoom out sufficiently to view entire galaxy map, especially on different screen sizes and orientations
+  - Root cause: Camera had a hard-coded minimum zoom of 0.25 that prevented zooming out beyond a certain level, and the fit-to-screen zoom was enforced as an absolute minimum
+  - Solution: 
+    - Reduced absolute minimum zoom from 0.25 to 0.1 to allow more zoom-out capability
+    - Changed camera initialization to use fit-to-screen zoom as starting point but not as enforced minimum
+    - Enhanced `constrainCamera()` to center the world when zoomed out beyond fit-to-screen level
+    - Updated `resizeCanvas()` to calculate and store fit-to-screen zoom without enforcing it
+  - Technical improvements:
+    - Made `camera.minZoom` truly dynamic (now 0.1 absolute minimum)
+    - Added `camera.fitToScreenZoom` property to track ideal zoom level
+    - World now centers in viewport when zoomed out far enough to see entire map
+    - Works seamlessly on both landscape (PC) and portrait/landscape (tablet) orientations
+  - Files modified: `js/gameState.js`
+
+### Technical Implementation
+- Updated camera object with new minZoom (0.1) and maxZoom (3)
+- Modified `resizeCanvas()` to calculate but not enforce fit-to-screen zoom
+- Enhanced `constrainCamera()` with conditional logic for centering vs. edge-clamping
+- Modified `startGame()` to initialize zoom at fit-to-screen level while allowing further zoom-out
+- Added comprehensive inline documentation for zoom behavior
+
+---
+
 ## Version 2.0.5 - 28/01/2026
 
 ### UI Improvements
