@@ -1,5 +1,41 @@
 # Release Notes
 
+## Version 2.0.5 - 28/01/2026
+
+### UI Improvements
+
+**Game Over Screen Fix**
+- Battle dialogs (Under Attack, Battle Results) now automatically close when the game ends
+- Only the game over screen (Victory/Defeat) is displayed when the game concludes
+- Unified planet panel also closes to provide a clean end-game view
+- Files modified: `js/uiManager.js`
+
+**Shipyard Layout Improvement**
+- Separated build options and build queue into distinct sections
+- Build queue now displays as compact tags below the build options
+- Queue items show ship icon and cumulative turns until completion
+- Queue can scroll independently when many ships are queued
+- Prevents build queue from pushing ship options to the right
+- Files modified: `js/uiManager.js`, `css/style.css`
+
+**Fleet Panel Redesign**
+- Ships are now grouped by type instead of showing individual ships
+- Each ship group shows: icon, name, available count, and selected count
+- Click/tap on a ship group to select one ship of that type
+- Click again to select another, or to deselect if all are selected
+- Purple highlight indicates groups with selected ships
+- Enemy ships displayed separately with red styling
+- More compact and easier to manage large fleets
+- Files modified: `js/uiManager.js`, `js/inputHandler.js`, `css/style.css`
+
+### Technical Implementation
+- Added `toggleShipTypeSelection(shipType)` function for group-based selection
+- New CSS classes: `.ship-group`, `.ship-group-icon`, `.ship-group-info`, etc.
+- Build queue uses flex-wrap layout with scrollable container
+- Shipyard content uses flex column layout for proper section separation
+
+---
+
 ## Version 2.0.4 - 28/01/2026
 
 ### Bug Fixes

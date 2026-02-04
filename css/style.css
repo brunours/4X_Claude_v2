@@ -522,27 +522,30 @@ body {
 }
 
 /* Two-column layout for ship lists */
-#fleetContent,
-#shipyardContent {
+#fleetContent {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
 }
 
-#fleetContent .ship-row,
-#shipyardContent .ship-row {
+/* Shipyard uses flex column layout to keep build options and queue separate */
+#shipyardContent {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#fleetContent .ship-row {
     grid-column: span 1;
     padding: 6px;
     font-size: 0.85rem;
 }
 
-#fleetContent .ship-info,
-#shipyardContent .ship-info {
+#fleetContent .ship-info {
     gap: 4px;
 }
 
-#fleetContent .ship-count,
-#shipyardContent .ship-count {
+#fleetContent .ship-count {
     font-size: 0.7rem;
     padding: 1px 6px;
 }
@@ -1106,23 +1109,36 @@ body {
 
 /* Build Queue */
 .build-queue {
-    margin-top: 10px;
+    margin-top: 0;
+    padding-top: 10px;
+    border-top: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.build-queue h4 {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    color: #a855f7;
+    margin-bottom: 8px;
 }
 
 .queue-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 80px;
+    overflow-y: auto;
 }
 
 .queue-item {
-    display: flex;
-    justify-content: space-between;
+    display: inline-flex;
     align-items: center;
-    padding: 6px 8px;
-    background: rgba(168, 85, 247, 0.1);
+    gap: 6px;
+    padding: 4px 8px;
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.3);
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    white-space: nowrap;
 }
 
 .queue-cancel {
@@ -1130,7 +1146,15 @@ body {
     border: none;
     color: #f44;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.queue-cancel:hover {
+    opacity: 1;
 }
 
 /* Notifications */
@@ -2467,4 +2491,77 @@ input:checked + .toggle-slider:before {
 .delete-btn:hover {
     background: rgba(255, 68, 68, 0.4);
     color: #fff;
+}
+
+/* ============================================
+   SHIP GROUPS (Fleet Panel)
+   ============================================ */
+.ship-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 170, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ship-group:hover {
+    background: rgba(0, 170, 255, 0.15);
+    border-color: rgba(0, 170, 255, 0.4);
+}
+
+.ship-group.has-selection {
+    background: rgba(168, 85, 247, 0.15);
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+.ship-group.has-selection:hover {
+    background: rgba(168, 85, 247, 0.25);
+    border-color: rgba(168, 85, 247, 0.6);
+}
+
+.ship-group.enemy {
+    opacity: 0.6;
+    cursor: default;
+    border-color: rgba(255, 68, 68, 0.3);
+}
+
+.ship-group-icon {
+    font-size: 1.4rem;
+    min-width: 30px;
+    text-align: center;
+}
+
+.ship-group-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.ship-group-name {
+    font-size: 0.85rem;
+    color: #fff;
+}
+
+.ship-group-counts {
+    display: flex;
+    gap: 8px;
+    font-size: 0.75rem;
+    margin-top: 2px;
+}
+
+.available-count {
+    color: #888;
+}
+
+.selected-count {
+    color: #a855f7;
+    font-weight: 600;
+}
+
+.enemy-count {
+    color: #f66;
 }

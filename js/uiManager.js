@@ -89,56 +89,70 @@ export function updateFleetPanel() {
     let content = '';
 
     if (tab === 'stationed') {
-        // Show individual ships from selected planet with selection capability
+        // Show ships grouped by type with click-to-select
         if (gameState.selectedPlanet && gameState.selectedPlanet.ships.length > 0) {
             // Separate player ships and enemy ships
             const playerShips = gameState.selectedPlanet.ships.filter(s => s.owner === 'player');
             const enemyShips = gameState.selectedPlanet.ships.filter(s => s.owner !== 'player');
 
-            // Show player ships (selectable)
+            // Group player ships by type
+            const shipGroups = {};
             for (const ship of playerShips) {
-                const shipType = SHIP_TYPES[ship.type];
-                const isSelected = gameState.selectedShipIds.has(ship.id);
-                const healthPercent = (ship.hitPoints / shipType.maxHitPoints) * 100;
-                const healthColor = healthPercent > 66 ? '#0f8' : healthPercent > 33 ? '#fa0' : '#f44';
+                if (!shipGroups[ship.type]) {
+                    shipGroups[ship.type] = { ships: [], selectedCount: 0 };
+                }
+                shipGroups[ship.type].ships.push(ship);
+                if (gameState.selectedShipIds.has(ship.id)) {
+                    shipGroups[ship.type].selectedCount++;
+                }
+            }
+
+            // Show player ship groups (click to select/deselect)
+            for (const [type, group] of Object.entries(shipGroups)) {
+                const shipType = SHIP_TYPES[type];
+                const totalCount = group.ships.length;
+                const selectedCount = group.selectedCount;
+                const availableCount = totalCount - selectedCount;
+                const hasSelection = selectedCount > 0;
 
                 content += `
-                    <div class="ship-row ${isSelected ? 'selected' : ''}" onclick="window.toggleShipSelection('${ship.id}')">
-                        <div class="ship-info">
-                            <span>${shipType.icon}</span>
-                            <span>${shipType.name}</span>
-                        </div>
-                        <div class="ship-health">
-                            <div class="health-bar">
-                                <div class="health-fill" style="width: ${healthPercent}%; background: ${healthColor};"></div>
-                            </div>
-                            <span class="health-text">${Math.ceil(ship.hitPoints)}/${shipType.maxHitPoints}</span>
+                    <div class="ship-group ${hasSelection ? 'has-selection' : ''}" onclick="window.toggleShipTypeSelection('${type}')">
+                        <div class="ship-group-icon">${shipType.icon}</div>
+                        <div class="ship-group-info">
+                            <span class="ship-group-name">${shipType.name}</span>
+                            <span class="ship-group-counts">
+                                <span class="available-count">${availableCount}</span>
+                                ${selectedCount > 0 ? `<span class="selected-count">+${selectedCount}</span>` : ''}
+                            </span>
                         </div>
                     </div>
                 `;
             }
 
-            // Show enemy ships (not selectable)
-            for (const ship of enemyShips) {
-                const shipType = SHIP_TYPES[ship.type];
-                const healthPercent = (ship.hitPoints / shipType.maxHitPoints) * 100;
-                const healthColor = healthPercent > 66 ? '#0f8' : healthPercent > 33 ? '#fa0' : '#f44';
+            // Show enemy ships grouped (not selectable)
+            if (enemyShips.length > 0) {
+                const enemyGroups = {};
+                for (const ship of enemyShips) {
+                    if (!enemyGroups[ship.type]) {
+                        enemyGroups[ship.type] = 0;
+                    }
+                    enemyGroups[ship.type]++;
+                }
 
-                content += `
-                    <div class="ship-row" style="opacity: 0.6; cursor: default;">
-                        <div class="ship-info">
-                            <span>${shipType.icon}</span>
-                            <span>${shipType.name}</span>
-                            <span style="color: #f44; font-size: 0.75rem;">(${ship.owner})</span>
-                        </div>
-                        <div class="ship-health">
-                            <div class="health-bar">
-                                <div class="health-fill" style="width: ${healthPercent}%; background: ${healthColor};"></div>
+                for (const [type, count] of Object.entries(enemyGroups)) {
+                    const shipType = SHIP_TYPES[type];
+                    content += `
+                        <div class="ship-group enemy">
+                            <div class="ship-group-icon">${shipType.icon}</div>
+                            <div class="ship-group-info">
+                                <span class="ship-group-name">${shipType.name}</span>
+                                <span class="ship-group-counts">
+                                    <span class="enemy-count">${count}</span>
+                                </span>
                             </div>
-                            <span class="health-text">${Math.ceil(ship.hitPoints)}/${shipType.maxHitPoints}</span>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             }
 
             // Add Send button if ships are selected
@@ -173,11 +187,13 @@ export function updateFleetPanel() {
             for (const [type, count] of Object.entries(shipCounts)) {
                 const shipType = SHIP_TYPES[type];
                 content += `
-                    <div class="ship-row">
-                        <div class="ship-info">
-                            <span>${shipType.icon}</span>
-                            <span>${shipType.name}</span>
-                            <span class="ship-count">${count}</span>
+                    <div class="ship-group">
+                        <div class="ship-group-icon">${shipType.icon}</div>
+                        <div class="ship-group-info">
+                            <span class="ship-group-name">${shipType.name}</span>
+                            <span class="ship-group-counts">
+                                <span class="available-count">${count}</span>
+                            </span>
                         </div>
                     </div>
                 `;
@@ -194,7 +210,8 @@ export function updateShipyardPanel() {
 
     const panel = document.getElementById('shipyardContent');
 
-    let content = '<h4>Build Ships</h4><div class="build-options">';
+    // Build options section (always visible)
+    let content = '<div class="build-options-section"><h4>Build Ships</h4><div class="build-options">';
 
     for (const [type, shipType] of Object.entries(SHIP_TYPES)) {
         const cost = shipType.cost;
@@ -217,11 +234,11 @@ export function updateShipyardPanel() {
         `;
     }
 
-    content += '</div>';
+    content += '</div></div>';
 
-    // Build queue
+    // Build queue section (separate from build options)
     if (planet.buildQueue.length > 0) {
-        content += '<div class="build-queue"><h4>Build Queue</h4><div class="queue-grid">';
+        content += '<div class="build-queue"><h4>Queue (' + planet.buildQueue.length + ')</h4><div class="queue-grid">';
 
         let cumulativeTurns = 0;
         for (const item of planet.buildQueue) {
@@ -229,7 +246,7 @@ export function updateShipyardPanel() {
             cumulativeTurns += item.turnsRemaining;
             content += `
                 <div class="queue-item">
-                    <span>${shipType.icon} ${shipType.name} (${cumulativeTurns} turns)</span>
+                    <span>${shipType.icon} ${cumulativeTurns}t</span>
                     <button class="queue-cancel" onclick="window.cancelBuildItem('${planet.id}', '${item.id}')">&times;</button>
                 </div>
             `;
@@ -340,6 +357,13 @@ export function showBattleDialog(attackingShips, planet, isDefending = false) {
 }
 
 export function showGameOver(victory) {
+    // Close any open battle dialogs first - game is over, only show game over screen
+    document.getElementById('battleDialog').style.display = 'none';
+    document.getElementById('battleResultsDialog').style.display = 'none';
+
+    // Also close the unified planet panel
+    document.getElementById('unifiedPanel').style.display = 'none';
+
     const screen = document.getElementById('gameOverScreen');
     screen.className = victory ? 'victory' : 'defeat';
 

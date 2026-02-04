@@ -363,6 +363,29 @@ window.toggleShipSelection = (shipId) => {
     updateFleetPanel();
 };
 
+// Toggle selection of one ship of a given type (click to select, click again to deselect)
+window.toggleShipTypeSelection = (shipType) => {
+    if (!gameState.selectedPlanet) return;
+
+    const playerShips = gameState.selectedPlanet.ships.filter(s => s.owner === 'player' && s.type === shipType);
+    if (playerShips.length === 0) return;
+
+    // Find first unselected ship of this type
+    const unselectedShip = playerShips.find(s => !gameState.selectedShipIds.has(s.id));
+
+    if (unselectedShip) {
+        // Select one more ship of this type
+        gameState.selectedShipIds.add(unselectedShip.id);
+    } else {
+        // All ships of this type are selected - deselect the last one
+        const selectedOfType = playerShips.filter(s => gameState.selectedShipIds.has(s.id));
+        if (selectedOfType.length > 0) {
+            gameState.selectedShipIds.delete(selectedOfType[selectedOfType.length - 1].id);
+        }
+    }
+    updateFleetPanel();
+};
+
 window.sendSelectedShips = () => {
     sendSelectedShips();
     updateFleetPanel();
