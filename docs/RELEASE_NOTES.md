@@ -1,5 +1,26 @@
 # Release Notes
 
+## Version 2.0.9 - 04/02/2026
+
+### New Features
+- **Greek god planet names**: All planets are now named after Greek gods and mythological figures. The player's starting planet is always "Gaia". List includes 50 names covering all map sizes.
+
+### Bug Fixes
+- **Fix multiple battles in same turn**: When two or more battles occurred in the same turn, only the last battle was shown and earlier battles were silently lost (ships would disappear). Battles are now queued and resolved sequentially — each battle dialog appears one after the other.
+  - Issue: Ships vanishing when multiple fleets arrived at hostile planets in the same turn
+  - Root cause: `gameState.battlePending` was a single object that got overwritten by each subsequent battle detection
+  - Solution: Added `gameState.battleQueue` array. Battles are pushed to the queue during turn processing, then shifted off one at a time for player resolution. After dismissing battle results, the next queued battle is shown automatically.
+  - Files modified: `js/gameState.js`, `js/turnSystem.js`, `js/inputHandler.js`, `js/combatSystem.js`
+
+### Technical Implementation
+- Replaced `planetNames` array in `gameState.js` with 50 Greek god/goddess names (Gaia first for player start)
+- Added `battleQueue: []` to gameState alongside existing `battlePending`
+- `turnSystem.js`: `handleShipArrival()` and `processBuildQueues()` now push to `battleQueue` instead of overwriting `battlePending`
+- `inputHandler.js`: Added `showNextBattle()` function that shifts battles from the queue into `battlePending` and shows the dialog
+- `closeBattleResults()` now calls `showNextBattle()` to chain subsequent battles after each resolution
+
+---
+
 ## Version 2.0.8 - 04/02/2026
 
 ### Bug Fixes

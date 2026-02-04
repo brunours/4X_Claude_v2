@@ -5,7 +5,7 @@
 // This module handles all combat mechanics, including battle resolution,
 // casualty calculations, conquest mechanics, and battle result displays.
 //
-// Version: 2.0.4 - Fixed colonizer destruction when army is defeated
+// Version: 2.0.9 - Battle queue for sequential multi-battle resolution
 //
 // Core Responsibilities:
 // - Resolve combat using realistic HP-based round-by-round calculations

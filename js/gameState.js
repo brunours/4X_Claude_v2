@@ -2,7 +2,7 @@
 // GAME STATE & INITIALIZATION
 // ============================================
 //
-// Version: 2.0.6
+// Version: 2.0.9
 // Last Modified: 04/02/2026
 //
 // This module manages the central game state and handles game initialization,
@@ -60,7 +60,8 @@ export let gameState = {
     shipsToSend: null,
     sourcePlanet: null,
     selectedShipIds: new Set(), // Track individually selected ships
-    battlePending: null, // Track pending battle for fight/withdraw choice
+    battlePending: null, // Currently active battle for fight/withdraw choice
+    battleQueue: [], // Queue of pending battles to resolve sequentially
     fleetTab: 'stationed', // Current fleet tab
     gameOver: false, // Track if game has ended
     // New fields for Supabase integration
@@ -271,6 +272,7 @@ export function startGame(providedSeed = null) {
     gameState.sourcePlanet = null;
     gameState.selectedShipIds = new Set();
     gameState.battlePending = null;
+    gameState.battleQueue = [];
     gameState.fleetTab = 'stationed';
 
     const sizeConfig = MAP_SIZES[gameState.mapSize];
@@ -322,9 +324,13 @@ export function generatePlanets(count) {
     const padding = 150;
     const minDistance = 200;
 
-    const planetNames = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa',
-        'Lambda', 'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon',
-        'Phi', 'Chi', 'Psi', 'Omega', 'Nova', 'Nebula', 'Pulsar', 'Quasar', 'Vega', 'Rigel'];
+    const planetNames = [
+        'Gaia', 'Zeus', 'Hera', 'Poseidon', 'Athena', 'Apollo', 'Artemis', 'Ares', 'Aphrodite', 'Hermes',
+        'Hephaestus', 'Demeter', 'Dionysus', 'Hades', 'Persephone', 'Hestia', 'Eros', 'Pan', 'Nike', 'Helios',
+        'Selene', 'Eos', 'Nyx', 'Thanatos', 'Hypnos', 'Nemesis', 'Tyche', 'Iris', 'Morpheus', 'Triton',
+        'Proteus', 'Nereus', 'Oceanus', 'Kronos', 'Rhea', 'Atlas', 'Prometheus', 'Epimetheus', 'Hyperion', 'Theia',
+        'Mnemosyne', 'Themis', 'Phoebe', 'Leto', 'Astraea', 'Calypso', 'Circe', 'Hecate', 'Chaos', 'Erebus'
+    ];
 
     for (let i = 0; i < count; i++) {
         let x, y, valid;
@@ -539,6 +545,7 @@ export function deserializeGameState(data) {
     gameState.shipsToSend = null;
     gameState.sourcePlanet = null;
     gameState.battlePending = null;
+    gameState.battleQueue = [];
 
     // Reinitialize seeded random (not needed for loaded games, but good for consistency)
     gameRandom = new SeededRandom(gameState.mapSeed);

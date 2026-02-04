@@ -31,6 +31,7 @@
 // Used by: main.js (called once during initialization)
 //
 // Version History:
+// - 2.0.9: Added battle queue for sequential multi-battle resolution
 // - 1.0.3: Added influence zone toggle controls (button and 'I' keyboard shortcut)
 // - 1.0.2: Added completeRetreat function for tactical withdrawal destination selection
 
@@ -306,14 +307,8 @@ async function handleEndTurn() {
         showGameOver(result.victory);
     }
 
-    // Show battle dialog if needed
-    if (gameState.battlePending) {
-        showBattleDialog(
-            gameState.battlePending.attackingShips,
-            gameState.battlePending.planet,
-            gameState.battlePending.isDefending
-        );
-    }
+    // Show first queued battle (subsequent battles shown after each resolution)
+    showNextBattle();
 
     updateDisplay();
 
@@ -401,7 +396,20 @@ window.closeBattleResults = () => {
             updateShipyardPanel();
         }
     }
+    // Show next queued battle if any remain
+    showNextBattle();
 };
+
+function showNextBattle() {
+    if (gameState.battleQueue.length > 0) {
+        gameState.battlePending = gameState.battleQueue.shift();
+        showBattleDialog(
+            gameState.battlePending.attackingShips,
+            gameState.battlePending.planet,
+            gameState.battlePending.isDefending
+        );
+    }
+}
 
 window.completeRetreat = (planetId) => {
     completeRetreat(planetId);

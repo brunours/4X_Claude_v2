@@ -1206,19 +1206,22 @@ When modifying the game:
 ---
 
 **Last Updated**: 2026-02-04
-**Version**: 2.0.8
+**Version**: 2.0.9
 **Documentation**: Complete
 
 ---
 
-## Recent Changes (v2.0.8)
+## Recent Changes (v2.0.9)
+
+### New Features
+- All planets are now named after Greek gods and mythological figures (50 names)
+- Player's starting planet is always "Gaia"
 
 ### Bug Fixes
-- Handle authenticated users with missing profiles: Users who are authenticated but have no profile row in the database can now sign in and use the game without errors
-- `signIn()` and `initAuth()` now fall back to email-derived display names when profile is missing
-- `showStartScreen()` checks `gameState.userId` instead of the profile object to determine authentication state
+- Fixed multiple battles in same turn: battles are now queued and resolved sequentially instead of the second battle overwriting the first
+- Added `battleQueue` array to gameState for sequential multi-battle resolution
 
 ### Technical Details
-- Added fallback logic in `auth.js` for missing profiles during sign-in and session restoration
-- Added detailed error logging in `getProfile()` for debugging profile fetch failures
-- Updated `main.js` `showStartScreen()` to use `gameState.userId` and guard `applyProfileToUI()` with null check
+- `turnSystem.js` pushes battles to `gameState.battleQueue` instead of overwriting `battlePending`
+- `inputHandler.js` adds `showNextBattle()` to chain battles after each resolution
+- `closeBattleResults()` triggers the next queued battle automatically

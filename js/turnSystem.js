@@ -1,6 +1,7 @@
 // ============================================
 // TURN SYSTEM
 // ============================================
+// Version: 2.0.9
 //
 // This module orchestrates the end-turn sequence, processing all game events
 // that occur each turn including builds, movement, healing, and resource collection.
@@ -100,11 +101,11 @@ export function processBuildQueues() {
 
                 // Set up battle dialog for player's planet being defended
                 if (planet.owner === 'player') {
-                    gameState.battlePending = {
+                    gameState.battleQueue.push({
                         attackingShips: enemyShips,
                         planet: planet,
                         isDefending: true
-                    };
+                    });
                 } else {
                     // AI planet - auto-resolve
                     resolveCombat([newShip], enemyShips, planet);
@@ -189,20 +190,20 @@ export function handleShipArrival(shipGroup) {
                 retreatOptions.unshift(fromPlanet);
             }
 
-            gameState.battlePending = {
+            gameState.battleQueue.push({
                 attackingShips: shipGroup.ships,
                 planet: targetPlanet,
                 isDefending: false,
                 retreatOptions: retreatOptions
-            };
+            });
         } else {
             // Enemy ships attacking player planet - show battle dialog
             if (targetPlanet.owner === 'player' || targetPlanet.ships.some(s => s.owner === 'player')) {
-                gameState.battlePending = {
+                gameState.battleQueue.push({
                     attackingShips: shipGroup.ships,
                     planet: targetPlanet,
                     isDefending: true
-                };
+                });
             } else {
                 // AI vs AI - auto-resolve
                 resolveCombat(shipGroup.ships, targetPlanet.ships, targetPlanet);
