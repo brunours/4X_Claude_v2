@@ -1,9 +1,11 @@
 // ============================================
 // AUTHENTICATION MODULE
 // ============================================
+// Version: 2.0.8
 //
 // This module handles all user authentication operations including
 // sign up, sign in, sign out, password reset, and profile management.
+// Includes fallback handling when user is authenticated but profile is missing.
 //
 // Exports:
 // - getCurrentUser() - Returns current session user or null
@@ -108,6 +110,12 @@ export async function signIn(email, password) {
         const profile = await getProfile();
         if (profile) {
             setUserInfo(data.user.id, profile.nickname || profile.username);
+        } else {
+            // Profile not found, but user is authenticated
+            // Set userId from auth so saves still work
+            console.warn('User authenticated but profile not found during sign in.');
+            const displayName = data.user.email?.split('@')[0] || 'User';
+            setUserInfo(data.user.id, displayName);
         }
     }
 
@@ -171,6 +179,8 @@ export async function getProfile() {
 
     if (error) {
         console.error('Error fetching profile:', error);
+        console.error('Profile fetch failed for user:', user.id);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         return null;
     }
 
@@ -238,9 +248,18 @@ export async function initAuth() {
         if (session?.user) {
             const profile = await getProfile();
             if (profile) {
+                // Profile found - use nickname for display
                 setUserInfo(session.user.id, profile.nickname || profile.username);
                 applyProfileToGameState(profile);
                 return { authenticated: true, profile };
+            } else {
+                // Profile not found, but user is authenticated
+                // Set userId from session so saves still work
+                console.warn('User authenticated but profile not found. Using email for display.');
+                const displayName = session.user.email?.split('@')[0] || 'User';
+                setUserInfo(session.user.id, displayName);
+                // Game will use default settings since no profile
+                return { authenticated: true, profile: null };
             }
         }
         return { authenticated: false, profile: null };

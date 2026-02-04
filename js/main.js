@@ -1,6 +1,7 @@
 // ============================================
 // MAIN - GAME INITIALIZATION & ORCHESTRATION
 // ============================================
+// Version: 2.0.8
 //
 // This is the entry point for the game. It coordinates the initialization
 // of all game systems and starts the game loop when the page loads.
@@ -115,10 +116,13 @@ function showStartScreen(profile = null) {
     document.getElementById('startScreen').style.display = 'flex';
     document.getElementById('ui').style.display = 'none';
 
-    if (profile) {
-        // Show user info with nickname
+    // Check if user is authenticated (has userId set)
+    const isAuthenticated = gameState.userId !== null;
+
+    if (isAuthenticated) {
+        // Show user info (even if profile is null, use username from gameState)
         document.getElementById('userInfo').style.display = 'flex';
-        document.getElementById('nicknameDisplay').textContent = profile.nickname || profile.username;
+        document.getElementById('nicknameDisplay').textContent = gameState.username || 'User';
 
         // Show right column with saved games and leaderboard
         document.getElementById('rightColumn').style.display = 'flex';
@@ -126,8 +130,11 @@ function showStartScreen(profile = null) {
         // Load saved games
         loadAndDisplaySavedGames();
 
-        // Apply profile preferences to UI
-        applyProfileToUI(profile);
+        // Apply profile preferences to UI (if profile exists)
+        if (profile) {
+            applyProfileToUI(profile);
+        }
+        // If no profile, UI will use current gameState values (defaults)
     } else {
         // Guest mode - hide authenticated-only features
         document.getElementById('userInfo').style.display = 'none';

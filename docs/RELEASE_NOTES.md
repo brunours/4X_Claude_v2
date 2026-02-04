@@ -1,5 +1,24 @@
 # Release Notes
 
+## Version 2.0.8 - 04/02/2026
+
+### Bug Fixes
+
+- **Handle authenticated users with missing profiles**: Users who are authenticated but have no profile in the database can now use the game without errors
+  - Issue: If a user's profile was missing from the database (e.g., deleted or not yet created), sign-in and session restoration would silently fail, leaving the user in an unauthenticated state despite being logged in
+  - Root cause: `signIn()` and `initAuth()` only called `setUserInfo()` when a profile was found, leaving `gameState.userId` as null
+  - Solution: Added fallback logic that sets userId and derives a display name from the user's email when profile is missing. Added detailed error logging for profile fetch failures. Updated `showStartScreen()` to check `gameState.userId` instead of the profile object.
+  - Files modified: `js/auth.js`, `js/main.js`
+
+### Technical Implementation
+- `signIn()` now falls back to email-derived display name when profile is missing
+- `initAuth()` returns `{ authenticated: true, profile: null }` for authenticated users without profiles
+- `getProfile()` logs detailed error information for debugging
+- `showStartScreen()` uses `gameState.userId` to determine authentication state and `gameState.username` for display
+- `applyProfileToUI()` is guarded behind a null check to prevent errors when profile is absent
+
+---
+
 ## Version 2.0.7 - 04/02/2026
 
 ### New Features

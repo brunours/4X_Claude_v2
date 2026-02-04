@@ -1205,20 +1205,20 @@ When modifying the game:
 
 ---
 
-**Last Updated**: 2026-01-28
-**Version**: 2.0.4
+**Last Updated**: 2026-02-04
+**Version**: 2.0.8
 **Documentation**: Complete
 
 ---
 
-## Recent Changes (v2.0.4)
+## Recent Changes (v2.0.8)
 
 ### Bug Fixes
-- Fixed colonizer destruction logic: Colonizers are now properly destroyed when their army is defeated in battle
-- Previously, colonizers from the losing side would incorrectly survive battles because `simulateCombat()` unconditionally added them to survivors
-- Now colonizers only survive if their side has surviving military ships; otherwise they are added to the destroyed list
+- Handle authenticated users with missing profiles: Users who are authenticated but have no profile row in the database can now sign in and use the game without errors
+- `signIn()` and `initAuth()` now fall back to email-derived display names when profile is missing
+- `showStartScreen()` checks `gameState.userId` instead of the profile object to determine authentication state
 
 ### Technical Details
-- Modified `simulateCombat()` function in `combatSystem.js` to check for surviving military ships before adding colonizers to survivors
-- Colonizers from defeated armies are now properly tracked in `destroyedAttackers` or `destroyedDefenders` arrays
-- This ensures colonizers without friendly ships at a planet are automatically destroyed as intended
+- Added fallback logic in `auth.js` for missing profiles during sign-in and session restoration
+- Added detailed error logging in `getProfile()` for debugging profile fetch failures
+- Updated `main.js` `showStartScreen()` to use `gameState.userId` and guard `applyProfileToUI()` with null check
