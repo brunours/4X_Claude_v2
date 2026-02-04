@@ -225,13 +225,6 @@ export async function saveSettingsToProfile() {
     });
 }
 
-// Subscribe to auth state changes
-export function onAuthStateChange(callback) {
-    return supabase.auth.onAuthStateChange((event, session) => {
-        callback(event, session);
-    });
-}
-
 // Check if user is authenticated
 export async function isAuthenticated() {
     const user = await getCurrentUser();
