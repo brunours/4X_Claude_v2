@@ -1675,6 +1675,40 @@ input:checked + .toggle-slider:before {
     text-decoration: underline;
 }
 
+/* Password Reset Styles */
+.forgot-password {
+    text-align: right;
+    margin-top: -5px;
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+}
+
+.forgot-password a {
+    color: #0af;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.forgot-password a:hover {
+    color: #0ff;
+    text-decoration: underline;
+}
+
+.form-hint {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.auth-success {
+    color: #0f8;
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+    min-height: 20px;
+    text-align: center;
+}
+
 .auth-divider {
     display: flex;
     align-items: center;

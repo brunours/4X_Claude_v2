@@ -3,13 +3,15 @@
 // ============================================
 //
 // This module handles all user authentication operations including
-// sign up, sign in, sign out, and profile management.
+// sign up, sign in, sign out, password reset, and profile management.
 //
 // Exports:
 // - getCurrentUser() - Returns current session user or null
 // - signUp(email, password, username) - Register new user
 // - signIn(email, password) - Login existing user
 // - signOut() - Logout current user
+// - requestPasswordReset(email) - Send password reset email
+// - updatePassword(newPassword) - Update password after reset
 // - getProfile() - Fetch user profile from database
 // - updateProfile(preferences) - Update user preferences
 // - onAuthStateChange(callback) - Subscribe to auth state changes
@@ -123,6 +125,39 @@ export async function signOut() {
     return true;
 }
 
+// Request password reset email
+// Supabase sends an email with a link that redirects back to the app
+export async function requestPasswordReset(email) {
+    // Get the current URL as the redirect destination
+    const redirectTo = window.location.origin + window.location.pathname;
+
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectTo
+    });
+
+    if (error) {
+        console.error('Error requesting password reset:', error);
+        return { success: false, error };
+    }
+
+    return { success: true, error: null };
+}
+
+// Update password after reset (called when user clicks email link)
+// This should be called after the PASSWORD_RECOVERY event is detected
+export async function updatePassword(newPassword) {
+    const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+    });
+
+    if (error) {
+        console.error('Error updating password:', error);
+        return { success: false, error };
+    }
+
+    return { success: true, error: null };
+}
+
 // Get user profile from database
 export async function getProfile() {
     const user = await getCurrentUser();
@@ -220,4 +255,13 @@ export async function initAuth() {
         console.error('Error initializing auth:', error);
         return { authenticated: false, profile: null };
     }
+}
+
+// Subscribe to auth state changes
+// Returns unsubscribe function
+export function onAuthStateChange(callback) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        callback(event, session);
+    });
+    return () => subscription.unsubscribe();
 }

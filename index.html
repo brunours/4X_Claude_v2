@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/d3-delaunay@6"></script>
 </head>
+
 <body>
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
@@ -24,8 +26,10 @@
                         <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
                     </div>
                     <div class="form-group">
-                        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+                        <input type="password" id="loginPassword" placeholder="Password"
+                            autocomplete="current-password">
                     </div>
+                    <p class="forgot-password"><a href="#" id="showForgotPassword">Forgot password?</a></p>
                     <div id="loginError" class="auth-error"></div>
                     <button id="loginBtn" class="auth-btn">LOGIN</button>
                     <p class="auth-switch">Don't have an account? <a href="#" id="showRegister">Register</a></p>
@@ -41,11 +45,41 @@
                         <input type="email" id="registerEmail" placeholder="Email" autocomplete="email">
                     </div>
                     <div class="form-group">
-                        <input type="password" id="registerPassword" placeholder="Password (min 6 characters)" autocomplete="new-password">
+                        <input type="password" id="registerPassword" placeholder="Password (min 6 characters)"
+                            autocomplete="new-password">
                     </div>
                     <div id="registerError" class="auth-error"></div>
                     <button id="registerBtn" class="auth-btn">REGISTER</button>
                     <p class="auth-switch">Already have an account? <a href="#" id="showLogin">Login</a></p>
+                </div>
+
+                <!-- Forgot Password Form -->
+                <div id="forgotPasswordForm" class="auth-form" style="display: none;">
+                    <h2>Reset Password</h2>
+                    <p class="form-hint">Enter your email to receive a reset link</p>
+                    <div class="form-group">
+                        <input type="email" id="resetEmail" placeholder="Email" autocomplete="email">
+                    </div>
+                    <div id="resetRequestError" class="auth-error"></div>
+                    <div id="resetRequestSuccess" class="auth-success"></div>
+                    <button id="resetRequestBtn" class="auth-btn">SEND RESET LINK</button>
+                    <p class="auth-switch"><a href="#" id="backToLogin">Back to Login</a></p>
+                </div>
+
+                <!-- Update Password Form (shown after clicking email link) -->
+                <div id="updatePasswordForm" class="auth-form" style="display: none;">
+                    <h2>New Password</h2>
+                    <p class="form-hint">Enter your new password</p>
+                    <div class="form-group">
+                        <input type="password" id="newPassword" placeholder="New password (min 6 characters)"
+                            autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password"
+                            autocomplete="new-password">
+                    </div>
+                    <div id="updatePasswordError" class="auth-error"></div>
+                    <button id="updatePasswordBtn" class="auth-btn">UPDATE PASSWORD</button>
                 </div>
 
                 <div class="auth-divider">
@@ -237,7 +271,8 @@
             <div class="fleet-section">
                 <h3>Fleet</h3>
                 <div class="fleet-tabs">
-                    <button class="fleet-tab active" data-tab="stationed" onclick="switchFleetTab('stationed')">Stationed</button>
+                    <button class="fleet-tab active" data-tab="stationed"
+                        onclick="switchFleetTab('stationed')">Stationed</button>
                     <button class="fleet-tab" data-tab="transit" onclick="switchFleetTab('transit')">In Transit</button>
                 </div>
                 <div id="fleetContent"></div>
@@ -303,8 +338,10 @@
                     <button class="close-btn" onclick="closeLeaderboard()">&times;</button>
                 </div>
                 <div class="leaderboard-tabs">
-                    <button class="leaderboard-tab active" data-tab="personal" onclick="switchLeaderboardTab('personal')">Personal Best</button>
-                    <button class="leaderboard-tab" data-tab="global" onclick="switchLeaderboardTab('global')">Global Top 10</button>
+                    <button class="leaderboard-tab active" data-tab="personal"
+                        onclick="switchLeaderboardTab('personal')">Personal Best</button>
+                    <button class="leaderboard-tab" data-tab="global" onclick="switchLeaderboardTab('global')">Global
+                        Top 10</button>
                 </div>
                 <div id="leaderboardContent" class="leaderboard-list">
                     <p class="loading">Loading...</p>
@@ -346,4 +383,5 @@
     <!-- Load JavaScript Modules -->
     <script type="module" src="js/main.js"></script>
 </body>
+
 </html>

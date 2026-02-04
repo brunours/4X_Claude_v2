@@ -34,7 +34,7 @@ import { init, gameState, setMapSeed, restartWithSameSeed, resetGameState } from
 import { setupEventListeners } from './inputHandler.js';
 import { gameLoop } from './renderer.js';
 import { updateDisplay } from './uiManager.js';
-import { initAuth, signIn, signUp, signOut, getProfile, applyProfileToGameState, saveSettingsToProfile, updateProfile } from './auth.js';
+import { initAuth, signIn, signUp, signOut, getProfile, applyProfileToGameState, saveSettingsToProfile, updateProfile, requestPasswordReset, updatePassword, onAuthStateChange } from './auth.js';
 import { listSavedGames, loadSavedGame, deleteSavedGame, completeGame, clearCurrentSave } from './saveSystem.js';
 import { getPersonalTop10, getGlobalTop10, getCompletedGameDetails, renderLeaderboardEntries, renderMapViewerInfo, drawMapPreview } from './leaderboard.js';
 import { invalidateZoneCache } from './influenceZones.js';
@@ -66,6 +66,20 @@ window.addEventListener('DOMContentLoaded', async () => {
         console.log('Setting up game over handlers...');
         setupGameOverHandlers();
         console.log('All handlers setup complete!');
+
+        // Listen for PASSWORD_RECOVERY event (when user clicks email reset link)
+        onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                console.log('Password recovery mode detected');
+                // Hide all forms and show update password form
+                document.getElementById('authScreen').style.display = 'flex';
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('forgotPasswordForm').style.display = 'none';
+                document.getElementById('updatePasswordForm').style.display = 'block';
+            }
+        });
     } catch (error) {
         console.error('Error during initialization:', error);
     }
@@ -271,6 +285,84 @@ function setupAuthHandlers() {
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         await signOut();
         showAuthScreen();
+    });
+
+    // Show forgot password form
+    document.getElementById('showForgotPassword').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('forgotPasswordForm').style.display = 'block';
+        document.getElementById('resetRequestError').textContent = '';
+        document.getElementById('resetRequestSuccess').textContent = '';
+    });
+
+    // Back to login from forgot password
+    document.getElementById('backToLogin').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('forgotPasswordForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+    });
+
+    // Request password reset
+    document.getElementById('resetRequestBtn').addEventListener('click', async () => {
+        const email = document.getElementById('resetEmail').value;
+        const errorDiv = document.getElementById('resetRequestError');
+        const successDiv = document.getElementById('resetRequestSuccess');
+
+        if (!email) {
+            errorDiv.textContent = 'Please enter your email';
+            successDiv.textContent = '';
+            return;
+        }
+
+        errorDiv.textContent = '';
+        successDiv.textContent = '';
+
+        const result = await requestPasswordReset(email);
+
+        if (result.success) {
+            successDiv.textContent = 'Reset link sent! Check your email.';
+        } else {
+            errorDiv.textContent = result.error?.message || 'Failed to send reset link';
+        }
+    });
+
+    // Update password (shown after clicking email link)
+    document.getElementById('updatePasswordBtn').addEventListener('click', async () => {
+        const newPasswordValue = document.getElementById('newPassword').value;
+        const confirmPasswordValue = document.getElementById('confirmPassword').value;
+        const errorDiv = document.getElementById('updatePasswordError');
+
+        if (!newPasswordValue || !confirmPasswordValue) {
+            errorDiv.textContent = 'Please fill in both fields';
+            return;
+        }
+
+        if (newPasswordValue.length < 6) {
+            errorDiv.textContent = 'Password must be at least 6 characters';
+            return;
+        }
+
+        if (newPasswordValue !== confirmPasswordValue) {
+            errorDiv.textContent = 'Passwords do not match';
+            return;
+        }
+
+        errorDiv.textContent = '';
+        const result = await updatePassword(newPasswordValue);
+
+        if (result.success) {
+            // Password updated, redirect to start screen or login
+            const profile = await getProfile();
+            if (profile) {
+                applyProfileToGameState(profile);
+                showStartScreen(profile);
+            } else {
+                showAuthScreen();
+            }
+        } else {
+            errorDiv.textContent = result.error?.message || 'Failed to update password';
+        }
     });
 }
 

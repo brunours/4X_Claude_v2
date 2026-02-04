@@ -1,5 +1,26 @@
 # Release Notes
 
+## Version 2.0.7 - 04/02/2026
+
+### New Features
+
+- **Password Reset Functionality**: Users can now reset their password if they forget it
+  - Added "Forgot password?" link on the login form
+  - Password reset request form sends email via Supabase Auth
+  - After clicking the email link, users can set a new password
+  - Validates password match and minimum length (6 characters)
+  - Automatic redirect to game after successful password update
+  - Files modified: `js/auth.js`, `js/main.js`, `index.html`, `css/style.css`
+
+### Technical Implementation
+- Added `requestPasswordReset(email)` and `updatePassword(newPassword)` functions to `auth.js`
+- Added `onAuthStateChange(callback)` to subscribe to Supabase auth events
+- Detects `PASSWORD_RECOVERY` event when user clicks email reset link
+- New HTML forms: forgot password form and update password form
+- New CSS classes: `.forgot-password`, `.form-hint`, `.auth-success`
+
+---
+
 ## Version 2.0.6 - 04/02/2026
 
 ### Bug Fixes
