@@ -1,5 +1,32 @@
 # Release Notes
 
+## Version 2.0.10 - 04/02/2026
+
+### New Features
+- **Planet name theme selection**: Players can now choose from 3 planet naming themes in the launch menu:
+  - **Greek Gods** (default): Home planet "Gaia", with 50 names from Greek mythology (Zeus, Athena, Apollo, etc.)
+  - **Norse Gods**: Home planet "Jord", with 50 names from Norse mythology (Odin, Thor, Freya, etc.)
+  - **Real Stars**: Home planet "Sol", with 50 real star names (Sirius, Vega, Rigel, etc.)
+  - Preference is saved to Supabase profile and persisted across sessions
+  - Files modified: `js/gameState.js`, `index.html`, `js/main.js`, `js/auth.js`
+
+### Bug Fixes
+- **Fix color pre-selection on launch menu**: Saved empire color preferences were not properly pre-selected when returning to the start screen after login. The X marks (disabled indicators) were stale from initial defaults.
+  - Issue: Profile colors (e.g. purple + green) were correctly stored in gameState but the UI showed default blue + red as selected
+  - Root cause: `applyProfileToUI()` set the `selected` CSS class correctly but never called `updateColorPickers()` to refresh `disabled`/`selected` states
+  - Solution: Call `updateColorPickers()` at the end of `applyProfileToUI()` after gameState already has the correct values from `applyProfileToGameState()`
+  - Files modified: `js/main.js`, `js/gameState.js` (exported `updateColorPickers`)
+
+### Technical Implementation
+- Added `PLANET_NAME_THEMES` constant in `gameState.js` with 3 collections of 50 names each
+- Added `planetNameTheme` to gameState, persisted via localStorage and Supabase profile
+- Added `preferred_planet_names` column to Supabase `profiles` table
+- Planet Names selector added to launch menu using existing `option-group` button pattern
+- `generatePlanets()` reads from theme-based name list dynamically
+- `updateColorPickers()` now exported from `gameState.js` for use by `main.js`
+
+---
+
 ## Version 2.0.9 - 04/02/2026
 
 ### New Features

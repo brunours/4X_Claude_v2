@@ -1,7 +1,7 @@
 // ============================================
 // MAIN - GAME INITIALIZATION & ORCHESTRATION
 // ============================================
-// Version: 2.0.8
+// Version: 2.0.10
 //
 // This is the entry point for the game. It coordinates the initialization
 // of all game systems and starts the game loop when the page loads.
@@ -31,7 +31,7 @@
 // Version History:
 // - 1.1.0: Added Supabase authentication, saved games, and leaderboards
 
-import { init, gameState, setMapSeed, restartWithSameSeed, resetGameState } from './gameState.js';
+import { init, gameState, setMapSeed, restartWithSameSeed, resetGameState, updateColorPickers } from './gameState.js';
 import { setupEventListeners } from './inputHandler.js';
 import { gameLoop } from './renderer.js';
 import { updateDisplay } from './uiManager.js';
@@ -184,6 +184,18 @@ function applyProfileToUI(profile) {
     const transparencyValue = Math.round((profile.preferred_influence_transparency || 0.10) * 100);
     transparencySlider.value = transparencyValue;
     document.getElementById('transparencyValue').textContent = `${transparencyValue}%`;
+
+    // Planet name theme
+    const planetTheme = profile.preferred_planet_names || 'greek';
+    document.querySelectorAll('[data-planet-names]').forEach(btn => {
+        btn.classList.remove('selected');
+        if (btn.dataset.planetNames === planetTheme) {
+            btn.classList.add('selected');
+        }
+    });
+
+    // Refresh color pickers to update disabled/selected states correctly
+    updateColorPickers();
 }
 
 async function loadAndDisplaySavedGames() {

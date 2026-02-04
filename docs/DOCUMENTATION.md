@@ -1206,22 +1206,24 @@ When modifying the game:
 ---
 
 **Last Updated**: 2026-02-04
-**Version**: 2.0.9
+**Version**: 2.0.10
 **Documentation**: Complete
 
 ---
 
-## Recent Changes (v2.0.9)
+## Recent Changes (v2.0.10)
 
 ### New Features
-- All planets are now named after Greek gods and mythological figures (50 names)
-- Player's starting planet is always "Gaia"
+- Planet name theme selection: 3 collections (Greek Gods, Norse Gods, Real Stars) with 50 names each
+- Player chooses theme in launch menu; preference saved to Supabase profile
+- Home planet names: Gaia (Greek), Jord (Norse), Sol (Stars)
 
 ### Bug Fixes
-- Fixed multiple battles in same turn: battles are now queued and resolved sequentially instead of the second battle overwriting the first
-- Added `battleQueue` array to gameState for sequential multi-battle resolution
+- Fixed color pre-selection bug: saved empire colors now correctly pre-selected on launch menu
+- `applyProfileToUI()` now calls `updateColorPickers()` to refresh all selected/disabled states
 
 ### Technical Details
-- `turnSystem.js` pushes battles to `gameState.battleQueue` instead of overwriting `battlePending`
-- `inputHandler.js` adds `showNextBattle()` to chain battles after each resolution
-- `closeBattleResults()` triggers the next queued battle automatically
+- `PLANET_NAME_THEMES` constant exported from `gameState.js` with 3 theme collections
+- `planetNameTheme` added to gameState, localStorage, and Supabase profile persistence
+- `updateColorPickers()` exported from `gameState.js` for cross-module use
+- New `preferred_planet_names` column in Supabase `profiles` table

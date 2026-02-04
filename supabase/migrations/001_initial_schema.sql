@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS profiles (
     preferred_ai_color TEXT DEFAULT 'red',
     preferred_map_size TEXT DEFAULT 'compact',
     preferred_difficulty TEXT DEFAULT 'easy',
-    preferred_influence_transparency NUMERIC DEFAULT 0.10
+    preferred_influence_transparency NUMERIC DEFAULT 0.10,
+    preferred_planet_names TEXT DEFAULT 'greek'
 );
 
 -- ============================================

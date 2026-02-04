@@ -1,7 +1,7 @@
 // ============================================
 // AUTHENTICATION MODULE
 // ============================================
-// Version: 2.0.8
+// Version: 2.0.10
 //
 // This module handles all user authentication operations including
 // sign up, sign in, sign out, password reset, and profile management.
@@ -79,7 +79,8 @@ export async function signUp(email, password, username, nickname = null) {
                 preferred_ai_color: 'red',
                 preferred_map_size: 'compact',
                 preferred_difficulty: 'easy',
-                preferred_influence_transparency: 0.10
+                preferred_influence_transparency: 0.10,
+                preferred_planet_names: 'greek'
             });
 
         if (profileError) {
@@ -199,6 +200,7 @@ export async function updateProfile(preferences) {
     if (preferences.mapSize !== undefined) updateData.preferred_map_size = preferences.mapSize;
     if (preferences.difficulty !== undefined) updateData.preferred_difficulty = preferences.difficulty;
     if (preferences.influenceTransparency !== undefined) updateData.preferred_influence_transparency = preferences.influenceTransparency;
+    if (preferences.planetNames !== undefined) updateData.preferred_planet_names = preferences.planetNames;
 
     const { error } = await supabase
         .from('profiles')
@@ -222,6 +224,7 @@ export function applyProfileToGameState(profile) {
     gameState.mapSize = profile.preferred_map_size || 'compact';
     gameState.difficulty = profile.preferred_difficulty || 'easy';
     gameState.influenceTransparency = profile.preferred_influence_transparency || 0.10;
+    gameState.planetNameTheme = profile.preferred_planet_names || 'greek';
 }
 
 // Save current game settings to profile
@@ -231,7 +234,8 @@ export async function saveSettingsToProfile() {
         aiColor: gameState.aiColor,
         mapSize: gameState.mapSize,
         difficulty: gameState.difficulty,
-        influenceTransparency: gameState.influenceTransparency
+        influenceTransparency: gameState.influenceTransparency,
+        planetNames: gameState.planetNameTheme
     });
 }
 

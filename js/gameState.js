@@ -2,7 +2,7 @@
 // GAME STATE & INITIALIZATION
 // ============================================
 //
-// Version: 2.0.9
+// Version: 2.0.10
 // Last Modified: 04/02/2026
 //
 // This module manages the central game state and handles game initialization,
@@ -28,6 +28,40 @@ import { MAP_SIZES, SHIP_TYPES } from './config.js';
 import { invalidateZoneCache } from './influenceZones.js';
 import { SeededRandom, generateMapSeed } from './seededRandom.js';
 
+// Planet name theme collections
+export const PLANET_NAME_THEMES = {
+    greek: {
+        label: 'Greek Gods', home: 'Gaia',
+        names: [
+            'Gaia', 'Zeus', 'Hera', 'Poseidon', 'Athena', 'Apollo', 'Artemis', 'Ares', 'Aphrodite', 'Hermes',
+            'Hephaestus', 'Demeter', 'Dionysus', 'Hades', 'Persephone', 'Hestia', 'Eros', 'Pan', 'Nike', 'Helios',
+            'Selene', 'Eos', 'Nyx', 'Thanatos', 'Hypnos', 'Nemesis', 'Tyche', 'Iris', 'Morpheus', 'Triton',
+            'Proteus', 'Nereus', 'Oceanus', 'Kronos', 'Rhea', 'Atlas', 'Prometheus', 'Epimetheus', 'Hyperion', 'Theia',
+            'Mnemosyne', 'Themis', 'Phoebe', 'Leto', 'Astraea', 'Calypso', 'Circe', 'Hecate', 'Chaos', 'Erebus'
+        ]
+    },
+    norse: {
+        label: 'Norse Gods', home: 'Jord',
+        names: [
+            'Jord', 'Odin', 'Thor', 'Freya', 'Loki', 'Frigg', 'Tyr', 'Baldur', 'Heimdall', 'Njord',
+            'Skadi', 'Bragi', 'Idun', 'Forseti', 'Vidar', 'Vali', 'Sif', 'Hel', 'Fenrir', 'Ran',
+            'Aegir', 'Mimir', 'Nott', 'Dagr', 'Sunna', 'Mani', 'Eir', 'Saga', 'Vor', 'Var',
+            'Syn', 'Snotra', 'Gna', 'Fulla', 'Hlin', 'Ull', 'Hodr', 'Hermod', 'Magni', 'Modi',
+            'Nanna', 'Sigyn', 'Angrboda', 'Bestla', 'Buri', 'Ymir', 'Surtr', 'Freyr', 'Kvasir', 'Verdandi'
+        ]
+    },
+    stars: {
+        label: 'Real Stars', home: 'Sol',
+        names: [
+            'Sol', 'Sirius', 'Vega', 'Rigel', 'Altair', 'Deneb', 'Polaris', 'Antares', 'Betelgeuse', 'Aldebaran',
+            'Spica', 'Fomalhaut', 'Regulus', 'Procyon', 'Achernar', 'Canopus', 'Arcturus', 'Capella', 'Pollux', 'Castor',
+            'Bellatrix', 'Mira', 'Algol', 'Rasalhague', 'Albireo', 'Mintaka', 'Alnilam', 'Alnitak', 'Saiph', 'Alnath',
+            'Alkaid', 'Dubhe', 'Merak', 'Alioth', 'Mizar', 'Alcor', 'Etamin', 'Thuban', 'Kochab', 'Alphard',
+            'Wezen', 'Aludra', 'Naos', 'Sargas', 'Shaula', 'Lesath', 'Nunki', 'Kaus', 'Ascella', 'Algenib'
+        ]
+    }
+};
+
 // Color palette configuration
 export const COLOR_OPTIONS = {
     blue: { name: 'Blue', hex: '#0096ff', glowRgba: '0, 150, 255', planetGlow: 'rgba(0, 255, 136, 0.3)' },
@@ -45,6 +79,7 @@ export let gameState = {
     difficulty: 'easy',
     playerColor: 'blue', // Empire color choice
     aiColor: 'red', // AI color choice
+    planetNameTheme: 'greek', // Planet name collection (greek, norse, stars)
     influenceTransparency: 0.10, // 0.02 to 0.25 (default: 10%)
     worldWidth: 1500,
     worldHeight: 1200,
@@ -196,6 +231,15 @@ export function setupStartScreen() {
         });
     });
 
+    // Planet name theme buttons
+    document.querySelectorAll('[data-planet-names]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-planet-names]').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            gameState.planetNameTheme = btn.dataset.planetNames;
+        });
+    });
+
     // Transparency slider
     const transparencySlider = document.getElementById('transparencySlider');
     const transparencyValue = document.getElementById('transparencyValue');
@@ -214,7 +258,7 @@ export function setupStartScreen() {
     document.getElementById('startBtn').addEventListener('click', () => startGame());
 }
 
-function updateColorPickers() {
+export function updateColorPickers() {
     // Update player color picker
     const playerColorPicker = document.getElementById('playerColorPicker');
     playerColorPicker.querySelectorAll('.color-tile').forEach(tile => {
@@ -324,13 +368,8 @@ export function generatePlanets(count) {
     const padding = 150;
     const minDistance = 200;
 
-    const planetNames = [
-        'Gaia', 'Zeus', 'Hera', 'Poseidon', 'Athena', 'Apollo', 'Artemis', 'Ares', 'Aphrodite', 'Hermes',
-        'Hephaestus', 'Demeter', 'Dionysus', 'Hades', 'Persephone', 'Hestia', 'Eros', 'Pan', 'Nike', 'Helios',
-        'Selene', 'Eos', 'Nyx', 'Thanatos', 'Hypnos', 'Nemesis', 'Tyche', 'Iris', 'Morpheus', 'Triton',
-        'Proteus', 'Nereus', 'Oceanus', 'Kronos', 'Rhea', 'Atlas', 'Prometheus', 'Epimetheus', 'Hyperion', 'Theia',
-        'Mnemosyne', 'Themis', 'Phoebe', 'Leto', 'Astraea', 'Calypso', 'Circe', 'Hecate', 'Chaos', 'Erebus'
-    ];
+    const theme = PLANET_NAME_THEMES[gameState.planetNameTheme] || PLANET_NAME_THEMES.greek;
+    const planetNames = theme.names;
 
     for (let i = 0; i < count; i++) {
         let x, y, valid;
@@ -465,7 +504,8 @@ export function saveSettings() {
     const settings = {
         playerColor: gameState.playerColor,
         aiColor: gameState.aiColor,
-        influenceTransparency: gameState.influenceTransparency
+        influenceTransparency: gameState.influenceTransparency,
+        planetNameTheme: gameState.planetNameTheme
     };
     localStorage.setItem('4xSpaceSettings', JSON.stringify(settings));
 }
@@ -478,6 +518,7 @@ export function loadSettings() {
             gameState.playerColor = settings.playerColor || 'blue';
             gameState.aiColor = settings.aiColor || 'red';
             gameState.influenceTransparency = settings.influenceTransparency || 0.25;
+            gameState.planetNameTheme = settings.planetNameTheme || 'greek';
         } catch (e) {
             console.error('Failed to load settings:', e);
         }
@@ -638,4 +679,5 @@ export function resetGameState() {
     gameState.mapSeed = null;
     gameState.currentSaveId = null;
     gameState.gameOver = false;
+    gameState.planetNameTheme = 'greek';
 }
