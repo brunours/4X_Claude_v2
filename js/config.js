@@ -5,7 +5,8 @@
 // This module contains all core game configuration constants that define
 // gameplay parameters, ship statistics, map sizes, and AI behavior settings.
 //
-// Version: 1.0.2 - Updated ship combat stats
+// Version: 1.1.0 - Enhanced AI difficulty parameters with strategic intelligence,
+//                  fleet composition, and defensive behaviors
 //
 // Ship Stats (v1.0.2):
 // - Colonizer: 0 attack, 1 HP (non-combat)
@@ -39,24 +40,60 @@ export const MAP_SIZES = {
 
 export const AI_CONFIG = {
     easy: {
+        // Decision frequency
         expansionPriority: 0.3,
         militaryPriority: 0.2,
         aggressiveness: 0.2,
         decisionDelay: 3,
-        buildEfficiency: 0.6
+        buildEfficiency: 0.6,
+        // Strategic intelligence (Proposal 2)
+        targetingStrategy: 'random',     // Random valid target
+        fleetCoordination: false,        // Ships move independently
+        // Fleet composition (Proposal 3)
+        attackForceRatio: 0.4,           // Only sends 40% of ships
+        escortSize: 1,                   // Minimal colonizer escort
+        overkillFactor: 0.5,             // Will attack even when weaker
+        // Defensive behavior (Proposal 5)
+        defenseThreshold: 0.0,           // Never holds ships back for defense
+        homeDefenseRatio: 0.0,           // Sends everything
+        counterAttackEnabled: false      // No retaliation logic
     },
     medium: {
+        // Decision frequency
         expansionPriority: 0.5,
         militaryPriority: 0.5,
         aggressiveness: 0.5,
         decisionDelay: 2,
-        buildEfficiency: 0.8
+        buildEfficiency: 0.8,
+        // Strategic intelligence (Proposal 2)
+        targetingStrategy: 'nearest',    // Nearest neutral, weakest enemy
+        fleetCoordination: true,         // Combine fleets from multiple planets
+        // Fleet composition (Proposal 3)
+        attackForceRatio: 0.6,           // Sends 60% of ships
+        escortSize: 2,                   // Standard colonizer escort
+        overkillFactor: 1.0,             // Attacks if equal or stronger
+        // Defensive behavior (Proposal 5)
+        defenseThreshold: 0.3,           // Defends if player has 30% more military
+        homeDefenseRatio: 0.2,           // Keeps 20% at home
+        counterAttackEnabled: false      // No retaliation logic
     },
     hard: {
+        // Decision frequency
         expansionPriority: 0.8,
         militaryPriority: 0.8,
         aggressiveness: 0.8,
         decisionDelay: 1,
-        buildEfficiency: 1.0
+        buildEfficiency: 1.0,
+        // Strategic intelligence (Proposal 2)
+        targetingStrategy: 'optimal',    // Consider resource value + defense
+        fleetCoordination: true,         // Combine fleets from multiple planets
+        // Fleet composition (Proposal 3)
+        attackForceRatio: 0.8,           // Sends most of fleet
+        escortSize: 4,                   // Heavy colonizer escort
+        overkillFactor: 1.5,             // Only attacks if 1.5x stronger
+        // Defensive behavior (Proposal 5)
+        defenseThreshold: 0.5,           // More cautious about defending
+        homeDefenseRatio: 0.3,           // Always keeps 30% for defense
+        counterAttackEnabled: true       // Retaliates after being attacked
     }
 };

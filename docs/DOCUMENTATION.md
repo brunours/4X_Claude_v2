@@ -265,17 +265,51 @@ newPopulation = Math.min(
 
 ### 8. Difficulty Levels
 
-AI behavior parameters:
+AI behavior parameters vary significantly across difficulty levels:
 
-| Difficulty | Expansion | Military | Aggression |
-|------------|-----------|----------|------------|
-| Easy | 0.3 | 0.2 | 0.2 |
-| Medium | 0.5 | 0.5 | 0.5 |
-| Hard | 0.8 | 0.8 | 0.8 |
+#### Core Decision Parameters
 
-- **Expansion**: Likelihood of colonizing neutral planets
-- **Military**: Preference for building military ships
-- **Aggression**: Frequency of attacks on player
+| Parameter | Easy | Medium | Hard | Description |
+|-----------|------|--------|------|-------------|
+| `expansionPriority` | 0.3 | 0.5 | 0.8 | Likelihood of building colonizers |
+| `militaryPriority` | 0.2 | 0.5 | 0.8 | Focus on combat ship construction |
+| `aggressiveness` | 0.2 | 0.5 | 0.8 | Frequency of attacks and movements |
+| `buildEfficiency` | 0.6 | 0.8 | 1.0 | Chance to attempt building each turn |
+
+#### Strategic Intelligence (v2.1.0)
+
+| Parameter | Easy | Medium | Hard | Description |
+|-----------|------|--------|------|-------------|
+| `targetingStrategy` | random | nearest | optimal | How AI selects targets |
+| `fleetCoordination` | false | true | true | Multi-planet attack coordination |
+
+- **random**: AI picks any valid target randomly
+- **nearest**: AI colonizes nearest neutral, attacks weakest enemy
+- **optimal**: AI evaluates value/defense ratio for best targets
+
+#### Fleet Composition (v2.1.0)
+
+| Parameter | Easy | Medium | Hard | Description |
+|-----------|------|--------|------|-------------|
+| `attackForceRatio` | 0.4 | 0.6 | 0.8 | Percentage of ships sent on attacks |
+| `escortSize` | 1 | 2 | 4 | Military ships protecting colonizers |
+| `overkillFactor` | 0.5 | 1.0 | 1.5 | Required strength advantage to attack |
+
+- **Easy**: Sends weak forces, minimal colonizer protection, attacks even when weaker
+- **Medium**: Balanced approach, waits for equal strength
+- **Hard**: Commits majority of fleet, heavy escorts, only attacks with significant advantage
+
+#### Defensive Behavior (v2.1.0)
+
+| Parameter | Easy | Medium | Hard | Description |
+|-----------|------|--------|------|-------------|
+| `homeDefenseRatio` | 0.0 | 0.2 | 0.3 | Ships kept back for defense |
+| `defenseThreshold` | 0.0 | 0.3 | 0.5 | When to prioritize defense |
+| `counterAttackEnabled` | false | false | true | Retaliates after being attacked |
+
+- **Easy**: Never defends, commits all ships to offense
+- **Medium**: Keeps 20% reserve, defends when player is 30% stronger
+- **Hard**: Keeps 30% reserve, actively counter-attacks player aggression
 
 ---
 
@@ -915,100 +949,126 @@ const gameState = {
 
 ## AI System
 
-### AI Decision Tree
+### AI Decision Tree (v2.1.0)
 
 ```
 AI Turn Start
 │
 ├─ For each AI planet:
 │   │
-│   ├─ Building Decision
-│   │   │
-│   │   ├─ Check resource availability
-│   │   │
-│   │   ├─ Count existing military ships
-│   │   │   └─ If below threshold:
-│   │   │       └─ Build random military ship (Scout/Frigate/Battleship)
-│   │   │           (Weighted by difficulty.military)
-│   │   │
-│   │   └─ Check expansion need
-│   │       └─ If below threshold:
-│   │           └─ Build Colonizer
-│   │               (Weighted by difficulty.expansion)
+│   └─ Building Decision (based on buildEfficiency chance)
+│       │
+│       ├─ Check resource availability
+│       │
+│       ├─ Evaluate threat level (player vs AI military)
+│       │   └─ If player > AI * 0.7:
+│       │       └─ Build military (based on militaryPriority)
+│       │           └─ Priority: Battleship > Frigate > Scout
+│       │
+│       └─ Otherwise: Build colonizer (based on expansionPriority)
+│           └─ Fallback: Build scouts if nothing else affordable
+│
+├─ Movement Decision (varies by difficulty)
 │   │
-│   └─ Movement Decision
+│   ├─ [Easy Mode] Individual planet decisions:
+│   │   │
+│   │   ├─ Random targeting (any valid target)
+│   │   ├─ 40% attack force ratio
+│   │   ├─ No home defense reserve
+│   │   └─ Attacks even when weaker (overkillFactor: 0.5)
+│   │
+│   ├─ [Medium Mode] Coordinated fleet movement:
+│   │   │
+│   │   ├─ Nearest/weakest targeting strategy
+│   │   ├─ Coordinates attacks from multiple planets
+│   │   ├─ 60% attack force ratio
+│   │   ├─ 20% home defense reserve
+│   │   └─ Attacks when equal or stronger (overkillFactor: 1.0)
+│   │
+│   └─ [Hard Mode] Optimal coordinated attacks:
 │       │
-│       ├─ Aggression Check (random < difficulty.aggression)
-│       │   └─ If true:
-│       │       ├─ Find player planets
-│       │       ├─ Sort by military strength (weakest first)
-│       │       └─ Send ships to attack weakest
-│       │
-│       ├─ Expansion Check (random < difficulty.expansion)
-│       │   └─ If true:
-│       │       ├─ Find neutral planets
-│       │       ├─ Sort by distance (nearest first)
-│       │       ├─ Check for colonizer ships
-│       │       └─ Send colonizer to nearest neutral
-│       │
-│       └─ Defensive Check (fallback)
-│           └─ Find weak AI planets
-│               └─ Send reinforcements
+│       ├─ Counter-attack logic (retaliates against attackers)
+│       ├─ Optimal targeting (value/defense ratio analysis)
+│       ├─ Coordinates attacks from multiple planets
+│       ├─ 80% attack force ratio
+│       ├─ 30% home defense reserve
+│       └─ Only attacks with 1.5x advantage (overkillFactor: 1.5)
 │
 └─ End AI Turn
 ```
 
-### AI Behavior Parameters
+### AI Behavior by Difficulty
 
 #### Easy Difficulty
 ```javascript
 {
-    expansion: 0.3,    // 30% chance to colonize per turn
-    military: 0.2,     // Builds military if < 20% of fleet
-    aggression: 0.2    // 20% chance to attack per turn
+    expansionPriority: 0.3, militaryPriority: 0.2, aggressiveness: 0.2,
+    buildEfficiency: 0.6, targetingStrategy: 'random',
+    fleetCoordination: false, attackForceRatio: 0.4, escortSize: 1,
+    overkillFactor: 0.5, homeDefenseRatio: 0.0, counterAttackEnabled: false
 }
 ```
-**Playstyle**: Passive, slow expansion, weak military
+**Playstyle**: Passive, random decisions, weak forces, no coordination
 
 #### Medium Difficulty
 ```javascript
 {
-    expansion: 0.5,
-    military: 0.5,
-    aggression: 0.5
+    expansionPriority: 0.5, militaryPriority: 0.5, aggressiveness: 0.5,
+    buildEfficiency: 0.8, targetingStrategy: 'nearest',
+    fleetCoordination: true, attackForceRatio: 0.6, escortSize: 2,
+    overkillFactor: 1.0, homeDefenseRatio: 0.2, counterAttackEnabled: false
 }
 ```
-**Playstyle**: Balanced, moderate pressure
+**Playstyle**: Balanced, smart targeting, coordinated attacks, maintains reserves
 
 #### Hard Difficulty
 ```javascript
 {
-    expansion: 0.8,
-    military: 0.8,
-    aggression: 0.8
+    expansionPriority: 0.8, militaryPriority: 0.8, aggressiveness: 0.8,
+    buildEfficiency: 1.0, targetingStrategy: 'optimal',
+    fleetCoordination: true, attackForceRatio: 0.8, escortSize: 4,
+    overkillFactor: 1.5, homeDefenseRatio: 0.3, counterAttackEnabled: true
 }
 ```
-**Playstyle**: Aggressive expansion, strong military, frequent attacks
+**Playstyle**: Aggressive, optimal targeting, coordinated overwhelming force, retaliates
 
 ### AI Targeting Logic
 
-**Attack Target Selection:**
-1. Filter for player-owned planets
-2. Calculate military strength at each
-3. Sort by strength (ascending)
-4. Choose weakest
+**Random Strategy (Easy):**
+- Picks any valid target at random
+- No strategic evaluation
+- May send weak forces against strong defenses
 
-**Colonization Target Selection:**
-1. Filter for neutral (unowned) planets
-2. Calculate distance from AI planet
-3. Sort by distance (ascending)
-4. Choose nearest
+**Nearest/Weakest Strategy (Medium):**
+- **Colonization**: Nearest neutral planet
+- **Attack**: Weakest player planet (lowest military strength)
 
-**Reinforcement Target Selection:**
-1. Filter for AI-owned planets
-2. Calculate military strength at each
-3. Sort by strength (ascending)
-4. Send ships to weakest AI planet
+**Optimal Strategy (Hard):**
+- **Colonization**: Best value target considering:
+  - Resource generation potential
+  - Distance from AI planets
+  - Strategic position
+- **Attack**: Optimal target considering:
+  - Planet population (high = valuable)
+  - Defense strength (low = easier)
+  - Value/defense ratio analysis
+
+### Fleet Coordination (Medium/Hard)
+
+When `fleetCoordination` is enabled:
+1. AI calculates total available force across all planets
+2. Selects high-value target based on targeting strategy
+3. Evaluates if combined force exceeds `overkillFactor` × target defense
+4. If sufficient: coordinates attack from multiple planets simultaneously
+5. If insufficient: waits and builds up force
+
+### Counter-Attack System (Hard Only)
+
+When `counterAttackEnabled` is true:
+1. AI tracks planets that were recently attacked by player
+2. On next turn, prioritizes retaliating against attack source
+3. Finds nearest player planet to the attacked AI planet
+4. Coordinates overwhelming counter-attack if force is sufficient
 
 ---
 
@@ -1206,12 +1266,28 @@ When modifying the game:
 ---
 
 **Last Updated**: 2026-02-05
-**Version**: 2.0.12
+**Version**: 2.1.0
 **Documentation**: Complete
 
 ---
 
-## Recent Changes (v2.0.12)
+## Recent Changes (v2.1.0)
+
+### New Features
+- **Enhanced AI difficulty system**: Complete overhaul with distinct strategic differences between levels
+  - **Strategic Intelligence**: Easy=random, Medium=nearest/weakest, Hard=optimal (value/defense analysis)
+  - **Fleet Coordination**: Medium and Hard AI coordinate attacks from multiple planets
+  - **Fleet Composition**: Variable attack ratios (40%/60%/80%), escort sizes (1/2/4), overkill factors (0.5/1.0/1.5)
+  - **Defensive Behaviors**: Home defense reserves (0%/20%/30%), counter-attack logic for Hard AI
+
+### Technical Details
+- New AI config parameters: `targetingStrategy`, `fleetCoordination`, `attackForceRatio`, `escortSize`, `overkillFactor`, `defenseThreshold`, `homeDefenseRatio`, `counterAttackEnabled`
+- New AI functions: `aiCoordinatedMovement()`, `coordinateAttackOnTarget()`, `selectTarget()`, `findBestColonizationTarget()`, `findOptimalAttackTarget()`, `getAvailableMilitary()`, `calculatePlanetStrength()`, `sendFleet()`, `recordPlayerAttack()`
+- Counter-attack tracking with `recentlyAttackedPlanets` array
+
+---
+
+## Previous Changes (v2.0.12)
 
 ### Improvements
 - **Wider launch menu columns**: Both columns now 480px wide to fit 3 planet name buttons per row
@@ -1220,9 +1296,3 @@ When modifying the game:
 ### Bug Fixes
 - **Battle consolidation**: Multiple ship groups arriving at same planet now trigger single combined battle
 - **Colonizer protection**: Colonizers with military escorts are now protected (die last in combat)
-
-### Technical Details
-- CSS column widths increased from 400/350px to 480px with 360px/500px min/max constraints
-- New leaderboard functions: `getPersonalBestByDifficulty()`, `getGlobalTop5ByDifficulty()`, `renderLeaderboardByDifficulty()`
-- `processTravelingShips()` now consolidates arrivals by planet+owner before processing
-- `applyDamageToFleet()` excludes colonizers from targeting while military ships remain

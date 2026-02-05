@@ -1,5 +1,51 @@
 # Release Notes
 
+## Version 2.1.0 - 05/02/2026
+
+### New Features
+- **Enhanced AI difficulty system**: Complete overhaul of AI behavior with distinct strategic differences between difficulty levels
+  - **Strategic Intelligence Tiers**:
+    - Easy: Random target selection - AI picks targets without strategy
+    - Medium: Nearest/weakest targeting - AI prioritizes nearby neutrals and vulnerable enemies
+    - Hard: Optimal targeting - AI evaluates planet value (population, resources) vs defense strength
+  - **Fleet Coordination** (Medium & Hard):
+    - AI can now coordinate attacks from multiple planets onto a single high-value target
+    - Calculates combined fleet strength before committing to attacks
+    - Only attacks when it has sufficient force advantage
+  - **Fleet Composition Intelligence**:
+    - `attackForceRatio`: Easy sends 40% of ships, Medium 60%, Hard 80%
+    - `escortSize`: Colonizer protection varies (1/2/4 military escorts)
+    - `overkillFactor`: Hard AI only attacks when 1.5x stronger than target
+  - **Defensive Behaviors**:
+    - `homeDefenseRatio`: Percentage of ships kept for planet defense (0%/20%/30%)
+    - `defenseThreshold`: When AI prioritizes defense over offense
+    - `counterAttackEnabled`: Hard AI retaliates against planets that attacked it
+  - Files modified: `js/config.js`, `js/aiSystem.js`
+
+### Technical Implementation
+- New AI configuration parameters in `AI_CONFIG`:
+  - `targetingStrategy`: 'random' | 'nearest' | 'optimal'
+  - `fleetCoordination`: boolean for multi-planet attack coordination
+  - `attackForceRatio`: 0.4 | 0.6 | 0.8
+  - `escortSize`: 1 | 2 | 4
+  - `overkillFactor`: 0.5 | 1.0 | 1.5
+  - `defenseThreshold`: 0.0 | 0.3 | 0.5
+  - `homeDefenseRatio`: 0.0 | 0.2 | 0.3
+  - `counterAttackEnabled`: boolean
+- New AI functions in `aiSystem.js`:
+  - `aiCoordinatedMovement()`: Coordinates attacks from multiple AI planets
+  - `coordinateAttackOnTarget()`: Gathers and sends sufficient force to a target
+  - `selectTarget()`: Routes targeting based on difficulty strategy
+  - `findBestColonizationTarget()`: Optimal colonization for hard AI
+  - `findOptimalAttackTarget()`: Value/defense ratio analysis for hard AI
+  - `getAvailableMilitary()`: Respects homeDefenseRatio
+  - `calculatePlanetStrength()`: Evaluates planet defense
+  - `sendFleet()`: Centralized fleet dispatch
+  - `recordPlayerAttack()`: Tracks attacks for counter-attack logic
+- Counter-attack tracking with `recentlyAttackedPlanets` array
+
+---
+
 ## Version 2.0.12 - 05/02/2026
 
 ### Improvements
