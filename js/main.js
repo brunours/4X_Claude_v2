@@ -85,22 +85,23 @@ window.addEventListener('DOMContentLoaded', async () => {
         console.error('Error during initialization:', error);
     }
 
-    // Check authentication state
-    try {
-        const authResult = await initAuth();
+    // Show auth screen IMMEDIATELY so buttons are clickable
+    // Don't block on Supabase - let auth check happen in background
+    showAuthScreen();
+    console.log('Auth screen shown - checking authentication in background...');
 
+    // Check authentication state in background (non-blocking for guest users)
+    initAuth().then(authResult => {
         if (authResult.authenticated) {
             // User is logged in - show start screen with saved games
+            console.log('User authenticated, showing start screen');
             showStartScreen(authResult.profile);
-        } else {
-            // Show auth screen
-            showAuthScreen();
         }
-    } catch (error) {
+        // If not authenticated, auth screen is already showing - do nothing
+    }).catch(error => {
         console.error('Auth initialization failed:', error);
-        // Show auth screen anyway so user can still try to login/register
-        showAuthScreen();
-    }
+        // Auth screen is already showing - do nothing
+    });
 
     console.log('Game initialized successfully!');
 });
