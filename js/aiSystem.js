@@ -38,7 +38,7 @@
 // Used by: turnSystem (called during endTurn() after player actions)
 
 import { gameState, generateId } from './gameState.js';
-import { canAffordShip, buildShip, calculateBuildTime } from './shipSystem.js';
+import { calculateBuildTime } from './shipSystem.js';
 import { SHIP_TYPES, AI_CONFIG } from './config.js';
 
 // Track recently attacked planets for counter-attack logic
