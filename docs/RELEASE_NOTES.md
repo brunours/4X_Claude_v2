@@ -1,5 +1,31 @@
 # Release Notes
 
+## Version 2.0.11 - 05/02/2026
+
+### Improvements
+- **Responsive launch menu redesign**: Complete overhaul of the start screen layout for better visibility across devices
+  - **4-container layout**: Reorganized into logical groups:
+    1. Game Settings (Galaxy Size, AI Difficulty, Empire Colors) - Left column
+    2. Saved Games - Right column top
+    3. Extra Settings (Influence Transparency, Planet Names) - Right column bottom
+    4. Action Buttons (LEADERBOARDS, LAUNCH) - Centered at bottom
+  - **Saved Games "More/Show Less"**: When more than 2 saved games exist, only shows the 2 most recent with a "More" button to expand the full list
+  - **PC/Desktop**: Two-column layout with fixed action buttons at bottom of screen
+  - **Tablet Landscape**: Compact two-column layout fitting screen without scrolling
+  - **Tablet/Mobile Portrait**: Single-column layout with fixed action buttons at TOP of screen for easy access while scrolling
+  - Renamed "VIEW LEADERBOARDS" button to "LEADERBOARDS" for consistency
+  - Files modified: `index.html`, `css/style.css`, `js/main.js`
+
+### Technical Implementation
+- Restructured HTML with 4 semantic containers: `gameSettingsContainer`, `savedGamesContainer`, `extraSettingsContainer`, `actionButtonsContainer`
+- Added `right-side-column` wrapper for right column containers
+- CSS media queries for: desktop (>900px), tablet landscape (768-900px landscape), tablet/mobile portrait (<767px or portrait)
+- Added `savedGamesMoreBtn` with toggle functionality
+- JavaScript tracks `allSavedGames` array and `savedGamesExpanded` state
+- `renderSavedGames()` function dynamically shows collapsed/expanded view
+
+---
+
 ## Version 2.0.10 - 04/02/2026
 
 ### New Features

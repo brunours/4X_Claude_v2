@@ -1,7 +1,7 @@
 // ============================================
 // MAIN - GAME INITIALIZATION & ORCHESTRATION
 // ============================================
-// Version: 2.0.10
+// Version: 2.0.11
 //
 // This is the entry point for the game. It coordinates the initialization
 // of all game systems and starts the game loop when the page loads.
@@ -124,8 +124,9 @@ function showStartScreen(profile = null) {
         document.getElementById('userInfo').style.display = 'flex';
         document.getElementById('nicknameDisplay').textContent = gameState.username || 'User';
 
-        // Show right column with saved games and leaderboard
-        document.getElementById('rightColumn').style.display = 'flex';
+        // Show saved games container and leaderboard button
+        document.getElementById('savedGamesContainer').style.display = 'block';
+        document.getElementById('leaderboardBtn').style.display = 'inline-block';
 
         // Load saved games
         loadAndDisplaySavedGames();
@@ -138,7 +139,8 @@ function showStartScreen(profile = null) {
     } else {
         // Guest mode - hide authenticated-only features
         document.getElementById('userInfo').style.display = 'none';
-        document.getElementById('rightColumn').style.display = 'none';
+        document.getElementById('savedGamesContainer').style.display = 'none';
+        document.getElementById('leaderboardBtn').style.display = 'none';
     }
 }
 
@@ -198,16 +200,40 @@ function applyProfileToUI(profile) {
     updateColorPickers();
 }
 
+// Track saved games state
+let allSavedGames = [];
+let savedGamesExpanded = false;
+const SAVED_GAMES_COLLAPSED_COUNT = 2;
+
 async function loadAndDisplaySavedGames() {
     const result = await listSavedGames();
     const container = document.getElementById('savedGamesList');
+    const moreBtn = document.getElementById('savedGamesMoreBtn');
 
     if (!result.success || result.saves.length === 0) {
         container.innerHTML = '<p class="no-saves">No saved games</p>';
+        moreBtn.style.display = 'none';
         return;
     }
 
-    container.innerHTML = result.saves.map(save => {
+    // Store all saves and reset expanded state
+    allSavedGames = result.saves;
+    savedGamesExpanded = false;
+
+    // Render saved games
+    renderSavedGames();
+}
+
+function renderSavedGames() {
+    const container = document.getElementById('savedGamesList');
+    const moreBtn = document.getElementById('savedGamesMoreBtn');
+
+    // Determine which saves to show
+    const savesToShow = savedGamesExpanded
+        ? allSavedGames
+        : allSavedGames.slice(0, SAVED_GAMES_COLLAPSED_COUNT);
+
+    container.innerHTML = savesToShow.map(save => {
         const updatedDate = new Date(save.updated_at).toLocaleDateString();
         return `
             <div class="saved-game-item" data-save-id="${save.id}">
@@ -227,6 +253,19 @@ async function loadAndDisplaySavedGames() {
             </div>
         `;
     }).join('');
+
+    // Show/hide More button based on total saves count
+    if (allSavedGames.length > SAVED_GAMES_COLLAPSED_COUNT) {
+        moreBtn.style.display = 'block';
+        moreBtn.textContent = savedGamesExpanded ? 'Show Less' : 'More';
+    } else {
+        moreBtn.style.display = 'none';
+    }
+}
+
+function toggleSavedGamesExpanded() {
+    savedGamesExpanded = !savedGamesExpanded;
+    renderSavedGames();
 }
 
 function setupAuthHandlers() {
@@ -389,6 +428,11 @@ function setupStartScreenHandlers() {
     // Leaderboard button
     document.getElementById('leaderboardBtn').addEventListener('click', () => {
         openLeaderboard();
+    });
+
+    // Saved games More/Show Less button
+    document.getElementById('savedGamesMoreBtn').addEventListener('click', () => {
+        toggleSavedGamesExpanded();
     });
 
     // Edit nickname button

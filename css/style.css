@@ -1,14 +1,18 @@
 /*
  * 4X SPACE CONQUEST - STYLESHEET
- * Version: 1.0.3
+ * Version: 2.0.11
  *
  * Complete styling for the 4X space strategy game including:
  * - Layout and responsive design
  * - Button styles and animations
  * - Canvas and UI overlays
  * - Battle dialog styling
- * - Influence zone toggle button (v1.0.3)
+ * - Influence zone toggle button
  * - Version display
+ * - Responsive launch menu (v2.0.11)
+ *   - 4-container layout for PC/tablet
+ *   - Portrait mode with sticky action buttons at top
+ *   - Saved games More/Show Less functionality
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap');
@@ -2367,62 +2371,369 @@ input:checked + .toggle-slider:before {
 }
 
 /* ============================================
-   START SCREEN 2-COLUMN LAYOUT
+   START SCREEN RESPONSIVE LAYOUT
    ============================================ */
+
+/* Main container for start screen content */
 .start-screen-content {
     display: flex;
-    gap: 40px;
+    gap: 30px;
     justify-content: center;
     align-items: flex-start;
     max-width: 1200px;
     width: 100%;
     padding: 0 20px;
+    flex-wrap: wrap;
 }
 
-.start-column {
+/* Container 1: Game Settings (Galaxy Size, AI Difficulty, Colors) */
+.settings-container {
     flex: 1;
-    max-width: 500px;
-}
-
-.left-column {
+    min-width: 320px;
+    max-width: 450px;
     text-align: center;
 }
 
-.right-column {
+/* Right side column containing saved games and extra settings */
+.right-side-column {
+    flex: 1;
+    min-width: 320px;
+    max-width: 400px;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-/* Adjust saved games section for right column */
-.right-column .saved-games-section {
+/* Container 2: Saved Games */
+.saved-games-container {
+    width: 100%;
+}
+
+.saved-games-container .saved-games-section {
     margin: 0;
     max-width: none;
 }
 
-.right-column .saved-games-list {
-    max-height: 300px;
+.saved-games-container .saved-games-list {
+    max-height: none;
+    overflow: visible;
 }
 
-/* Leaderboard button container in right column */
-#leaderboardBtnContainer {
+.saved-games-container .saved-games-list.collapsed {
+    max-height: none;
+    overflow: hidden;
+}
+
+/* More/Show Less button for saved games */
+.saved-games-more-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: rgba(0, 170, 255, 0.15);
+    border: 1px solid rgba(0, 170, 255, 0.3);
+    border-radius: 6px;
+    color: #0af;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
+}
+
+.saved-games-more-btn:hover {
+    background: rgba(0, 170, 255, 0.3);
+    border-color: #0af;
+}
+
+/* Container 3: Extra Settings (Influence & Planet Names) */
+.extra-settings-container {
+    width: 100%;
     text-align: center;
 }
 
-/* Responsive: Stack columns on smaller screens */
-@media (max-width: 900px) {
+/* Container 4: Action Buttons */
+.action-buttons-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.action-buttons-container #startBtn {
+    margin-top: 0;
+}
+
+.action-buttons-container .leaderboard-btn {
+    padding: 20px 40px;
+    font-size: 1rem;
+}
+
+/* ============================================
+   PC/DESKTOP LAYOUT (min-width: 900px)
+   ============================================ */
+@media (min-width: 901px) {
+    #startScreen {
+        padding-top: 20px;
+        padding-bottom: 20px;
+        overflow-y: auto;
+    }
+
+    .start-screen-content {
+        flex-wrap: nowrap;
+    }
+
+    .settings-container {
+        flex: 0 0 auto;
+        width: 400px;
+    }
+
+    .right-side-column {
+        flex: 0 0 auto;
+        width: 350px;
+    }
+
+    .action-buttons-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(5, 10, 18, 0.98) 0%, rgba(5, 10, 18, 0.9) 80%, transparent 100%);
+        padding: 25px 20px 20px;
+        margin-top: 0;
+        z-index: 10;
+    }
+
+    /* Add bottom padding to content to account for fixed buttons */
+    .start-screen-content {
+        padding-bottom: 100px;
+    }
+}
+
+/* ============================================
+   TABLET LANDSCAPE LAYOUT
+   ============================================ */
+@media (min-width: 768px) and (max-width: 900px) and (orientation: landscape),
+       (min-width: 900px) and (max-height: 600px) {
+    #startScreen {
+        padding: 10px 20px;
+        overflow-y: auto;
+    }
+
+    .start-header {
+        margin-bottom: 15px;
+    }
+
+    .start-header h1 {
+        font-size: 2rem;
+        margin-bottom: 5px;
+    }
+
+    .start-header .subtitle {
+        margin-bottom: 10px;
+    }
+
+    .start-screen-content {
+        flex-wrap: nowrap;
+        gap: 20px;
+    }
+
+    .settings-container {
+        flex: 1;
+        min-width: 280px;
+        max-width: 350px;
+    }
+
+    .right-side-column {
+        flex: 1;
+        min-width: 280px;
+        max-width: 320px;
+    }
+
+    .menu-section {
+        margin-bottom: 15px;
+    }
+
+    .menu-section h2 {
+        font-size: 0.75rem;
+        margin-bottom: 8px;
+    }
+
+    .option-btn {
+        padding: 10px 15px;
+        font-size: 0.75rem;
+        min-width: 80px;
+    }
+
+    .color-tile {
+        width: 35px;
+        height: 35px;
+    }
+
+    .action-buttons-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(5, 10, 18, 0.98) 0%, rgba(5, 10, 18, 0.9) 80%, transparent 100%);
+        padding: 15px 20px;
+        margin-top: 0;
+        z-index: 10;
+    }
+
+    .action-buttons-container #startBtn,
+    .action-buttons-container .leaderboard-btn {
+        padding: 12px 30px;
+        font-size: 0.9rem;
+    }
+
+    .start-screen-content {
+        padding-bottom: 80px;
+    }
+}
+
+/* ============================================
+   TABLET/MOBILE PORTRAIT LAYOUT
+   ============================================ */
+@media (max-width: 767px),
+       (max-width: 900px) and (orientation: portrait) {
+    #startScreen {
+        padding: 10px;
+        overflow-y: auto;
+        justify-content: flex-start;
+        padding-top: 10px;
+    }
+
+    .start-header {
+        margin-bottom: 10px;
+        position: relative;
+    }
+
+    .start-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+    }
+
+    .start-header .subtitle {
+        font-size: 0.7rem;
+        margin-bottom: 10px;
+        letter-spacing: 5px;
+    }
+
+    /* Fixed action buttons at top in portrait */
+    .action-buttons-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to bottom, rgba(5, 10, 18, 0.98) 0%, rgba(5, 10, 18, 0.9) 80%, transparent 100%);
+        padding: 10px 15px 20px;
+        margin-top: 0;
+        z-index: 100;
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .action-buttons-container #startBtn,
+    .action-buttons-container .leaderboard-btn {
+        flex: 1;
+        padding: 12px 15px;
+        font-size: 0.85rem;
+    }
+
+    /* Add top padding to account for fixed buttons */
+    .start-header {
+        margin-top: 70px;
+    }
+
     .start-screen-content {
         flex-direction: column;
         align-items: center;
+        gap: 15px;
+        padding-bottom: 20px;
     }
 
-    .start-column {
-        max-width: 500px;
+    /* Reorder containers for portrait - saved games first */
+    .right-side-column {
+        order: -1;
         width: 100%;
+        max-width: 400px;
     }
 
-    .right-column {
-        order: -1; /* Show saved games above new game options on mobile */
+    .settings-container {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .extra-settings-container {
+        order: 1;
+    }
+
+    .menu-section {
+        margin-bottom: 15px;
+    }
+
+    .menu-section h2 {
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+    }
+
+    .option-btn {
+        padding: 10px 18px;
+        font-size: 0.8rem;
+        min-width: 85px;
+    }
+
+    .option-group {
+        gap: 8px;
+    }
+
+    .color-tile {
+        width: 40px;
+        height: 40px;
+    }
+
+    .color-picker {
+        gap: 10px;
+    }
+
+    .saved-game-item {
+        padding: 10px 12px;
+        flex-wrap: wrap;
+    }
+
+    .save-actions {
+        width: 100%;
+        margin-top: 8px;
+        justify-content: flex-end;
+    }
+}
+
+/* ============================================
+   SMALL MOBILE SCREENS
+   ============================================ */
+@media (max-width: 400px) {
+    .start-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .option-btn {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        min-width: 70px;
+    }
+
+    .color-tile {
+        width: 35px;
+        height: 35px;
+    }
+
+    .action-buttons-container #startBtn,
+    .action-buttons-container .leaderboard-btn {
+        padding: 10px 12px;
+        font-size: 0.75rem;
     }
 }
 

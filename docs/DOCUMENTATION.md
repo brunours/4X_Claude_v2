@@ -1205,25 +1205,23 @@ When modifying the game:
 
 ---
 
-**Last Updated**: 2026-02-04
-**Version**: 2.0.10
+**Last Updated**: 2026-02-05
+**Version**: 2.0.11
 **Documentation**: Complete
 
 ---
 
-## Recent Changes (v2.0.10)
+## Recent Changes (v2.0.11)
 
-### New Features
-- Planet name theme selection: 3 collections (Greek Gods, Norse Gods, Real Stars) with 50 names each
-- Player chooses theme in launch menu; preference saved to Supabase profile
-- Home planet names: Gaia (Greek), Jord (Norse), Sol (Stars)
-
-### Bug Fixes
-- Fixed color pre-selection bug: saved empire colors now correctly pre-selected on launch menu
-- `applyProfileToUI()` now calls `updateColorPickers()` to refresh all selected/disabled states
+### Improvements
+- **Responsive launch menu redesign**: 4-container layout for better visibility across devices
+  - PC/Desktop: Two-column layout with fixed action buttons at bottom
+  - Tablet Landscape: Compact two-column layout without scrolling
+  - Tablet/Mobile Portrait: Single-column with fixed buttons at TOP of screen
+- **Saved Games More/Show Less**: Shows 2 most recent saves with expandable list
+- Renamed "VIEW LEADERBOARDS" to "LEADERBOARDS"
 
 ### Technical Details
-- `PLANET_NAME_THEMES` constant exported from `gameState.js` with 3 theme collections
-- `planetNameTheme` added to gameState, localStorage, and Supabase profile persistence
-- `updateColorPickers()` exported from `gameState.js` for cross-module use
-- New `preferred_planet_names` column in Supabase `profiles` table
+- HTML restructured with 4 containers: `gameSettingsContainer`, `savedGamesContainer`, `extraSettingsContainer`, `actionButtonsContainer`
+- CSS media queries for desktop, tablet landscape, and portrait orientations
+- JavaScript `renderSavedGames()` with collapse/expand toggle functionality

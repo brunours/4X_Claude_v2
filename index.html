@@ -104,8 +104,8 @@
             </div>
 
             <div class="start-screen-content">
-                <!-- Left Column: New Game Options -->
-                <div class="start-column left-column">
+                <!-- Container 1: Game Settings (Galaxy Size, AI Difficulty, Colors) -->
+                <div class="settings-container" id="gameSettingsContainer">
                     <div class="menu-section">
                         <h2>Galaxy Size</h2>
                         <div class="option-group">
@@ -147,46 +147,51 @@
                             <div class="color-tile" data-color="orange" style="background: #ff8800;"></div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="menu-section">
-                        <h2>Influence Zone Transparency</h2>
-                        <div class="slider-container">
-                            <input type="range" id="transparencySlider" min="2" max="25" value="15" step="1">
-                            <div class="slider-labels">
-                                <span>Subtle</span>
-                                <span id="transparencyValue">15%</span>
-                                <span>Strong</span>
+                <!-- Right Side Column (for PC/landscape) -->
+                <div class="right-side-column" id="rightSideColumn">
+                    <!-- Container 2: Saved Games (only shown when logged in) -->
+                    <div id="savedGamesContainer" class="saved-games-container" style="display: none;">
+                        <div class="menu-section saved-games-section">
+                            <h2>Saved Games</h2>
+                            <div id="savedGamesList" class="saved-games-list">
+                                <p class="no-saves">No saved games</p>
+                            </div>
+                            <button id="savedGamesMoreBtn" class="saved-games-more-btn" style="display: none;">More</button>
+                        </div>
+                    </div>
+
+                    <!-- Container 3: Influence & Planet Names -->
+                    <div class="extra-settings-container" id="extraSettingsContainer">
+                        <div class="menu-section">
+                            <h2>Influence Zone Transparency</h2>
+                            <div class="slider-container">
+                                <input type="range" id="transparencySlider" min="2" max="25" value="15" step="1">
+                                <div class="slider-labels">
+                                    <span>Subtle</span>
+                                    <span id="transparencyValue">15%</span>
+                                    <span>Strong</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="menu-section">
+                            <h2>Planet Names</h2>
+                            <div class="option-group">
+                                <button class="option-btn selected" data-planet-names="greek">Greek Gods</button>
+                                <button class="option-btn" data-planet-names="norse">Norse Gods</button>
+                                <button class="option-btn" data-planet-names="stars">Real Stars</button>
                             </div>
                         </div>
                     </div>
-
-                    <div class="menu-section">
-                        <h2>Planet Names</h2>
-                        <div class="option-group">
-                            <button class="option-btn selected" data-planet-names="greek">Greek Gods</button>
-                            <button class="option-btn" data-planet-names="norse">Norse Gods</button>
-                            <button class="option-btn" data-planet-names="stars">Real Stars</button>
-                        </div>
-                    </div>
-
-                    <button id="startBtn">LAUNCH</button>
                 </div>
+            </div>
 
-                <!-- Right Column: Saved Games & Leaderboards (only shown when logged in) -->
-                <div id="rightColumn" class="start-column right-column" style="display: none;">
-                    <!-- Saved Games Section -->
-                    <div id="savedGamesSection" class="menu-section saved-games-section">
-                        <h2>Saved Games</h2>
-                        <div id="savedGamesList" class="saved-games-list">
-                            <p class="no-saves">No saved games</p>
-                        </div>
-                    </div>
-
-                    <!-- Leaderboard Button -->
-                    <div id="leaderboardBtnContainer" class="menu-section">
-                        <button id="leaderboardBtn" class="leaderboard-btn">VIEW LEADERBOARDS</button>
-                    </div>
-                </div>
+            <!-- Container 4: Action Buttons (Leaderboard & Launch) -->
+            <div class="action-buttons-container" id="actionButtonsContainer">
+                <button id="leaderboardBtn" class="leaderboard-btn" style="display: none;">LEADERBOARDS</button>
+                <button id="startBtn">LAUNCH</button>
             </div>
         </div>
 
@@ -324,7 +329,7 @@
         <div id="zoomIndicator">Zoom: 100%</div>
 
         <!-- Version Display -->
-        <div id="versionDisplay">v2.0.10</div>
+        <div id="versionDisplay">v2.0.11</div>
 
         <!-- Game Over Screen -->
         <div id="gameOverScreen">
