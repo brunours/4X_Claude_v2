@@ -1206,22 +1206,23 @@ When modifying the game:
 ---
 
 **Last Updated**: 2026-02-05
-**Version**: 2.0.11
+**Version**: 2.0.12
 **Documentation**: Complete
 
 ---
 
-## Recent Changes (v2.0.11)
+## Recent Changes (v2.0.12)
 
 ### Improvements
-- **Responsive launch menu redesign**: 4-container layout for better visibility across devices
-  - PC/Desktop: Two-column layout with fixed action buttons at bottom
-  - Tablet Landscape: Compact two-column layout without scrolling
-  - Tablet/Mobile Portrait: Single-column with fixed buttons at TOP of screen
-- **Saved Games More/Show Less**: Shows 2 most recent saves with expandable list
-- Renamed "VIEW LEADERBOARDS" to "LEADERBOARDS"
+- **Wider launch menu columns**: Both columns now 480px wide to fit 3 planet name buttons per row
+- **Leaderboard by difficulty**: Restructured to show Easy/Medium/Hard sections with personal best and global top 5 for each
+
+### Bug Fixes
+- **Battle consolidation**: Multiple ship groups arriving at same planet now trigger single combined battle
+- **Colonizer protection**: Colonizers with military escorts are now protected (die last in combat)
 
 ### Technical Details
-- HTML restructured with 4 containers: `gameSettingsContainer`, `savedGamesContainer`, `extraSettingsContainer`, `actionButtonsContainer`
-- CSS media queries for desktop, tablet landscape, and portrait orientations
-- JavaScript `renderSavedGames()` with collapse/expand toggle functionality
+- CSS column widths increased from 400/350px to 480px with 360px/500px min/max constraints
+- New leaderboard functions: `getPersonalBestByDifficulty()`, `getGlobalTop5ByDifficulty()`, `renderLeaderboardByDifficulty()`
+- `processTravelingShips()` now consolidates arrivals by planet+owner before processing
+- `applyDamageToFleet()` excludes colonizers from targeting while military ships remain

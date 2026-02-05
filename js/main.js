@@ -37,7 +37,7 @@ import { gameLoop } from './renderer.js';
 import { updateDisplay } from './uiManager.js';
 import { initAuth, signIn, signUp, signOut, getProfile, applyProfileToGameState, saveSettingsToProfile, updateProfile, requestPasswordReset, updatePassword, onAuthStateChange } from './auth.js';
 import { listSavedGames, loadSavedGame, deleteSavedGame, completeGame, clearCurrentSave } from './saveSystem.js';
-import { getPersonalTop10, getGlobalTop10, getCompletedGameDetails, renderLeaderboardEntries, renderMapViewerInfo, drawMapPreview } from './leaderboard.js';
+import { getPersonalTop10, getGlobalTop10, getPersonalBestByDifficulty, getGlobalTop5ByDifficulty, getCompletedGameDetails, renderLeaderboardEntries, renderLeaderboardByDifficulty, renderMapViewerInfo, drawMapPreview } from './leaderboard.js';
 import { invalidateZoneCache } from './influenceZones.js';
 
 let currentLeaderboardTab = 'personal';
@@ -568,14 +568,12 @@ async function loadLeaderboardTab(tab) {
         }
     });
 
-    let entries = [];
-    if (tab === 'personal') {
-        entries = await getPersonalTop10();
-    } else {
-        entries = await getGlobalTop10();
-    }
+    // Load data by difficulty
+    const personalBests = tab === 'personal' ? await getPersonalBestByDifficulty() : { easy: null, medium: null, hard: null };
+    const globalTop5 = await getGlobalTop5ByDifficulty();
 
-    content.innerHTML = renderLeaderboardEntries(entries, tab === 'personal');
+    // Render by difficulty (show personal bests only on personal tab)
+    content.innerHTML = renderLeaderboardByDifficulty(personalBests, globalTop5, tab === 'personal');
 }
 
 async function viewLeaderboardGame(gameId) {

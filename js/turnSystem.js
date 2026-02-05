@@ -1,7 +1,7 @@
 // ============================================
 // TURN SYSTEM
 // ============================================
-// Version: 2.0.9
+// Version: 2.0.12
 //
 // This module orchestrates the end-turn sequence, processing all game events
 // that occur each turn including builds, movement, healing, and resource collection.
@@ -17,6 +17,7 @@
 // - Handle ship arrivals including colonization of neutral planets
 // - Trigger combat when enemy ships encounter each other
 // - Check for victory/defeat conditions
+// - Consolidate multiple ship arrivals at same planet into single battle
 //
 // Exports:
 // - endTurn(): Main turn processing function called by "End Turn" button
@@ -31,6 +32,7 @@
 // Used by: main.js and uiManager (End Turn button), called once per turn
 //
 // Version History:
+// - 2.0.12: Fixed battle consolidation - multiple arrivals at same planet now trigger single battle
 // - 1.0.2: Added retreat options to battlePending for tactical withdrawals
 // - 1.0.1: Fixed colonization bug where newly colonized planets were incorrectly neutralized
 // - 1.0.7: Added auto-save integration for authenticated users
@@ -119,14 +121,37 @@ export function processBuildQueues() {
 }
 
 export function processTravelingShips() {
+    // First, collect all arriving groups and consolidate by target planet and owner
+    const arrivingByPlanetAndOwner = new Map(); // Key: "planetId_owner" -> { ships: [], fromPlanetId, retreatOptions }
+
     for (let i = gameState.travelingShips.length - 1; i >= 0; i--) {
         const group = gameState.travelingShips[i];
         group.turnsRemaining--;
 
         if (group.turnsRemaining <= 0) {
-            handleShipArrival(group);
+            // Consolidate ships arriving at same planet from same owner
+            const key = `${group.targetPlanetId}_${group.owner}`;
+
+            if (!arrivingByPlanetAndOwner.has(key)) {
+                arrivingByPlanetAndOwner.set(key, {
+                    targetPlanetId: group.targetPlanetId,
+                    owner: group.owner,
+                    ships: [],
+                    fromPlanetId: group.fromPlanetId // Keep first one for retreat
+                });
+            }
+
+            // Add ships from this group to the consolidated group
+            arrivingByPlanetAndOwner.get(key).ships.push(...group.ships);
+
+            // Remove from traveling ships
             gameState.travelingShips.splice(i, 1);
         }
+    }
+
+    // Process each consolidated arrival group
+    for (const consolidatedGroup of arrivingByPlanetAndOwner.values()) {
+        handleShipArrival(consolidatedGroup);
     }
 }
 

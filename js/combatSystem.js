@@ -5,7 +5,7 @@
 // This module handles all combat mechanics, including battle resolution,
 // casualty calculations, conquest mechanics, and battle result displays.
 //
-// Version: 2.0.9 - Battle queue for sequential multi-battle resolution
+// Version: 2.0.12 - Colonizers now die last when escorted
 //
 // Core Responsibilities:
 // - Resolve combat using realistic HP-based round-by-round calculations
@@ -17,13 +17,15 @@
 // - Handle special cases (colonizers auto-destroyed without escorts or when army defeated)
 // - Manage planet ownership changes and neutralization after successful attacks
 // - Implement tactical withdrawal with damage and destination selection
+// - Ensure colonizers with escorts are destroyed last (protected by military ships)
 //
-// Combat Mechanics (v1.0.2):
+// Combat Mechanics (v2.0.12):
 // - Ships fire in rounds until one side is eliminated
 // - Each round has ±15% damage randomness
 // - Defenders receive 10% HP bonus (not strength multiplier)
 // - Equal strength battles cause significant damage to winners
 // - Withdrawal incurs 30-40% of defender firepower as damage
+// - Colonizers are protected by escorts and only destroyed after all military ships die
 //
 // Exports:
 // - resolveBattleChoice(choice): Processes player's fight/withdraw decision
@@ -487,30 +489,42 @@ function simulateCombat(attackers, defenders, attackerWinChance) {
 function applyDamageToFleet(ships, totalDamage, destroyedList) {
     // Distribute damage across fleet
     // Damage is distributed randomly but weighted by HP (weaker ships more likely to be hit)
+    // Colonizers are protected while military ships are present (they die last)
     let remainingDamage = totalDamage;
 
     while (remainingDamage > 0 && ships.length > 0) {
-        // Pick a random ship weighted by HP (ships with more HP are bigger targets)
-        const totalHP = ships.reduce((sum, s) => sum + s.hitPoints, 0);
-        let roll = Math.random() * totalHP;
-        let targetIndex = 0;
+        // Separate military ships from colonizers
+        const militaryShips = ships.filter(s => s.type !== 'colonizer');
+        const targetableShips = militaryShips.length > 0 ? militaryShips : ships;
 
-        for (let i = 0; i < ships.length; i++) {
-            roll -= ships[i].hitPoints;
+        // Pick a random ship weighted by HP (ships with more HP are bigger targets)
+        const totalHP = targetableShips.reduce((sum, s) => sum + s.hitPoints, 0);
+        if (totalHP <= 0) break;
+
+        let roll = Math.random() * totalHP;
+        let target = null;
+
+        for (let i = 0; i < targetableShips.length; i++) {
+            roll -= targetableShips[i].hitPoints;
             if (roll <= 0) {
-                targetIndex = i;
+                target = targetableShips[i];
                 break;
             }
         }
 
-        const target = ships[targetIndex];
+        if (!target) target = targetableShips[targetableShips.length - 1];
+
         const damage = Math.min(remainingDamage, target.hitPoints);
         target.hitPoints -= damage;
         remainingDamage -= damage;
 
         if (target.hitPoints <= 0) {
             destroyedList.push({type: target.type, owner: target.owner});
-            ships.splice(targetIndex, 1);
+            // Find and remove from original ships array
+            const targetIndex = ships.findIndex(s => s.id === target.id);
+            if (targetIndex !== -1) {
+                ships.splice(targetIndex, 1);
+            }
         }
     }
 }

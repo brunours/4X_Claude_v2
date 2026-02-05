@@ -1,5 +1,42 @@
 # Release Notes
 
+## Version 2.0.12 - 05/02/2026
+
+### Improvements
+- **Wider launch menu columns**: Increased column widths from 400/350px to 480px each for better button layout
+  - Both settings and right-side columns now match at 480px width
+  - Planet name buttons (Greek Gods, Norse Gods, Real Stars) now fit on one row
+  - Min/max constraints updated to 360px/500px for responsive scaling
+  - Files modified: `css/style.css`
+
+- **Leaderboard restructured by difficulty**: Leaderboards now grouped by AI difficulty (Easy, Medium, Hard)
+  - Each difficulty section shows your personal best score (if logged in)
+  - Each difficulty section shows global top 5 scores
+  - Click any entry to view the final map state
+  - Color-coded difficulty headers (green for Easy, yellow for Medium, red for Hard)
+  - Files modified: `js/leaderboard.js`, `js/main.js`, `css/style.css`
+
+### Bug Fixes
+- **Battle consolidation fix**: Multiple ship groups arriving at the same planet now trigger a single combined battle
+  - Issue: If you sent 2 fleets to the same enemy planet and both arrived on the same turn, you'd fight 2 separate battles instead of one combined battle
+  - Root cause: Each traveling group was processed individually in `processTravelingShips()`, triggering separate `handleShipArrival()` calls
+  - Solution: Added consolidation step that groups all arriving ships by planet+owner key before processing, so all ships from the same owner arrive together
+  - Files modified: `js/turnSystem.js`
+
+- **Colonizers now die last when escorted**: Colonizers with military escorts are protected during combat
+  - Issue: When a fleet with colonizers and military ships took damage, colonizers could be randomly targeted and destroyed before their escorts
+  - Root cause: `applyDamageToFleet()` randomly selected targets weighted by HP, including colonizers
+  - Solution: Modified damage distribution to only target military ships while they're present; colonizers are only damaged after all military ships are destroyed
+  - Files modified: `js/combatSystem.js`
+
+### Technical Implementation
+- CSS media query adjustments for desktop layout (>900px width)
+- New leaderboard functions: `getPersonalBestByDifficulty()`, `getGlobalTop5ByDifficulty()`, `renderLeaderboardByDifficulty()`
+- Ship arrival consolidation uses Map data structure with `${planetId}_${owner}` composite keys
+- Combat damage targeting now filters military ships first before considering colonizers
+
+---
+
 ## Version 2.0.11 - 05/02/2026
 
 ### Improvements

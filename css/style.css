@@ -2121,6 +2121,102 @@ input:checked + .toggle-slider:before {
     padding: 40px;
 }
 
+/* Leaderboard Difficulty Sections */
+.leaderboard-difficulty-section {
+    margin-bottom: 25px;
+}
+
+.leaderboard-difficulty-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.leaderboard-difficulty-header h3 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.leaderboard-difficulty-header.easy h3 { color: #0f8; }
+.leaderboard-difficulty-header.medium h3 { color: #fc0; }
+.leaderboard-difficulty-header.hard h3 { color: #f44; }
+
+.leaderboard-personal-best {
+    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+}
+
+.leaderboard-personal-best .pb-label {
+    font-size: 0.7rem;
+    color: #a855f7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.leaderboard-personal-best .pb-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.leaderboard-personal-best .pb-score {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.2rem;
+    color: #0f8;
+}
+
+.leaderboard-personal-best .pb-details {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.leaderboard-no-score {
+    color: #555;
+    font-size: 0.85rem;
+    font-style: italic;
+    text-align: center;
+    padding: 10px;
+}
+
+.leaderboard-global-header {
+    font-size: 0.75rem;
+    color: #0af;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 10px 0 8px 0;
+}
+
+.leaderboard-entry.compact {
+    padding: 8px 12px;
+    margin-bottom: 5px;
+}
+
+.leaderboard-entry.compact .leaderboard-rank {
+    font-size: 1rem;
+    width: 30px;
+}
+
+.leaderboard-entry.compact .leaderboard-player-name {
+    font-size: 0.85rem;
+}
+
+.leaderboard-entry.compact .leaderboard-player-details {
+    font-size: 0.7rem;
+}
+
+.leaderboard-entry.compact .leaderboard-score {
+    font-size: 0.95rem;
+}
+
 /* ============================================
    MAP VIEWER MODAL
    ============================================ */
@@ -2389,16 +2485,16 @@ input:checked + .toggle-slider:before {
 /* Container 1: Game Settings (Galaxy Size, AI Difficulty, Colors) */
 .settings-container {
     flex: 1;
-    min-width: 320px;
-    max-width: 450px;
+    min-width: 360px;
+    max-width: 500px;
     text-align: center;
 }
 
 /* Right side column containing saved games and extra settings */
 .right-side-column {
     flex: 1;
-    min-width: 320px;
-    max-width: 400px;
+    min-width: 360px;
+    max-width: 500px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -2487,12 +2583,12 @@ input:checked + .toggle-slider:before {
 
     .settings-container {
         flex: 0 0 auto;
-        width: 400px;
+        width: 480px;
     }
 
     .right-side-column {
         flex: 0 0 auto;
-        width: 350px;
+        width: 480px;
     }
 
     .action-buttons-container {

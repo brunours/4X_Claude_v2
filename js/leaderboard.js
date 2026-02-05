@@ -1,21 +1,25 @@
 // ============================================
 // LEADERBOARD MODULE
 // ============================================
+// Version: 2.0.12
 //
 // This module handles all leaderboard operations including:
-// - Fetching personal best scores
-// - Fetching global top scores
+// - Fetching personal best scores by difficulty
+// - Fetching global top scores by difficulty
 // - Getting completed game details for map viewing
 //
 // Exports:
-// - getPersonalTop10() - Get user's best victories
-// - getGlobalTop10() - Get global best victories
+// - getPersonalTop10() - Get user's best victories (legacy)
+// - getGlobalTop10() - Get global best victories (legacy)
+// - getPersonalBestByDifficulty() - Get user's best score for each difficulty
+// - getGlobalTop5ByDifficulty() - Get global top 5 for each difficulty
 // - getCompletedGameDetails(gameId) - Fetch full game details for viewing/replay
+// - renderLeaderboardByDifficulty() - Render difficulty-grouped leaderboard
 
 import { supabase } from './supabaseClient.js';
 import { gameState } from './gameState.js';
 
-// Get user's personal top 10 victories
+// Get user's personal top 10 victories (legacy - still used for backward compatibility)
 export async function getPersonalTop10() {
     if (!gameState.userId) {
         return [];
@@ -32,7 +36,7 @@ export async function getPersonalTop10() {
     return data || [];
 }
 
-// Get global top 10 victories
+// Get global top 10 victories (legacy - still used for backward compatibility)
 export async function getGlobalTop10() {
     const { data, error } = await supabase
         .rpc('get_global_leaderboard');
@@ -43,6 +47,59 @@ export async function getGlobalTop10() {
     }
 
     return data || [];
+}
+
+// Get user's personal best for each difficulty
+export async function getPersonalBestByDifficulty() {
+    if (!gameState.userId) {
+        return { easy: null, medium: null, hard: null };
+    }
+
+    const { data, error } = await supabase
+        .from('completed_games')
+        .select('*')
+        .eq('user_id', gameState.userId)
+        .eq('victory', true)
+        .order('final_score', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching personal bests:', error);
+        return { easy: null, medium: null, hard: null };
+    }
+
+    // Group by difficulty and get best for each
+    const result = { easy: null, medium: null, hard: null };
+    for (const entry of data || []) {
+        const diff = entry.difficulty;
+        if (diff && !result[diff]) {
+            result[diff] = entry;
+        }
+    }
+
+    return result;
+}
+
+// Get global top 5 for each difficulty
+export async function getGlobalTop5ByDifficulty() {
+    const result = { easy: [], medium: [], hard: [] };
+
+    for (const difficulty of ['easy', 'medium', 'hard']) {
+        const { data, error } = await supabase
+            .from('completed_games')
+            .select('*')
+            .eq('difficulty', difficulty)
+            .eq('victory', true)
+            .order('final_score', { ascending: false })
+            .limit(5);
+
+        if (error) {
+            console.error(`Error fetching global top 5 for ${difficulty}:`, error);
+        } else {
+            result[difficulty] = data || [];
+        }
+    }
+
+    return result;
 }
 
 // Get detailed information about a completed game (for map viewing)
@@ -95,7 +152,7 @@ export function formatLeaderboardEntry(entry, rank) {
     };
 }
 
-// Render leaderboard entries to HTML
+// Render leaderboard entries to HTML (legacy - kept for backward compatibility)
 export function renderLeaderboardEntries(entries, isPersonal = false) {
     if (!entries || entries.length === 0) {
         return `<p class="no-saves">${isPersonal ? 'No victories yet! Win a game to appear here.' : 'No entries yet!'}</p>`;
@@ -128,6 +185,84 @@ export function renderLeaderboardEntries(entries, isPersonal = false) {
             </div>
         `;
     });
+
+    return html;
+}
+
+// Render leaderboard grouped by difficulty
+export function renderLeaderboardByDifficulty(personalBests, globalTop5, showPersonal = true) {
+    const difficulties = [
+        { key: 'easy', label: 'Easy', color: '#0f8' },
+        { key: 'medium', label: 'Medium', color: '#fc0' },
+        { key: 'hard', label: 'Hard', color: '#f44' }
+    ];
+
+    const sizeLabels = {
+        compact: 'Compact',
+        standard: 'Standard',
+        vast: 'Vast'
+    };
+
+    let html = '';
+
+    for (const diff of difficulties) {
+        html += `<div class="leaderboard-difficulty-section">`;
+        html += `<div class="leaderboard-difficulty-header ${diff.key}">
+            <h3>${diff.label}</h3>
+        </div>`;
+
+        // Personal best section (only if showing personal tab)
+        if (showPersonal) {
+            const pb = personalBests[diff.key];
+            if (pb) {
+                const date = new Date(pb.completed_at).toLocaleDateString();
+                html += `
+                    <div class="leaderboard-personal-best" data-game-id="${pb.id}" onclick="window.viewLeaderboardGame('${pb.id}')" style="cursor: pointer;">
+                        <div class="pb-label">Your Best</div>
+                        <div class="pb-content">
+                            <span class="pb-score">${pb.final_score.toLocaleString()}</span>
+                            <span class="pb-details">${sizeLabels[pb.map_size] || pb.map_size} | Turn ${pb.final_turn} | ${date}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `<div class="leaderboard-no-score">No victory yet on ${diff.label}</div>`;
+            }
+        }
+
+        // Global top 5 section
+        html += `<div class="leaderboard-global-header">Global Top 5</div>`;
+        const globalEntries = globalTop5[diff.key] || [];
+
+        if (globalEntries.length === 0) {
+            html += `<div class="leaderboard-no-score">No entries yet</div>`;
+        } else {
+            for (let i = 0; i < globalEntries.length; i++) {
+                const entry = globalEntries[i];
+                const rank = i + 1;
+                let rankClass = '';
+                if (rank === 1) rankClass = 'gold';
+                else if (rank === 2) rankClass = 'silver';
+                else if (rank === 3) rankClass = 'bronze';
+
+                const date = new Date(entry.completed_at).toLocaleDateString();
+                html += `
+                    <div class="leaderboard-entry compact" data-game-id="${entry.id}" onclick="window.viewLeaderboardGame('${entry.id}')">
+                        <div class="leaderboard-rank ${rankClass}">#${rank}</div>
+                        <div class="leaderboard-player">
+                            <div class="leaderboard-player-name">${escapeHtml(entry.username)}</div>
+                            <div class="leaderboard-player-details">
+                                ${sizeLabels[entry.map_size] || entry.map_size} | Turn ${entry.final_turn} | ${date}
+                            </div>
+                        </div>
+                        <div class="leaderboard-score">${entry.final_score.toLocaleString()}</div>
+                    </div>
+                `;
+            }
+        }
+
+        html += `</div>`; // Close difficulty section
+    }
 
     return html;
 }
